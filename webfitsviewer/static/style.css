@@ -1,0 +1,70 @@
+/* Body */
+body{
+    font-family: sans-serif;
+    background-color: #ffffff;
+    line-height: 1.2em;
+}
+
+/* Headings */
+h1, h2, h3 {
+    background-color: #99ffff;
+    padding: 7px;
+}
+
+/* Selections */
+select {
+    font-size: 0.9em;
+}
+
+/* Input */
+input {
+    font-size: 0.9em;
+}
+
+/****** Tables */
+/* General Table */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table tr td, table tr th {
+    border:#000 solid 1px;
+    padding:4px;
+}
+
+/* Header Table */
+td.header {
+    background-color: #9FF;
+    border: 0px;
+    padding: 6px;
+}
+
+/* Tools Table */
+td.tools {
+    border: 0px;
+    vertical-align:top;
+    line-height: 1.2em;
+}
+
+/* Log Table */
+tr.logdebug {
+	background-color: #9FF;
+}
+
+tr.loginfo {
+	background-color: #9F6;
+}
+
+tr.logwarning {
+	background-color: #FF3;
+}
+
+tr.logerror {
+	background-color: #F96;
+}
+
+tr.logcritical {
+	background-color: #000;
+	color: #FFF;
+}

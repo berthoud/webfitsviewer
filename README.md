@@ -3,6 +3,9 @@ An online server to show FITS images and other data.
 
 A demo viewer with sample data is at [hawcnest.ciera.northwestern.edu/viewdemo](https://hawcnest.ciera.northwestern.edu/viewdemo).
 
+Table of Contents:
+ * [Developper's Manual](#devman)
+
 ## Users Manual
 
 The Options at the top show you the different screens:
@@ -18,6 +21,7 @@ The Options at the top show you the different screens:
  * Edit the local config file (default is webfitsview_config.txt) and the webserver config file (default webfitsview.conf) to point to the correct files.
  * Setup the webserver with the config file (webfitsview.conf or your own version of it).
 
+<a name="devman"></a>
 ## Developper's Manual
 
 Read the code

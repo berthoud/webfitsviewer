@@ -4,6 +4,27 @@
     with both, the SiteModel and the SiteViews. A call to the controller
     calls start_response and returns the contents of the response.
     
+    Upgrade to multi-site:
+    ./ set up with config in apache config
+    ./ changes to main
+      ./ read and open config
+      ./ set paths from config
+      ./ check if import weberror works else set flag
+    ./ changes to controller
+      ./ look for script_name split into sitename and responsearr
+        (keep older code arround but commented out)
+      ./ update config if section with name exists
+      ./ clean up baseurlpath or replace with siteurl where appropriate
+    ./ test on current site
+      ./ make 2 sites with 2 different folders and names (also check if basename works)
+      ./ also check if old system with scriptalias still works
+    ./ changes to main with extra error
+      ./ make changes to have both error functions, call of correct application at bottom
+      ./ test both errors
+    - look at main <-> controller: does split make sense?
+    - update log in controller
+    
+    
 """
 
 ### Preparation
@@ -24,7 +45,7 @@ class SiteController(object):
     """ Controller object that formulates the response to the http
         request.
     """
-    def __init__(self, config_filepathname):
+    def __init__(self):
         """ Constructor: declares the variables
         """
         # Declare Variables
@@ -37,7 +58,6 @@ class SiteController(object):
         self.request = {} # Request Variables
         self.views = None # The views object
         self.model = None # The model object
-        self.config_filepathname = config_filepathname
 
     def __call__(self,environ,start_response):
         """ Object Call: creates the response
@@ -46,8 +66,22 @@ class SiteController(object):
         errormsg = ''
         # Set Environment
         self.env = environ
+        # Split URI into sitename and RESPONSEARR with path info -> fill / update session vars
+        # response = environ.get('PATH_INFO','list') # Old code: PATH_INFO not available using SciptAliasMatch
+        #responsearr = environ.get('SCRIPT_NAME').strip('/').split('/') # Does not work with older browsers
+        responsearr = environ.get('REQUEST_URI').strip('/').split('/')
+        if len(responsearr) > 0:
+            siteurl = responsearr[0]
+            responsearr = responsearr[1:]
+        else: siteurl = ''
         # Load Configuration
-        self.conf = ConfigObj(self.config_filepathname)
+        self.conf = ConfigObj(environ.get('WEBVIEW_CONFIG'))
+        # Add configuration from site_sitename
+        if self.conf.has_key('site_'+siteurl):
+            self.conf.merge(self.conf['site_'+siteurl])
+        # Edit siteurl in config
+        if len(siteurl):
+            self.conf['path']['siteurl'] = '/'+siteurl
         # Set up logging & print message
         self.log = logging.getLogger('hawc.webview.control')
         logconfile = os.path.join(self.conf['path']['basepath'],
@@ -85,11 +119,8 @@ class SiteController(object):
         self.views = SiteViews(self.env, self.session, self.conf)
         self.model = SiteModel(self.env, self.session, self.conf)
         self.views.model = self.model
-        ### Compute response (format is page/request)
-        # Select Response and Query from Path Info
-        # ==>> Make RESPONSEARR with path info -> fill / update session vars
-        response = environ.get('PATH_INFO','list')
-        responsearr = response.strip('/').split('/')
+        ###### Compute response (format is page/request)
+        # Select Response and Query from URI -> fill / update session vars
         if len(responsearr) > 0:  self.session['page'] = responsearr[0].lower()
         else: self.session['page'] = 'list'
         if not (self.session['page'] in ['data','error','log', 'list', 'test']):
@@ -98,6 +129,7 @@ class SiteController(object):
         #-- DATA Response: update session variables and validate request
         self.session['request'] = '' # Clear request
         if self.session['page'] == 'data':
+            responsefolder = '' # variable to allow check if folder is valid
             # Get and Validate request
             if responsearr[-1].lower() in ['raw']:
                 self.session['request'] = responsearr[-1].lower()
@@ -106,7 +138,8 @@ class SiteController(object):
             if request_params.has_key('folder_selection'):
                 self.session['folder'] = request_params.get('folder_selection')[0]
             elif len(responsearr) > 1:
-                self.session['folder'] = os.path.join(*responsearr[1:])
+                responsefolder = os.path.join(*responsearr[1:])
+                self.session['folder'] = responsefolder
             # FILE selection from request parameters
             if request_params.has_key('file_selection'):
                 self.session['file'] = request_params.get('file_selection')[0]
@@ -119,8 +152,9 @@ class SiteController(object):
             # PLANE selection from request parameters
             if request_params.has_key('plane_selection'):
                 self.session['plane'] = request_params.get('plane_selection')[0]
-            # Validate / Set session variables - if no data available -> error
+            # Validate / Set session variables
             self.model.set_selection()
+            # if no data available -> error
             if len(self.session['data']) == 0:
                 self.session['page'] = 'error'
                 errormsg = 'No FITS data avaialable:<br> &nbsp;'
@@ -129,6 +163,11 @@ class SiteController(object):
                 errormsg += ' step = <%s>' % (self.session['step'])
                 errormsg += ' data = <%s>' % (self.session['data'])
                 errormsg += ' plane = <%s>' % (self.session['plane'])
+            # if responsefolder was invalid raise error
+            if ( len(responsefolder) and not responsefolder in self.session['folder'] and
+                 int(self.conf['ctrl']['erronbadurl']) ):
+                self.session['page'] = 'error'
+                errormsg = 'Nonexistent or empty folder requested: %s is not available or contains no data' % responsefolder
         #-- LOG Response: update session variables and validate request
         if self.session['page'] == 'log':
             # Get and Validate request
@@ -144,8 +183,10 @@ class SiteController(object):
         #-- LIST Response: update session variables and validate request
         if self.session['page'] == 'list':
             # LIST_FOLDER selection from response path array
+            responsefolder = '' # variable to allow check if folder is valid
             if len(responsearr) > 1:
-                self.session['listfolder'] = responsearr[1]
+                responsefolder = responsearr[1]
+                self.session['listfolder'] = responsefolder
             else:
                 self.session['listfolder'] = ''
             # Get Folder list and make sure there's something there
@@ -155,14 +196,23 @@ class SiteController(object):
                 errormsg = '<b>NO Data Folders Available</b><p> No folders were found under '
                 errormsg += os.path.join(self.conf['path']['basepath'], self.conf['path']['datapath'])
                 errormsg += '. Check the server settings or contact the administrator.'
+            elif ( len(responsefolder) and not responsefolder in folderlist and 
+                   int(self.conf['ctrl']['erronbadurl'])):
+                self.session['page'] = 'error'
+                errormsg = 'Nonexistent folder requested: %s is not available or contains no data' % responsefolder
             else:
-                # Validate list_folder            
+                # Set list_folder            
                 if not self.session['listfolder'] in folderlist:
                     self.session['listfolder'] = folderlist[-1]
+        #-- TEST Response: log the messages
+        if self.session['page'] == 'test':
+            if 'messagetext' in request_params:
+                self.log.debug('Test - Message from %s: %s' % 
+                               (environ.get('REMOTE_ADDR'), request_params['messagetext'][0]) )
         # Print request if it came up
         if len(self.session['request']) > 0:
             self.log.info('Request Type is = %s' % self.session['request'])
-        ### Make response page
+        ###### Make response page
         # Initialize Response
         status = '200 OK'
         response_headers = [('Content-Type','text/html')]
@@ -235,6 +285,15 @@ class SiteController(object):
         self.output += output
 
 """ === History ===
+    2020-1-10 Marc Berthoud,
+        * removed [path][baseurlpath from config: Either use absolute paths
+          or use siteurl (which is set automatically), also in logscripts.js
+        * Config now comes from environment variable WEBVIEW_CONFIG
+        * Load site_siteurl preferences from config section into config
+          to allow multiple sites on a server.
+        * Main.py now loads pythonpaths from config file
+        * Main.py checks if weberror.errormiddleware exists else uses
+          simpler error reporting function
     2015-2-20 Marc Berthoud, Various improvements
         * Update code for using astropy.io.fits
     2014-4-3 Marc Berthoud, Added self.infohead to model object to specify

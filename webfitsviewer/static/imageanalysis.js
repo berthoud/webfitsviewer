@@ -51,7 +51,7 @@ function imageanalysisobject() {
 	this.imgrawsort = new Array(0); // Image data sorted
 	this.imgscaled = new Array(0); // Image data scaled (0..255 for each pixel)
 	this.nnans = 0; // Number of NaN in the image
-	this.imgscale = '98%'; //'MinMax'; // Scale setting
+	this.imgscale = ''; // Scale setting (Initial value is set by self.getOptions() )
 	this.imgmin = 0.0; // Scale min data value
 	this.imgmax = 1.0; // Scale max data value
 	this.imgcolor = 'grey'; // Selected color scale
@@ -93,6 +93,7 @@ function imageanalysisobject() {
 		     Scale:<br> \
 		     <select id = "scaleselect" disabled> \
 		     <option>MinMax</option> \
+			 <option>99.5%</option> \
 		     <option>98%</option> \
 		     <option>90%</option> \
 		     <option>1 StDev</option> \
@@ -298,7 +299,6 @@ function imageanalysisobject() {
 		var imgn = this.imgwidth * this.imgheight;
 		this.imgraw = new Array(imgn);
 		this.nnans = 0;
-		imglogadd('Unpack Loop:');
 		var i = imgn;
 		var val = 0;
 		while ( i > 0 ) {
@@ -768,6 +768,11 @@ function imageanalysisobject() {
 			// Calculate new imgmin and imgmax
 			pixeln = this.imgwidth * this.imgheight - this.nnans;
 			switch (this.imgscale) {
+			case '99.5%':
+				this.imgmin = this.imgrawsort[Math.round(pixeln / 400)];
+				this.imgmax = this.imgrawsort[Math.round(399 * pixeln / 400) - 1];
+				this.rescale = 1;
+				break;
 			case '98%':
 				this.imgmin = this.imgrawsort[Math.round(pixeln / 100)];
 				this.imgmax = this.imgrawsort[Math.round(99 * pixeln / 100) - 1];
@@ -831,15 +836,15 @@ function imageanalysisobject() {
 	this.getOptions = function() {
 		// Read the cookie
 		var cookies = document.cookie;
-		// Check new zoom
+		// Check new zoom (not implemented, this feature would be annoying)
 		// Check new scale
 		newscale = unescape($.cookie('imageanalscale'));
-		if (newscale == null) {
-			newscale = 'MinMax';
+		if (['MinMax','99.5%','98%','90%','5 StDev','Log','Box'].indexOf(newscale) < 0) {
+			newscale = '99.5%';
 		}
 		// Check new color
 		newcolor = unescape($.cookie('imageanalcolor'));
-		if (newcolor == null) {
+		if (['GREY','RAINBOW','STAIRCASE'].indexOf(newcolor) < 0) {
 			newcolor = 'GREY';
 		}
 		// Call updateOptions
@@ -1096,10 +1101,12 @@ function imagetoolstatsobject() {
 				.html('<form> \
 					   <input type="checkbox" id="statsbox">\
 					   <span id="statscolor">&nbsp;Box&nbsp;</span><br />Min: '
-					  + this.imgmin + '<br />Max: ' + this.imgmax);
+					  + this.imgmin + '<br />Max: ' + this.imgmax + 
+					  '<br />Npix: ' + imgn);
 		$('#imagetoolsoutput2').html(
 				'Median: ' + imgmed + '<br />Average: ' + imgavg
-						+ '<br />StdDev: ' + imgstd);
+						+ '<br />StdDev: ' + imgstd + '<br />Sum: '
+						+ this.imganalobj.valueformat(sum) );
 		// Set [./]box callback functions
 		statsbox = $('#statsbox')[0];
 		statsbox.callback_object = this;
@@ -1663,6 +1670,8 @@ function imglogadd(message){
 	
 /***
  * === History ===
+ * 2019 Feb: Marc Berthoud - Fix getting scaling options from cookies
+ * 
  * 2016 March: Marc Berthoud - Add scaling options: log and box
  * - New imagescaled[] array that contains cval for each pixel. This
  *   array is filled by imagedraw() and used by imagedraw() and

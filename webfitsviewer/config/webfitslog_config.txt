@@ -22,7 +22,7 @@ qualname = hawc
 class = FileHandler
 level = NOTSET
 formatter = fileform
-args = ('../logs/hawc.webview.log.txt','a')
+args = ('../logs/web_fits_view_log.txt','a')
 
 [formatter_fileform]
 format=%(asctime)s - %(name)s - %(levelname)s - %(message)s

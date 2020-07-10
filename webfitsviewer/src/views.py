@@ -39,8 +39,8 @@ class SiteViews(object):
         # Make text string
         #   Entries: pagetitle%s stylefile%s iconfilepathname%s
         #            scriptsinclude%s logofilepathname%s sitetitle%s
-        #            baseurlpath%s listfolder%s listlabel%s
-        #            baseurlpath%s baseurlpath%s helpurl%s
+        #            siteurl%s listfolder%s listlabel%s
+        #            siteurl%s siteurl%s helpurl%s
         text = """
 <!DOCTYPE html>
 <html>
@@ -68,8 +68,7 @@ class SiteViews(object):
 </table>
 """
         # Make image folder
-        staticpath = os.path.join(self.conf['path']['baseurlpath'],
-                                  self.conf['path']['static'])
+        staticpath = self.conf['path']['static']
         # Make listlabel (label for list view considering folder names)
         listlabel = string.join(self.foldernames,' / ')
         listlabel = '%s List' % listlabel
@@ -110,13 +109,13 @@ class SiteViews(object):
         if self.session['page'] == 'list':
             listflight = '/'+self.session['listfolder']
         # Return string
-        baseurlpath = self.conf['path']['baseurlpath']
+        siteurl = self.conf['path']['siteurl']
         text = text % (pagetitle, stylefile, iconfilepathname,
                        scriptsinclude, logofilepathname,
                        self.conf['view']['sitename'],
-                       baseurlpath, listfolder, listlabel,
-                       baseurlpath,
-                       baseurlpath, self.conf['view']['helpurl'])
+                       siteurl, listfolder, listlabel,
+                       siteurl,
+                       siteurl, self.conf['view']['helpurl'])
         self.log.debug('Header Written')
         return text
 
@@ -160,7 +159,7 @@ class SiteViews(object):
         """ Returns the text for the selections in the data view page.
         """
         # Make selectform string
-        #   Entries: BaseUrlPath%s FolderSelections%s FileSelectons%s
+        #   Entries: siteurl%s FolderSelections%s FileSelectons%s
         #            StepSelections%s DataOptions%s PlaneSelection%s sid%s
         #            filelinks%s
         selecttext = """
@@ -357,21 +356,19 @@ Image Frame: <select name = "plane_selection"
 # onClick="window.open('%s','Download');" doesn't work with Safari
 
         # Make Link to Folder
-        folderlink = os.path.join(self.conf['path']['baseurlpath'],
-                                  self.conf['path']['dataurlpath'],
+        folderlink = os.path.join(self.conf['path']['dataurlpath'],
                                   self.session['folder'])
         # Make Link to Fits Image
         fitsimage = os.path.split(self.model.data.filename)[-1]
         fitslink = os.path.join(folderlink,
                                 fitsimage)
         # Staticpath
-        staticpath = os.path.join(self.conf['path']['baseurlpath'],
-                                  self.conf['path']['static'])
+        staticpath = self.conf['path']['static']
         # Combine filedownload
         filedownload = filedownload % (fitslink, staticpath, folderlink,
                                        staticpath)
         ### Combine to select text
-        selecttext = selecttext % (self.conf['path']['baseurlpath'],
+        selecttext = selecttext % (self.conf['path']['siteurl'],
                                    foldersel, fileselections, stepsel,
                                    dataopt, planesel, self.session['sid'],
                                    filedownload)
@@ -448,7 +445,7 @@ analimg.init("%s", "%s");
                               data Display.<br>
                               Choose a different Display or File.</center>"""
         # Get data url
-        dataurl = self.conf['path']['baseurlpath']+'/data/raw';
+        dataurl = self.conf['path']['siteurl']+'/data/raw';
         dataurl += '?sid=%s' % self.session['sid'];
         # Determine AddToolCommands
         if self.model.filenamesteps:
@@ -611,36 +608,42 @@ analimg.init("%s", "%s");
         maxsize = int(self.conf['view']['maxsize'])
         if image.shape[0] > maxsize:
             image = image[0:maxsize,:]
-            message = '<b>Notice:</b> Image has been cropped'
-            message += ' to %dx%d' % (maxsize, maxsize)
-            message += '. Download FITS File to view all data.'
+            message = ' Large image -> Image has been cropped'
+            message += ' to %dx%d.' % (maxsize, maxsize)
         if image.shape[1] > maxsize:
             image = image[:, 0:maxsize]
-            message = '<b>Notice:</b> Image has been cropped'
-            message += ' to %dx%d' % (maxsize, maxsize)
-            message += '. Download FITS File to view all data.'
+            message = ' Large image -> Image has been cropped'
+            message += ' to %dx%d.' % (maxsize, maxsize)
         # Set up response
         retdata = ''
         # Get shape
         wid = image.shape[1]
         hei = image.shape[0]
         # Get scale (remember FFFF is for NaN)
-        # If wid*hei>=1000 -> cut top and bottom 0.1%
-        if wid*hei>=1000:
+        imgmin = numpy.nanmin(image)
+        imgmax = numpy.nanmax(image)
+        imgstd = numpy.std(image)
+        # Cut top and bottom 0.1% if extreme outliers exist
+        # - better way to detect outliers may be possible -
+        if imgstd * 1000 < imgmax - imgmin:
             try: # has to be tried b/c not all interpreters have numpy 1.9
                 bzero = numpy.nanpercentile(image, 0.1)
                 bscale = numpy.nanpercentile(image, 99.9)
                 image[image<bzero] = bzero
                 image[image>bscale] = bscale
+                message += ' Outlying datapoints -> image scale has been cut to [0.1 . . . 99.9] percentile.'
             except:
-                bzero = numpy.nanmin(image)
-                bscale = numpy.nanmax(image)                
+                bzero = imgmin
+                bscale = imgmax                
         else:
-            bzero = numpy.nanmin(image)
-            bscale = numpy.nanmax(image)
+            bzero = imgmin
+            bscale = imgmax
         bscale = (bscale-bzero)/(2.**16-2)
         if bscale == 0:
             bscale = 1.0
+        # Update message
+        if len(message) > 0:
+            message = '<b>Notice:</b>%s Download FITS File to view original data.' % message
         # Make data header
         retdata += "width = %d\n" % wid
         retdata += "height = %d\n" % hei
@@ -679,7 +682,7 @@ analimg.init("%s", "%s");
         """
         # Make text string
         #   Entries: LevelOptions%s Sid%s Sid%s
-        #            BaseUrlPath%s ReloadTime%s LineMaxN%s
+        #            siteurl%s ReloadTime%s LineMaxN%s
         logdisplay = """
 <h2>Pipeline Log</h2>
 <form id = "selectform" action = "" method = "post">
@@ -697,7 +700,7 @@ Level : <select name = "log_level"
 <script language="javascript"><!--
 // set global variables
 sid = "%s";
-baseurlpath = "%s";
+siteurl = "%s";
 reloadtime = %s;
 linemaxn = %s;
 // request log table data
@@ -717,7 +720,7 @@ logrequest();
         # Combine display text
         logdisplay = logdisplay % (levelopt, self.session['sid'],
                                    self.session['sid'],
-                                   self.conf['path']['baseurlpath'],
+                                   self.conf['path']['siteurl'],
                                    self.conf['view']['logreloadtime'],
                                    self.conf['view']['loglinemaxn'])
         self.log.debug('PipeLog written')
@@ -798,7 +801,7 @@ logrequest();
         """ Returns the Folders and Subfolders list
         """
         # Make text string
-        #   Entries: FolderNames%s FolderTop%s BaseUrlPath%s FolderOptions%s
+        #   Entries: FolderNames%s FolderTop%s siteurl%s FolderOptions%s
         #            FolderTop%s SubFolder%s Sid% tabletext%s
         listdisplay = """
 <h2>%s List</h2>
@@ -843,7 +846,7 @@ logrequest();
         else:
             indend = len(folders)
         # Make string for observation link
-        #   Entries: baseurlpath%s fullfolder%s subfolder%s
+        #   Entries: siteurl%s fullfolder%s subfolder%s
         obslink = '<tr><td><a href = "%s/data/%s">%s</a>'
         # Loop through topfolders
         folderi = indbeg # index counts up
@@ -863,27 +866,32 @@ logrequest();
                 if ind > -1: foldertext += '<th>%s' % item[:ind]
                 else: foldertext += '<tr>%s' % item
             # subfolder items - make list
-            baseurlpath = self.conf['path']['baseurlpath']
+            siteurl = self.conf['path']['siteurl']
             subfolders = self.model.folderlist(1,folder)
             subfolders.reverse()
             subfoldern -= len(subfolders)
             subtextlist = [] # list with sortkeyword and text
             for sfolder in subfolders:
                 # subfolder title
-                subtext = obslink % ( baseurlpath, sfolder,
+                subtext = obslink % ( siteurl, sfolder,
                                       sfolder.split(os.sep)[1])
                 # Load subfolder header
                 self.model.loadfolderhead(sfolder)
                 # AOR items
                 for item in listkeys:
                     ind = item.rfind(' ')
-                    if ind < 0: subtext += '<td> '
+                    # if no valid listkey entry -> no value
+                    if ind < 0: val = '-'
+                    # if no file loaded -> no value
+                    elif not len(self.model.data.filename):
+                        val = '-'
+                    # get value
                     else:
                         val = self.model.getheadval(item[ind+1:])
                         if not isinstance(val, basestring):
-                            val    = repr(val)
-                        if not len(val) : val = '-'
-                        subtext += '<td>%s' % val
+                            val    = repr(val) # Change to string
+                        if not len(val) : val = '-' # Add dash if no content
+                    subtext += '<td>%s' % val
                 # Add sortkey if needed
                 if len(sortkeyw):
                     subtext = self.model.getheadval(sortkeyw) + subtext
@@ -902,7 +910,7 @@ logrequest();
                 tabletext += foldertext + '</table>'
         # Combine display text
         listdisplay = listdisplay % (foldernames, self.foldernames[0],
-                                     self.conf['path']['baseurlpath'],
+                                     self.conf['path']['siteurl'],
                                      folderopts, self.foldernames[0],
                                      self.foldernames[1], self.session['sid'],
                                      tabletext )
@@ -930,11 +938,16 @@ Button and Field for tests:
 </div>
 <form><input type = 'Button' value = 'Test'
                    onclick = 'buttonf();'>
-<textarea id='testtext' rows = '10' cols = '60'>TextText</Textarea>
+<textarea id='testtext' rows = '5' cols = '60'>TextText</Textarea>
 </form>
 <script language="javascript"><!--
 browsertests();
 //--></script>
+<h2>Feedback Message:</h2>
+<form action = "" method = "post">
+<input type='text' id='messagetext' name='messagetext' cols = '60'>aa
+<input type = 'Submit' value = 'Send'>
+</form>
 <p>
 <table style="width:70%%; border-style:ridge;
               margin-left:auto; margin-right:auto"><tr><td>
@@ -965,8 +978,8 @@ you use <a href="http://www.mozilla.org/firefox/">Firefox</a>.
 <a href="%s">Back to Data List</a>
 """
         # get base url path
-        baseurlpath = self.conf['path']['baseurlpath']
-        text = text % (message, baseurlpath)
+        siteurl = self.conf['path']['siteurl']
+        text = text % (message, siteurl)
         self.log.debug('Error written')
         return text
 

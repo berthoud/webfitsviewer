@@ -1,9 +1,8 @@
 # Web Fits Viewer
-An online server to show FITS images and other data.
+An online server to show FITS images and other data. A demo viewer with sample data is at
+[hawcnest.ciera.northwestern.edu/viewdemo](https://hawcnest.ciera.northwestern.edu/viewdemo).
 
-A demo viewer with sample data is at [hawcnest.ciera.northwestern.edu/viewdemo](https://hawcnest.ciera.northwestern.edu/viewdemo).
-
-Table of Contents:
+**Table of Contents:**
  * [Users Manual](#userman)
  * [Installation Manual](#instman)
  * [Developper's Manual](#devman)

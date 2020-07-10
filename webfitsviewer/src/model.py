@@ -12,7 +12,6 @@ import numpy # Numpy Library
 import re # Regexp search Library
 from PIL import Image # Image Library
 from drp.pipedata import PipeData # Pipedata object @UnresolvedImport
-from astropy.io.ascii.tests.test_connect import files
 
 ### Class Definition
 class SiteModel(object):
@@ -199,10 +198,17 @@ class SiteModel(object):
                                   folder)
         # Check if folderpath exists
         if not os.path.exists(folderpath):
+            self.log.warn('Folderlist - non existant folder %s' % folderpath)
+            return []
+        # Get list of all files in folder (also check if have access)
+        try:
+            folderlist = os.listdir(folderpath)
+        except:
+            self.log.warn('Folderlist - unable to access folder %s' % folderpath)
             return []
         # Get subfolders in folderpath
-        folderlist = [ f for f in os.listdir(folderpath)
-                    if os.path.isdir(os.path.join(folderpath,f))]
+        folderlist = [ f for f in folderlist
+                       if os.path.isdir(os.path.join(folderpath,f))]
         folderlist.sort()
         # Join subfolders to folder
         folderlist = [ os.path.join(folder,f) for f in folderlist ]
@@ -480,7 +486,7 @@ class SiteModel(object):
         # Return planelist
         if self.session['data'][:6] in ['HEADER','TABLE:']:
             planelist = []
-        elif self.data.imageget(self.session['data']) == None: 
+        elif self.data.imageget(self.session['data']) is None: 
             planelist = []
         else:
             shape = self.data.imageget(self.session['data']).shape
@@ -510,7 +516,7 @@ class SiteModel(object):
         # Get the data
         imgdata = self.data.imageget(data)
         # If data is empty -> return
-        if imgdata == None:
+        if imgdata is None:
             self.log.debug('Raw image returned - empty')
             return numpy.zeros([0,0])
         if len(imgdata) == 0:
@@ -578,8 +584,7 @@ class SiteModel(object):
         imgout.save(outfilepathname)
         self.log.debug('Saved image %s' % outfilepathname)
         # Prepare image string
-        outfileurlpath = os.path.join(self.conf['path']['baseurlpath'],
-                                      self.conf['path']['imagesurl'],
+        outfileurlpath = os.path.join(self.conf['path']['imagesurl'],
                                       outfilename)
         n = 1
         minsize = int(self.conf['model']['minsize'])
@@ -671,9 +676,8 @@ class SiteModel(object):
             value = self.data.getheadval(key, 
                         dataname = self.infohead)
         except:
-            self.log.warn('No Header Value for HDU = %s Key = %s %s %s' % 
-                          (self.infohead,key,
-                           str(self.data.imgnames), self.data.filename) )
+            self.log.info('No Header Value for HDU = %s Key = %s' % 
+                          (self.infohead,key ) )
             return ''
         # Return value
         self.log.debug('Header Value returned: %s = <%s>' % (key,repr(value)))

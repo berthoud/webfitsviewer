@@ -10,7 +10,7 @@ new content.
 //**** Global Variables
 var request; // XMLHttpRequest object
 var sid; // Session ID
-var baseurlpath; // base url path to make absolute URL paths
+var siteurl; // base url path to make absolute URL paths
 var reloadtime; // reload time
 var linemaxn=500; // number of lines to show
 
@@ -22,7 +22,7 @@ function logrequest() {
     request = new XMLHttpRequest();
     request.onreadystatechange = logadd;
     // fill the request
-    request.open("POST", baseurlpath+"/log/update", true);
+    request.open("POST", siteurl+"/log/update", true);
     request.send("sid="+sid);
 }
 

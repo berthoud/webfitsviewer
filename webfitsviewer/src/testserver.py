@@ -15,8 +15,8 @@ def app(environ, start_response):
     diag = "Diagnosic data:<br>\n"
     for v in environ:
         diag += v + " : " + repr(environ[v])+"<br>\n"
-    ouput = output % diag
-    return [output]
+    ouput1 = (output % repr(diag))
+    return [output1]
 
 # Call main for the application to be callable as cgi script
 if __name__ == '__main__':

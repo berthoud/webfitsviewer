@@ -12,11 +12,11 @@ def app(environ, start_response):
 </body>
 </html>
 """
-    diag = "Diagnosic data:<br>\n"
+    diag = "Diagnosic data:<br>"
     for v in environ:
-        diag += v + " : " + repr(environ[v])+"<br>\n"
-    ouput1 = (output % repr(diag))
-    return [output1]
+        diag += v + " : " + repr(environ[v])+"<br>"
+    output = (output % repr(diag))
+    return [output]
 
 # Call main for the application to be callable as cgi script
 if __name__ == '__main__':

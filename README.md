@@ -40,14 +40,20 @@ Use the wiki or contact the developer
 ### Installation Solutions
 If you encounter problems, change the server configuration file ( .conf ) to run testmain.py instead of main.py.
 To do that you uncomment the appropriate ScriptAlias.
- * *No change in webserver behavior:* You updated the .conf file but nothing changed.
-  * Make sure the changes you made are in the config file that the webserver is actually using.
-  * Restart your webserver after configuration changes. ex: apachectl restart
-  * Consult the webserver error log for more information. ex: /var/log/apache2 or similar folder.
- * *Webserver doesn't start:* You install the .conf file and after restarting the webserver (apache) you don't get a page.
-  * You may have to replace "Require all access" with "Requre local" in the configuration file.
- * *Browser reports "Forbidden"* or webserver log reports *Permission denied: exec* of main.py
-  * Make sure the webserver user on your machine has read and execute access to this file.
- * Browser shows *content of main.py* file, it doesn't run the file
-  * Make sure your main server configuration (usually httpd.conf) allows running cgi scripts.
-  * This usually means loading cgid_module. 
+  * **No change in webserver behavior:** You updated the .conf file but nothing changed.
+    * Make sure the changes you made are in the config file that the webserver is actually using.
+    * Restart your webserver after configuration changes. ex: apachectl restart
+    * Consult the webserver error log for more information. ex: /var/log/apache2 or similar folder.
+  * **Webserver doesn't start:** You install the .conf file and after restarting the webserver (apache) you don't get a page.
+    * You may have to replace "Require all access" with "Requre local" in the configuration file.
+  * **Unable to connect** error from your browser.
+    * Your web server may be shut down or not have restarted correctly. 
+    * Go to [127.0.0.1](http://127.0.0.1) as most webservers have a default splash page.
+    * Undo the configuration changes and restart the webserver.
+  * **Browser reports "Forbidden"** or webserver log reports **Permission denied: exec** of main.py
+    * Make sure the webserver user on your machine has read and execute access to this file.
+  * Browser shows **content of main.py** file, it doesn't run the file
+    * Make sure your main server configuration (usually httpd.conf) allows running cgi scripts.
+    * This usually means loading cgid_module. 
+  * **Wrong python version is used:** the webserver doesn't run the python installation you expect.
+    * Use SetEnv PATH "/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" in your webserver configuration path.

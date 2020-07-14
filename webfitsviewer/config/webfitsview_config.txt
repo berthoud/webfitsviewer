@@ -2,16 +2,16 @@
 
 ['path']
 # Paths section 
-    basepath = '/data/scripts/fitsview' # Path to the base (webview) folder
-    baseurlpath = '/fitsview17' # Base url path
-    session = '/data/tmp/fitsviewsessions' # Path to sessions (used with basepath)
-    images = '/data/images/fitsview/temp/images' # Path to images (used with basepath)
+    basepath = '/path/to/webfitsviewer/webfitsviewer' # Path to the base (webfitsview) folder
+    baseurlpath = '/webview' # Base url path
+    session = 'temp/sessions' # Path to sessions (used with basepath)
+    images = 'temp/images' # Path to images (used with basepath)
     imagesurl = '/images/fitsview/temp/images' # Url Path to images (used with baseurlpath)
     static = '/images/fitsview/static' # Path to static web page information
-    datapath = '/data/images/StoneEdge/0.5meter/2017' # Path to FITS file data (used with basepath)
+    datapath = '../exampledata' # Path to FITS file data (used with basepath)
     dataurlpath = '/images/StoneEdge/0.5meter/2017' # URL Path to FITS file data (used with baseurlpath)
-    pipelog = '/data/scripts/DataReduction/PipeLineLog.txt'
-    #pipelog = '/home/hawc/hawcdata/Reduced/lab_fs10.log'
+    pipelog = '/path/file/name/to/PipeLineLog.txt'
+    pythonpath = '/path/to/darepype'
 
 ['ctrl']
 # Controller section
@@ -21,7 +21,7 @@
 ['view']
 # Views section
     # Site Name / main logo and icon
-    sitename = 'Stone Edge FITS Viewer 2017'
+    sitename = 'Web FITS Viewer Default'
     pagelogo = 'seo_logo_sml.png'
     pageicon = 'seo_logo_sml.png'
     #pageicon = 'hawc_logo_ico32.png'
@@ -56,7 +56,7 @@
 
 ['model']
 # Model section
-    pipeconf = '/data/scripts/DataReduction/pipeconf_stonedge_auto.txt' # Pipeline Configuration file
+    pipeconf = '/path/file/name/to/a/pipeconf_file.txt' # Pipeline Configuration file
     minsize = 300 # Minimal size of image
     maxsize = 5000 # Maximal image dimension 
     steporder = 'raw fla wcs rgb' # Order for steps

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """ Main function to be used as CGI script or to create WSGI application.
 

@@ -11,7 +11,7 @@ import logging # Logging Library
 import numpy # Numpy Library
 import re # Regexp search Library
 from PIL import Image # Image Library
-from drp.pipedata import PipeData # Pipedata object @UnresolvedImport
+from darepype.drp.datafits import DataFits as PipeData # Pipedata object @UnresolvedImport
 
 ### Class Definition
 class SiteModel(object):
@@ -53,7 +53,7 @@ class SiteModel(object):
         #   At this point the folder depth of files is taken from
         #   the length of conf['view']['foldernames'].split(os.sep)
         # Get existing Folder value
-        if self.session.has_key('folder'):
+        if 'folder' in self.session:
             foldercurr = self.session['folder']
             filen = len(self.filelist(foldercurr))
         else:
@@ -97,7 +97,7 @@ class SiteModel(object):
         # Get File list
         filelist = self.filelist()
         # Get existing File value
-        if self.session.has_key('file'): filecurr = self.session['file']
+        if 'file' in self.session: filecurr = self.session['file']
         else: filecurr = ''
         # Check and set File value
         if not filecurr in filelist:
@@ -116,7 +116,7 @@ class SiteModel(object):
             # Get Step list
             steplist = self.steplist()
             # Get existing Step value
-            if self.session.has_key('step'): stepcurr = self.session['step']
+            if 'step' in self.session: stepcurr = self.session['step']
             else: stepcurr = None
             # Check and set File value
             if not stepcurr in steplist:
@@ -130,7 +130,7 @@ class SiteModel(object):
         # Get Data list
         datalist = self.datalist()
         # Get existing Data value
-        if self.session.has_key('data'): datacurr = self.session['data']
+        if 'data' in self.session: datacurr = self.session['data']
         else: datacurr = ''
         # Check and set Data value
         if not datacurr in datalist:
@@ -144,7 +144,7 @@ class SiteModel(object):
         # Get Plane list
         planelist = self.planelist()
         # Get existing Plane value
-        if self.session.has_key('plane'): planecurr = self.session['plane']
+        if 'plane' in self.session: planecurr = self.session['plane']
         else: planecurr = ''
         # Check and set Plane value
         if not planecurr in planelist:
@@ -181,7 +181,7 @@ class SiteModel(object):
                 'foo/bar','foo/baz' and 'foo/qux' are returned
         """
         # Get folder
-        if len(folder) == 0 and self.session.has_key('folder'):
+        if len(folder) == 0 and 'folder' in self.session:
             folder = self.session['folder']
         # Cut folder to desired level: Get folder list - cut it
         if len(folder) == 0:

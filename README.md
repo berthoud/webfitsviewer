@@ -46,7 +46,7 @@ To do that you uncomment the appropriate ScriptAlias.
     * Restart your webserver after configuration changes. ex: apachectl restart
     * Consult the webserver error log for more information.
       * On mac: /var/log/apache2 or similar folder.
-      * On windows: 
+      * On windows: C:\Users\you\Documents\apacheServer\Apache24\logs
   * **Unable to connect** error from your browser.
     * Your web server may be shut down or not have restarted correctly. 
     * Go to [127.0.0.1](http://127.0.0.1) as most webservers have a default splash page.

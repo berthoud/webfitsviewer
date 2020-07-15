@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """ Main function to be used as CGI script or to create WSGI application.
 
@@ -57,7 +57,7 @@ def errapp(environ, start_response):
         #environ['wsgi.input']=''
         controller = SiteController()
         output = controller(environ,start_response)
-    except Exception, e:
+    except Exception as e:
         start_response('200 OK',[('Content-Type','text/html')])
         output = """<html><body>
 <b>Error</b> = %s<br>

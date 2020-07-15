@@ -21,11 +21,12 @@ The Options at the top show you the different screens:
 <a name="instman"></a>
 ## Installation Manual
 
- * Download the code in webfitsviewer
- * Make sure the webserver (Apache or Tomcat) has access to the files in webfitsviewer
- * Edit the local config file (default is webfitsview_config.txt) and the webserver config file (default webfitsview.conf) to point to the correct files.
- * Setup the webserver with the config file (webfitsview.conf or your own version of it).
- * Now, you should be able to see the page at [127.0.0.1/webviewtest](http://127.0.0.1/webviewtest). Subtitute the domain name of your server if you're working remotely. 
+  * Download the code in webfitsviewer
+  * Make sure the webserver (Apache or Tomcat) has read and execute (where needed) access to the files in webfitsviewer
+  * Make your own copy of the server configuration file webfitsview_apache.conf and the viewer configuration file webfitsview_config.txt .
+  * Edit your copies of these files to point to the correct files.
+  * Setup the webserver with the config file (webfitsview_apache.conf or your own version of it). Restart your webserver.
+  * Now, you should be able to see the page at [127.0.0.1/webview](http://127.0.0.1/webview). Subtitute the domain name of your server if you're working remotely. 
 
 <a name="devman"></a>
 ## Developper's Manual
@@ -43,7 +44,9 @@ To do that you uncomment the appropriate ScriptAlias.
   * **No change in webserver behavior:** You updated the .conf file but nothing changed.
     * Make sure the changes you made are in the config file that the webserver is actually using.
     * Restart your webserver after configuration changes. ex: apachectl restart
-    * Consult the webserver error log for more information. ex: /var/log/apache2 or similar folder.
+    * Consult the webserver error log for more information.
+      * On mac: /var/log/apache2 or similar folder.
+      * On windows: 
   * **Unable to connect** error from your browser.
     * Your web server may be shut down or not have restarted correctly. 
     * Go to [127.0.0.1](http://127.0.0.1) as most webservers have a default splash page.
@@ -57,6 +60,7 @@ To do that you uncomment the appropriate ScriptAlias.
     * This usually means loading cgid_module. 
   * **Wrong python version is used:** the webserver doesn't run the python installation you expect.
     * Use SetEnv PATH "/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" in your webserver configuration path.
+    * Edit the first line in main.py (or testmain.py) to say "python3" instead of "python"
   * **Unable to load configuration file:** You make a change to the configuration file now the application doesn't load.
     * Review the changes you made to the configuration file, check for syntax errors
     * Run the following code in a shell and check for any error messages.

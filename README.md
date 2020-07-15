@@ -34,7 +34,7 @@ Read the code
 
 <a name="support"></a>
 ## Support
-Use the wiki or contact the developer
+Use the wiki or contact @berthoud
 
 <a name="support_install"></a>
 ### Installation Solutions
@@ -57,3 +57,12 @@ To do that you uncomment the appropriate ScriptAlias.
     * This usually means loading cgid_module. 
   * **Wrong python version is used:** the webserver doesn't run the python installation you expect.
     * Use SetEnv PATH "/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" in your webserver configuration path.
+  * **Unable to load configuration file:** You make a change to the configuration file now the application doesn't load.
+    * Review the changes you made to the configuration file, check for syntax errors
+    * Run the following code in a shell to check the file.
+    . ```python
+from configobj import ConfigObj
+conffilename = '/path/file/name/of/your/webfitsview_config.txt'
+conf = ConfigObj(conffilename)
+```
+    

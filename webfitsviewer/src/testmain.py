@@ -15,9 +15,10 @@ def app(environ, start_response):
     """
     # Start document
     start_response('200 OK',[('Content-Type','text/html')])
-    output = """<html><head><title>WebFitsView Test Page</title></head><body>
-<h1>WebFitsViewer Application Test Script</h1>
+    output = """<html><head><title>Web View Test Page</title></head><body>
+<h1>Web Viewer Application Test Script</h1>
 This page is intended as a basic check to see if your webserver is set up for WebFitsView.
+The application will not run until all the checks below are successful.
 """
     ### Run Checks
     output += "<h2>Checks</h2>"

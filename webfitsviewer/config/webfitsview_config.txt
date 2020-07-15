@@ -6,8 +6,8 @@
     baseurlpath = '/webview' # Base url path
     session = 'temp/sessions' # Path to sessions (used with basepath)
     images = 'temp/images' # Path to images (used with basepath)
-    imagesurl = '/images/fitsview/temp/images' # Url Path to images (used with baseurlpath)
-    static = '/images/fitsview/static' # Path to static web page information
+    imagesurl = '/webview/temp/images' # Url Path to images (used with baseurlpath)
+    static = '/webview/static' # Path to static web page information
     datapath = '../exampledata' # Path to FITS file data (used with basepath)
     dataurlpath = '/images/StoneEdge/0.5meter/2017' # URL Path to FITS file data (used with baseurlpath)
     pipelog = '/path/file/name/to/PipeLineLog.txt'

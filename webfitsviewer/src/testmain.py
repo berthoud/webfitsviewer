@@ -31,7 +31,7 @@ The application will not run until all the checks below are successful.
             output += "<p>&#128721; WEBVIEW_CONFIG = %s does not point to valid and visible file" % environ['WEBVIEW_CONFIG']
         else:
             conffilename = environ['WEBVIEW_CONFIG']
-            output += "<p>&#10004; WEBVIEW_CONFIG = %s is valid" % conffilename
+            output += "<p>&#10004; WEBVIEW_CONFIG = %s points to an existing file" % conffilename
         # Check if configobj can me imported
         try:
             from configobj import ConfigObj
@@ -65,7 +65,7 @@ The application will not run until all the checks below are successful.
         diag += v + " : " + repr(environ[v])+"<br>"
     output += diag
     output += "</body></html>"
-    return [output]
+    return [output.encode()]
 
 # Call main for the application to be callable as cgi script
 if __name__ == '__main__':

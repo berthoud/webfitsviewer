@@ -42,7 +42,7 @@ def app(environ, start_response):
     from controller import SiteController # has to be in here to catch errors
     controller = SiteController()
     output = controller(environ,start_response)
-    return [output]
+    return [output.encode()]
 
 # Define Application with error handler
 #application = ErrorMiddleware(app, debug = True,
@@ -72,7 +72,7 @@ def errapp(environ, start_response):
             diag += v + " : " + repr(environ[v])+"<br>\n"
         output = output % (repr(e), traceback.format_exc().replace('\n','<br>\n'),
                            repr(sys.path), diag)
-    return [output]
+    return [output.encode()]
 
 # Define WSGI application
 if weberror_imported:

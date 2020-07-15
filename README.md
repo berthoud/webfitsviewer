@@ -60,7 +60,7 @@ To do that you uncomment the appropriate ScriptAlias.
   * **Unable to load configuration file:** You make a change to the configuration file now the application doesn't load.
     * Review the changes you made to the configuration file, check for syntax errors
     * Run the following code in a shell to check the file.
-    . ```python
+```python
 from configobj import ConfigObj
 conffilename = '/path/file/name/of/your/webfitsview_config.txt'
 conf = ConfigObj(conffilename)

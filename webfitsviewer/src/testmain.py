@@ -23,7 +23,7 @@ The application will not run until all the checks below are successful.
     ### Run Checks
     output += "<h2>Checks</h2>"
     try:
-        # See if WEBVIEW_CONFIG exists and points to valid file
+        # Check if WEBVIEW_CONFIG exists and points to valid file
         conffilename = None
         if not 'WEBVIEW_CONFIG' in environ:
             output += "<p>&#128721; Missing WEBVIEW_CONFIG environment Variable"
@@ -32,18 +32,14 @@ The application will not run until all the checks below are successful.
         else:
             conffilename = environ['WEBVIEW_CONFIG']
             output += "<p>&#10004; WEBVIEW_CONFIG = %s is valid" % conffilename
-        # See if configobj can me imported
+        # Check if configobj can me imported
         try:
             from configobj import ConfigObj
             output += "<p>&#10004; ConfigObj package found"
-            if conffilename:
-                conf = ConfigObj(conffilename)
-            else:
-                confg= ConfigObj()
         except:
             output += "<p>&#128721; Unable to import ConfigObj"
             conffilename = None
-        # See if config can be loaded
+        # Check if config can be loaded
         if conffilename: 
             try:
                 conf = ConfigObj(conffilename)
@@ -51,18 +47,20 @@ The application will not run until all the checks below are successful.
             except:
                 output += "<p>&#128721; Unable to load webview configuration file"
                 conffilename = None
-        # See if [path] exists in config
+        # Check if [path] exists in config
         if conffilename:
             if 'path' in conf:
                 output += "<p>&#10004; [path] section found in webview config"
             else:
                 output += "<p>&#128721; No [path] section in webview config"
-        # Print python version
-        output += "<p>&#10004; Python Version %s" % (sys.version)
     except:
         output += "<p>&#128721; Some checks failed"
     ### Add diagnostic information
-    diag = "<h2>Diagnostics</h2> <b>Environment Variables:</b><br>"
+    diag = "<h2>Diagnostics</h2>"
+    # Print python version
+    diag += "<p><b>Python Version:</b><br> %s" % (sys.version)
+    # Print environment variables
+    diag += "<p><b>Environment Variables:</b><br>"
     for v in environ:
         diag += v + " : " + repr(environ[v])+"<br>"
     output += diag

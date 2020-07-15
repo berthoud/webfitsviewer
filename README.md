@@ -59,10 +59,9 @@ To do that you uncomment the appropriate ScriptAlias.
     * Use SetEnv PATH "/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" in your webserver configuration path.
   * **Unable to load configuration file:** You make a change to the configuration file now the application doesn't load.
     * Review the changes you made to the configuration file, check for syntax errors
-    * Run the following code in a shell to check the file.
+    * Run the following code in a shell and check for any error messages.
 ```python
 from configobj import ConfigObj
 conffilename = '/path/file/name/of/your/webfitsview_config.txt'
 conf = ConfigObj(conffilename)
 ```
-    

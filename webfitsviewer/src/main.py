@@ -9,24 +9,27 @@
 
 """
 
-# Add to pythonpath (get from config)
+# Imports
 import sys
 import os
 from configobj import ConfigObj # Configuration Object
+# Load configuration
 conf = ConfigObj(os.environ['WEBVIEW_CONFIG'])
-newpaths = conf['path']['pythonpath'].split('\n')
-newpaths = [p.strip() for p in newpaths]
-for np in newpaths:
-    if np not in sys.path:
-        sys.path.append(np)
+# Add to pythonpath (get from config)
+if 'pythonpath' in conf['path']:
+    newpaths = conf['path']['pythonpath'].split('\n')
+    newpaths = [p.strip() for p in newpaths]
+    for np in newpaths:
+        if np not in sys.path:
+            sys.path.append(np)
 
 # Import - check if possible to import weberror.errormiddleware
 import traceback
 from wsgiref.handlers import CGIHandler
-weberror_imported = 0 # flag to indicate with error wrapper to use
+weberror_imported = False # flag to indicate with error wrapper to use
 try:
     from weberror.errormiddleware import ErrorMiddleware # @UnresolvedImport
-    weberror_imported = 1
+    weberror_imported = True
 except:
     pass
 

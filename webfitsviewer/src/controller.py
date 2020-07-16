@@ -91,18 +91,23 @@ class SiteController(object):
         self.log.info('          Request from %s to %s'
                        % (environ.get('REMOTE_ADDR'),
                           environ.get('REQUEST_URI')))
-        # Get Post request parameters
+        # Get Post request parameters (decode if needed)
         try:
             request_size = int(environ.get('CONTENT_LENGTH', 0))
         except (ValueError):
             request_size = 0
         request_body = environ['wsgi.input'].read(request_size)
+        try:
+            request_body = request_body.decode()
+        except(UnicodeDecodeError,AttributeError):
+            pass
         request_params = cgi.parse_qs(request_body)
         # Attach GET request parameters
         query_string = environ['QUERY_STRING']
         request_params.update(cgi.parse_qs(query_string))
         self.request = request_params
         # Get session id from Post request
+        self.log.debug('Request Params = ' + repr(request_params))
         self.sid = request_params.get('sid',[''])[0]
         if len(self.sid):
             self.log.info('Existing Session SID = %s' % self.sid)

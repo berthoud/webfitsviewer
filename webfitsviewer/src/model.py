@@ -764,7 +764,7 @@ class SiteModel(object):
             levels = [lvlfmt % level for level in levels]
         # Open log file
         logfilename = os.path.join(self.conf['path']['pipelog'])
-        logfile = open(logfilename)
+        logfile = open(logfilename,'rb')
         # Read Last entries from log file (last 50kb)
         if os.path.getsize(logfilename) > 51000:
             logfile.seek(-50000,2)
@@ -773,6 +773,7 @@ class SiteModel(object):
         # Make list of requested Lines
         outlist = []
         for line in loglines:
+            line = line.decode('ascii')
             for level in levels:
                 if level in line:
                     outlist.append(line)

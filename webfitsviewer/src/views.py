@@ -783,7 +783,7 @@ logrequest();
                 # set outputs
                 logsrc = logsplit[1].strip()
                 loglvl = logsplit[2].strip()
-                logmsg = string.join(logsplit[3:],' - ').strip()
+                logmsg = ' - '.join(logsplit[3:]).strip()
             else:
                 # Just get message, do not set loglvl (assume unchanged)
                 logsrc = ''

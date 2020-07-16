@@ -70,7 +70,7 @@ class SiteViews(object):
         # Make image folder
         staticpath = self.conf['path']['static']
         # Make listlabel (label for list view considering folder names)
-        listlabel = string.join(self.foldernames,' / ')
+        listlabel = ' / '.join(self.foldernames)
         listlabel = '%s List' % listlabel
         # Make pagetitles
         titlelist = {'data':': Data Display',
@@ -280,7 +280,7 @@ Display : <select name = "data_selection"
                 %s""" % (filecommonstart,fileopt, filecommonend)
         # Get step names
         stepnames = self.conf['view']['stepnames'].split('|')
-        stepnames = dict([[name.split()[0].upper(),string.join(name.split()[1:])]
+        stepnames = dict([[name.split()[0].upper(),''.join(name.split()[1:])]
                           for name in stepnames])
         # Get step options
         steplist = self.model.steplist()
@@ -783,7 +783,7 @@ logrequest();
                 # set outputs
                 logsrc = logsplit[1].strip()
                 loglvl = logsplit[2].strip()
-                logmsg = string.join(logsplit[3:],' - ').strip()
+                logmsg = ' - '.join(logsplit[3:]).strip()
             else:
                 # Just get message, do not set loglvl (assume unchanged)
                 logsrc = ''
@@ -819,7 +819,7 @@ logrequest();
 %s
 """
         # Make foldernames, foldertop
-        foldernames = string.join(self.foldernames, ' / ')
+        foldernames = ' / '.join(self.foldernames)
         # Make list for pulldown menu
         folders = self.model.folderlist(0)
         folders.reverse()
@@ -888,7 +888,7 @@ logrequest();
                     # get value
                     else:
                         val = self.model.getheadval(item[ind+1:])
-                        if not isinstance(val, basestring):
+                        if not isinstance(val, str):
                             val    = repr(val) # Change to string
                         if not len(val) : val = '-' # Add dash if no content
                     subtext += '<td>%s' % val

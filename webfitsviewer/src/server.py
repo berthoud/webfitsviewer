@@ -11,17 +11,17 @@ def app(environ, start_response):
     # Get the Path Info
     pathinfo = environ['PATH_INFO']
     # Check if hawcview folder is requested as expected  
-    if not '/hawcview' in pathinfo:
+    if not '/webviewserve' in pathinfo:
         start_response('200 OK', [('Content-Type', 'text/html')])
         output = '<h1>It Works!</h1>'
         return [output]
     # Check if it's a file
     filename = ''
-    if '/hawcview/static' in pathinfo:
+    if '/webviewserve/static' in pathinfo:
         filename = pathinfo[10:]
-    elif '/hawcview/temp/images' in pathinfo:
+    elif '/webviewserve/temp/images' in pathinfo:
         filename = pathinfo[10:]
-    elif 'hawcview/filedata' in pathinfo:
+    elif 'webviewserve/filedata' in pathinfo:
         filename = pathinfo[10:]
     # If it's a file, return it
     if len(filename) > 0:

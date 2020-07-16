@@ -77,7 +77,7 @@ class SiteController(object):
         # Load Configuration
         self.conf = ConfigObj(environ.get('WEBVIEW_CONFIG'))
         # Add configuration from site_sitename
-        if self.conf.has_key('site_'+siteurl):
+        if 'site_'+siteurl in self.conf:
             self.conf.merge(self.conf['site_'+siteurl])
         # Edit siteurl in config
         if len(siteurl):
@@ -91,24 +91,29 @@ class SiteController(object):
         self.log.info('          Request from %s to %s'
                        % (environ.get('REMOTE_ADDR'),
                           environ.get('REQUEST_URI')))
-        # Get Post request parameters
+        # Get Post request parameters (decode if needed)
         try:
             request_size = int(environ.get('CONTENT_LENGTH', 0))
         except (ValueError):
             request_size = 0
         request_body = environ['wsgi.input'].read(request_size)
+        try:
+            request_body = request_body.decode()
+        except(UnicodeDecodeError,AttributeError):
+            pass
         request_params = cgi.parse_qs(request_body)
         # Attach GET request parameters
         query_string = environ['QUERY_STRING']
         request_params.update(cgi.parse_qs(query_string))
         self.request = request_params
         # Get session id from Post request
+        self.log.debug('Request Params = ' + repr(request_params))
         self.sid = request_params.get('sid',[''])[0]
         if len(self.sid):
             self.log.info('Existing Session SID = %s' % self.sid)
         else:
             self.log.info('New Session')
-            self.sid = hashlib.sha1(repr(time.time())+environ['REMOTE_ADDR']).hexdigest()
+            self.sid = hashlib.sha1((repr(time.time())+environ['REMOTE_ADDR']).encode('utf-8')).hexdigest()
         # Get session information / make new session file
         sessionfile = os.path.join(self.conf['path']['basepath'],
                                    self.conf['path']['session'],
@@ -135,22 +140,22 @@ class SiteController(object):
                 self.session['request'] = responsearr[-1].lower()
                 responsearr = responsearr[0:-1]
             # FOLDER selection from request parameters or response path array
-            if request_params.has_key('folder_selection'):
+            if 'folder_selection' in request_params:
                 self.session['folder'] = request_params.get('folder_selection')[0]
             elif len(responsearr) > 1:
                 responsefolder = os.path.join(*responsearr[1:])
                 self.session['folder'] = responsefolder
             # FILE selection from request parameters
-            if request_params.has_key('file_selection'):
+            if 'file_selection' in request_params:
                 self.session['file'] = request_params.get('file_selection')[0]
             # STEP selection from request parameters
-            if request_params.has_key('step_selection'):
+            if 'step_selection' in request_params:
                 self.session['step'] = request_params.get('step_selection')[0]
             # DATA selection from request parameters
-            if request_params.has_key('data_selection'):
+            if 'data_selection' in request_params:
                 self.session['data'] = request_params.get('data_selection')[0]
             # PLANE selection from request parameters
-            if request_params.has_key('plane_selection'):
+            if 'plane_selection' in request_params:
                 self.session['plane'] = request_params.get('plane_selection')[0]
             # Validate / Set session variables
             self.model.set_selection()
@@ -174,11 +179,11 @@ class SiteController(object):
             if responsearr[-1].lower() in ['update']:
                 self.session['request'] = responsearr[-1].lower()
             # LOG_LEVEL selection from request parameters
-            if request_params.has_key('log_level'):
+            if 'log_level' in request_params:
                 level = request_params.get('log_level')[0]
                 if level in 'DEBUG INFO WARNING ERROR CRITICAL':
                     self.session['loglevel'] = level
-            elif not self.session.has_key('loglevel'):
+            elif not 'loglevel' in self.session:
                 self.session['loglevel'] = 'INFO'
         #-- LIST Response: update session variables and validate request
         if self.session['page'] == 'list':

@@ -15,7 +15,7 @@
 
 ['ctrl']
 # Controller section
-    logconfig = 'config/weblog_config.txt' # Location of log config file
+    logconfig = 'config/webfitslog_config.txt' # Location of log config file
     debuginfo = 0 # Flag to add debug info to the page
     
 ['view']

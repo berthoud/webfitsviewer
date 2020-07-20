@@ -16,7 +16,7 @@
 ['ctrl']
 # Controller section
     logconfig = 'config/webfitslog_config.txt' # Location of log config file
-    erronbadurl =1 
+    erronbadurl = 1 # flag to print error message instead of showing next file / folder if file not found
     debuginfo = 0 # Flag to add debug info to the page
     
 ['view']

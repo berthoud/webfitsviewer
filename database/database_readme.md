@@ -9,4 +9,12 @@ If you do all of the above, you should be able to run create_databases.py and it
 3) populate that seo table using the FITS files in path_to_sample_data. 
 Note that repeated reruns will delete and recreate the table. I recommend reading the code and comments as alternatives are commented out sometimes, in particular with regards to deleting already existing things.
 
+TESTING: With regards to seeing the results from the code, I recommend just running mysql in the command line. After successfully running create_database.py, you can run the following sequence of commands to understand what occurred:
+mysql -u root -p <will prompt you for root password>
+SHOW DATABASES <shows databases, should include the seo one the code creates>
+USE seo 
+SHOW TABLES <shows tables within seo, should include fits_data one created by code>
+DESC fits_data <should show fields of fits_data table>
+SELECT * FROM fits_data <should show records added from your path_to_data>
+
 Feel free to reach out if you run into problems.

@@ -651,7 +651,7 @@ analimg.init("%s", "%s");
         retdata += "bscale = %e\n" % bscale
         retdata += "message = %s\n" % message
         retdata += "encoding = %s\n" % "UInt16"
-        if 'CTYPE1' in head > 0:
+        if 'CTYPE1' in head:
             retdata += "coordx0 = %.5f\n" % x0
             retdata += "coordy0 = %.5f\n" % y0
             retdata += "coordrowx = %.5f\n" % rowx

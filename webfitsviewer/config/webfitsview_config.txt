@@ -2,7 +2,7 @@
 
 ['path']
 # Paths section 
-    basepath = '/path/to/webfitsviewer/webfitsviewer' # Path to the base (webfitsview) folder
+    basepath = '/CHANGE/path/to/webfitsviewer/webfitsviewer' # Path to the base (webfitsview) folder
     baseurlpath = '/webview' # Base url path
     session = 'temp/sessions' # Path to sessions (used with basepath)
     images = 'temp/images' # Path to images (used with basepath)
@@ -10,12 +10,13 @@
     static = '/webview/static' # Path to static web page information
     datapath = '../exampledata' # Path to FITS file data (used with basepath)
     dataurlpath = '/images/StoneEdge/0.5meter/2017' # URL Path to FITS file data (used with baseurlpath)
-    pipelog = '/path/file/name/to/PipeLineLog.txt'
-    pythonpath = '/path/to/darepype'
+    pipelog = '/CHANGE/path/file/name/to/PipeLineLog.txt'
+    pythonpath = '/CHANGE/path/to/darepype'
 
 ['ctrl']
 # Controller section
-    logconfig = 'config/weblog_config.txt' # Location of log config file
+    logconfig = 'config/webfitslog_config.txt' # Location of log config file
+    erronbadurl = 1 # flag to print error message instead of showing next file / folder if file not found
     debuginfo = 0 # Flag to add debug info to the page
     
 ['view']
@@ -56,7 +57,7 @@
 
 ['model']
 # Model section
-    pipeconf = '/path/file/name/to/a/pipeconf_file.txt' # Pipeline Configuration file
+    pipeconf = '/CHANGE/path/file/name/to/a/pipeconf_file.txt' # Pipeline Configuration file
     minsize = 300 # Minimal size of image
     maxsize = 5000 # Maximal image dimension 
     steporder = 'raw fla wcs rgb' # Order for steps

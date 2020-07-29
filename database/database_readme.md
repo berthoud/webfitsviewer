@@ -3,11 +3,11 @@
 **Table of Contents:**
   * [Initial Database Code](#idb)
     * [Run Initial Database Guide](#idbrun)
-    * [Testing Support](#idb_tst)
+    * [Testing Support Guide](#idb_tst)
   * [Database Webview](#webdb)
-    * [Webview Installation](#webin)
+    * [Webview Installation Guide](#webin)
     * [Run Webview Guide](#webrun)
-    * [Testing Support](#web_tst)
+    * [Testing Support Guide](#web_tst)
 
 --------------------
 
@@ -30,17 +30,17 @@ Note that repeated reruns will delete and recreate the table. I recommend readin
 ### SUPPORT: Testing
 With regards to seeing the results from the code, I recommend just running mysql in the command line. After successfully running create_database.py, you can run the following sequence of commands to understand what occurred:
 
- **$ mysql -u root -p** <will prompt you for root password>
+⋅⋅⋅ **$ mysql -u root -p** <will prompt you for root password>
 
- **mysql> SHOW DATABASES;** <shows databases, should include the seo one the code creates>
+⋅⋅⋅ **mysql> SHOW DATABASES;** <shows databases, should include the seo one the code creates>
 
- **mysql> USE seo;** 
+⋅⋅⋅ **mysql> USE seo;** 
 
- **mysql> SHOW TABLES;** <shows tables within seo, should include fits_data one created by code>
+⋅⋅⋅ **mysql> SHOW TABLES;** <shows tables within seo, should include fits_data one created by code>
 
- **mysql> DESC fits_data;** <should show fields of fits_data table>
+⋅⋅⋅ **mysql> DESC fits_data;** <should show fields of fits_data table>
 
- **mysql>** **SELECT** * **FROM fits_data;** <should show records added from your path_to_data>
+⋅⋅⋅ **mysql>** **SELECT** * **FROM fits_data;** <should show records added from your path_to_data>
 
 --------------------
 
@@ -49,12 +49,14 @@ With regards to seeing the results from the code, I recommend just running mysql
 (Recycled/repurposed code from [source](https://www.roytuts.com/python-web-application-crud-example-using-flask-and-mysql/).)
 
 <a name="webin"></a>
-### Pre-requisites & Installation
- * **Pre-requisites:** Python 3.8.0, Flask 1.1.1, Flask Table 0.5.0, MySQL 8.0.17
+### Requirements & Installation
+Pre-requisites: **Python 3.8.0, Flask 1.1.1, Flask Table 0.5.0, MySQL 8.0.17**
 
 The module **table** is required to show data in tabular format on HTML view, the module **flask** works as a web framework and **mysql** module is required to establish connection with MySQL database and query the database using Python programming language.
- * **pip install flask_table
- * **pip install flask-mysql
+ 
+⋅⋅⋅ **$ pip install flask_table**
+ 
+⋅⋅⋅ **$ pip install flask-mysql**
 
 <a name="webrun"></a>
 ### To run...

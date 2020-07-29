@@ -1,0 +1,34 @@
+# ABOUT
+# This file configures the fields that will be stored in the fits_data table of the seo database.
+# This file is read in the create_database.py code, so changing it will only change the fields
+# stored in the actual database by rerunning that code, which may entail deleting and repopulating
+# the database.
+
+# FORMAT
+# Every non-empty line should consist of words separated only by whitespace.
+# 
+# the name of the desired sql field and, optionally, the exact specification of the type used
+# to store the field using SQL types. If the latter is not given, varchar(15) is assumed.
+# Lines starting with hashtags are ignored.
+
+# NAMING CONVENTION
+# It is good to have a standard convention for SQL table fields storing database
+# that corresponds to a FITS header field so that we can convert between the two 
+# without exception. I recommend the following convention: 
+# decapitalize the field, replace hyphens with underscores, and add a trailing underscore.
+# The reasons for these are (1) SQL fields are traditionally lowercase (2) hyphens are not allowed
+# in field names (3) some header fields such as "dec" are SQL keywords. Adding an underscore prevents 
+# this. The trailing underscore is not mandatory but you should make sure your field name is not an 
+# sql keyword if you leave it out.
+
+# file_path field below is added by the python code directly; it is required and the primary field.
+# Included here for completeness.
+# FIELDS            TYPES
+
+# file_path         varchar(260)
+simple              varchar(1)
+date_obs            varchar(19)
+bitpix              TINYINT
+ra                  varchar(11)
+dec_                varchar(12)
+exptime             decimal(5, 2)

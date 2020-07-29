@@ -21,21 +21,23 @@ SELECT * FROM fits_data <should show records added from your path_to_data>
 
 # DATABASE (CRUD) WEBVIEW
 (Recycled/repurposed code from https://www.roytuts.com/python-web-application-crud-example-using-flask-and-mysql/)
-The module table is required to show data in tabular format on HTML view, the module flask works as a web framework and mysql module is required to establish connection with MySQL database and query the database using Python programming language.
 
 ## Pre-requisites:
 Python 3.8.0, Flask 1.1.1, Flask Table 0.5.0, MySQL 8.0.17,
 
 ## Installation
-pip install flask_table
-pip install flask-mysql
+The module **table** is required to show data in tabular format on HTML view, the module **flask** works as a web framework and **mysql** module is required to establish connection with MySQL database and query the database using Python programming language.
+ * **pip install flask_table
+ * **pip install flask-mysql
 
 ## TO RUN
 1) Using the commandline, enter directory: **$ cd user_crud**
 2) Using the commandline: **$ python main.py**
 3) Open browser, go to url: http://localhost:5000/
+4) Explore!
 
 ## NOTES: TESTING /BROKEN CODE
-Currently, the edit and delete functionalities do not work properly. Ultimately, these functions will not be available through the webviewer and will be exclusive to STARS server IP.
+ * If broken links to 'Show Users' or 'Show Files', click on 'Show Init' and try again.
+ * Currently, the edit and delete functionalities do not work properly. Ultimately, these functions will not be available through the webviewer and will be exclusive to STARS server IP.
 
 Feel free to reach out if you run into problems.

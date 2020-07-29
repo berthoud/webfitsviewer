@@ -1,0 +1,27 @@
+<doctype html>
+<title>Edit User - Python Flask MySQL CRUD</title>
+<h2>Edit User</h2>
+<form method="post" action="/update">
+    <dl>
+		<p>
+			<input name="inputUserId" value="{{ row['userId'] }}" type="text" placeholder="User Id" autocomplete="off" required>
+		</p>
+		<p>
+			<input name="inputFName" value="{{ row['inputFName'] }}" type="text" placeholder="First Name" autocomplete="off" required>
+		</p>
+		<p>
+			<input name="inputLName" value="{{ row['inputLName'] }}" type="text" placeholder="Last Name" autocomplete="off" required>
+		</p>
+		<p>
+			<input name="inputEmail" value="{{ row['email'] }}" type="text" placeholder="Email" autocomplete="off" required>
+		</p>
+		<p>
+			<input name="inputPassword" value="" type="password" placeholder="Password" autocomplete="off" required>
+		</p>
+    </dl>
+    <p>
+		<input name="inputPermissions" value="{{ row['permissions'] }}" type="hidden">
+		<input name="id" value="{{ row['userId'] }}" type="hidden">
+		<input type="submit" value="Submit">
+	</p>
+</form>

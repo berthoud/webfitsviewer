@@ -1,0 +1,41 @@
+<doctype html>
+<title>Edit File - Python Flask MySQL CRUD</title>
+<h2>Edit File</h2>
+<form method="post" action="/update">
+    <dl>
+		<p>
+			<input name="inputFileId" value="{{ row['fileId'] }}" type="text" placeholder="User Id" autocomplete="off" required>
+		</p>
+		<p>
+			<input name="inputObjectName" value="{{ row['inputObjectName'] }}" type="text" placeholder="Object Name" autocomplete="off" required>
+		</p>
+		<p>
+			<input name="inputDate" value="{{ row['inputDate'] }}" type="date" placeholder="Date" autocomplete="off" required>
+		</p>
+		<p>
+			<input name="inputTime" value="{{ row['inputTime'] }}" type="time" placeholder="Time" autocomplete="off" required>
+		</p>
+		<p>
+			<input name="inputTimeStamp" value="{{ row['inputTimeStamp'] }}" type="text" placeholder="TimeStamp" autocomplete="off">
+		</p>
+        <p>
+			<input name="inputReductionStage" value="{{ row['inputReductionStage'] }}" type="text" placeholder="Reduction Time" autocomplete="off">
+		</p>
+        <p>
+			<input name="inputFileType" value="{{ row['inputFileType'] }}" type="text" placeholder="File Type" autocomplete="off">
+		</p>
+        <p>
+			<input name="inputQuality" value="{{ row['inputQuality'] }}" type="text" placeholder="Quality" autocomplete="off">
+		</p>
+        <p>
+			<input name="inputPosition" value="{{ row['inputPosition'] }}" type="text" placeholder="Position" autocomplete="off">
+		</p>
+        <p>
+			<input name="inputBandType" value="{{ row['inputBandType'] }}" type="text" placeholder="Band Type" autocomplete="off">
+		</p>
+    </dl>
+    <p>
+		<input name="id" value="{{ row['fileId'] }}" type="hidden">
+		<input type="submit" value="Submit">
+	</p>
+</form>

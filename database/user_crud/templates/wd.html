@@ -1,10 +1,9 @@
 <doctype html>
-<title>Stars-DB : Add</title>
+<title>List of Weather Daily</title>
 
-<a href="{{ url_for('.start') }}"> Home </a>|&nbsp; 
-<a href="{{ url_for('.show_files') }}"> Search :TODO </a>
-
-<p><a href="{{ url_for('.add_file_view') }}"> Add Files </a></p>
+<a href="{{ url_for('.start') }}"> Home </a> |&nbsp; 
+<a href="{{ url_for('.start') }}"> Search :TODO</a>
+<p><a href="{{ url_for('.add_wd_view') }}"> Add Weather Data for Day </a></p>
 
 <p>
 	{% with messages = get_flashed_messages() %}

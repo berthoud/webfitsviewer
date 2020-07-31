@@ -1,0 +1,25 @@
+<doctype html>
+<title>Stars-DB: Add</title>
+<h2>Add Obs</h2>
+<form method="post" action="/addObs">
+    <dl>
+  		<p>
+			<input id="gid" name="inputGroupId" value="" type="text" placeholder="Group Id" autocomplete="off" required>
+		</p>
+		<p>
+			<input id="fid" name="inputFileId" value="" type="text" placeholder="File Id" autocomplete="off" required>
+		</p>
+		<p>
+            <label for="st">Start Time: </label>
+	        <input id="st" name="inputStart" value="" type="datetime-local" placeholder="Start Time" autocomplete="off" required>
+		</p>
+		<p>
+            <label for="et">End Time: </label>
+			<input id="et" name="inputEnd" value="" type="datetime-local" placeholder="End Time" autocomplete="off" required>
+		</p>
+    </dl>
+    <p>
+		<input type="submit" value="Submit">
+	</p>
+
+</form>

@@ -1,18 +1,33 @@
-<doctype html>
-<title>List of users - Python Flask MySQL CRUD</title>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
 
-<p><a href="{{ url_for('.add_user_view') }}"> Add User </a></p>
+<head>
+  <title>All Users</title>
+</head>
 
-<p>
-	{% with messages = get_flashed_messages() %}
-	  {% if messages %}
-		<ul class=flashes>
-		{% for message in messages %}
-		  <li>{{ message }}</li>
-		{% endfor %}
-		</ul>
-	  {% endif %}
-	{% endwith %}
-</p>
+<body>
+  <div>
+    <h1 style="background-color:DodgerBlue;"> Stars-DB </h1>
+    <a href="{{ url_for('.start') }}"> Home </a> |&nbsp; 
+    <a href="{{ url_for('.start') }}"> Search :TODO </a>
+  </div>
 
-{{ table }}
+  <h3 style="text-align: center;"> Users </h3>
+  <p><a href="{{ url_for('.add_user_view') }}"> Add User </a></p>
+
+  <p>
+	  {% with messages = get_flashed_messages() %}
+	    {% if messages %}
+		  <ul class=flashes>
+		  {% for message in messages %}
+		    <li>{{ message }}</li>
+		  {% endfor %}
+		  </ul>
+	    {% endif %}
+	  {% endwith %}
+  </p>
+
+  {{ table }}
+<body>
+
+</html>

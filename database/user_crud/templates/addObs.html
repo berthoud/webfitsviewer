@@ -1,25 +1,50 @@
 <doctype html>
+<head>
 <title>Stars-DB: Add</title>
-<h2>Add Obs</h2>
+</head>
+
+<body>
+  <div style="text-align: center; background-color:DodgerBlue;">
+    <h1> Stars-DB </h1>
+    <a href="{{ url_for('.start') }}"> Home </a> |&nbsp;
+    <a href="{{ url_for('.show_obs') }}"> Observations </a> |&nbsp;
+    <a href="{{ url_for('.show_files') }}"> Files </a> |&nbsp;
+    <a href="{{ url_for('.show_wd') }}"> Weather (Daily) </a> |&nbsp; |&nbsp;
+    <a href="{{ url_for('.start') }}"> Search :TODO </a>
+  </div>
+
+<h2>Add Observation</h2>
 <form method="post" action="/addObs">
     <dl>
   		<p>
+        <label for="gid">Group ID: </label> <br>
 			<input id="gid" name="inputGroupId" value="" type="text" placeholder="Group Id" autocomplete="off" required>
 		</p>
 		<p>
-			<input id="fid" name="inputFileId" value="" type="text" placeholder="File Id" autocomplete="off" required>
+        <label for="sd">Start Date: </label> <br>
+			<input id="sd" name="inputSD" value="" type="DATE" placeholder="Start Date" autocomplete="off" required>
 		</p>
 		<p>
-            <label for="st">Start Time: </label>
-	        <input id="st" name="inputStart" value="" type="datetime-local" placeholder="Start Time" autocomplete="off" required>
+        <label for="st">Start Time: </label> <br>
+	        <input id="st" name="inputST" value="" type="time" placeholder="Start Time" autocomplete="off" required>
 		</p>
+        <p>
+        <label for="ed">End Date: </label> <br>
+			<input id="ed" name="inputED" value="" type="DATE" placeholder="End Date" autocomplete="off">
+        </p>
 		<p>
-            <label for="et">End Time: </label>
-			<input id="et" name="inputEnd" value="" type="datetime-local" placeholder="End Time" autocomplete="off" required>
+        <label for="et">End Time: </label> <br>
+			<input id="et" name="inputET" value="" type="time" placeholder="End Time" autocomplete="off">
 		</p>
+        <p>
+        <label for="desc">Description: </label> <br>
+          <input id="desc" name="inputDesc" value="" type="text" placeholder="Description" autocomplete="off">
+        </p>
     </dl>
     <p>
 		<input type="submit" value="Submit">
 	</p>
 
 </form>
+</body>
+</html>

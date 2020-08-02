@@ -1,5 +1,18 @@
 <doctype html>
+<head>
 <title>Add File</title>
+</head>
+
+<body>
+  <div style="text-align: center; background-color:DodgerBlue;">
+    <h1> Stars-DB </h1>
+    <a href="{{ url_for('.start') }}"> Home </a> |&nbsp;
+    <a href="{{ url_for('.show_obs') }}"> Observations </a> |&nbsp;
+    <a href="{{ url_for('.show_files') }}"> Files </a> |&nbsp;
+    <a href="{{ url_for('.show_wd') }}"> Weather (Daily) </a> |&nbsp; |&nbsp;
+    <a href="{{ url_for('.start') }}"> Search :TODO </a>
+  </div>
+
 <h2>Add File</h2>
 <form method="post" action="/addFile">
     <dl>
@@ -42,3 +55,5 @@
 	</p>
 
 </form>
+</body>
+</html>

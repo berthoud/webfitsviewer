@@ -1,41 +1,71 @@
 <doctype html>
-<title>Edit File - Python Flask MySQL CRUD</title>
-<h2>Edit File</h2>
-<form method="post" action="/update">
-    <dl>
-		<p>
-			<input name="inputFileId" value="{{ row['fileId'] }}" type="text" placeholder="User Id" autocomplete="off" required>
-		</p>
-		<p>
-			<input name="inputObjectName" value="{{ row['inputObjectName'] }}" type="text" placeholder="Object Name" autocomplete="off" required>
-		</p>
-		<p>
-			<input name="inputDate" value="{{ row['inputDate'] }}" type="date" placeholder="Date" autocomplete="off" required>
-		</p>
-		<p>
-			<input name="inputTime" value="{{ row['inputTime'] }}" type="time" placeholder="Time" autocomplete="off" required>
-		</p>
-		<p>
-			<input name="inputTimeStamp" value="{{ row['inputTimeStamp'] }}" type="text" placeholder="TimeStamp" autocomplete="off">
-		</p>
-        <p>
-			<input name="inputReductionStage" value="{{ row['inputReductionStage'] }}" type="text" placeholder="Reduction Time" autocomplete="off">
-		</p>
-        <p>
-			<input name="inputFileType" value="{{ row['inputFileType'] }}" type="text" placeholder="File Type" autocomplete="off">
-		</p>
-        <p>
-			<input name="inputQuality" value="{{ row['inputQuality'] }}" type="text" placeholder="Quality" autocomplete="off">
-		</p>
-        <p>
-			<input name="inputPosition" value="{{ row['inputPosition'] }}" type="text" placeholder="Position" autocomplete="off">
-		</p>
-        <p>
-			<input name="inputBandType" value="{{ row['inputBandType'] }}" type="text" placeholder="Band Type" autocomplete="off">
-		</p>
-    </dl>
-    <p>
-		<input name="id" value="{{ row['fileId'] }}" type="hidden">
-		<input type="submit" value="Submit">
-	</p>
-</form>
+<head>
+  <title>Edit File </title>
+</head>
+
+<body>
+  <div>
+    <h1 style="background-color:DodgerBlue;"> Stars-DB </h1>
+    <a href="{{ url_for('.start') }}"> Home </a> |&nbsp;
+    <a href="{{ url_for('.show_files') }}"> All Files </a> |&nbsp;
+    <a href="{{ url_for('.start') }}"> Search :TODO </a>
+    <h2>Edit File</h2>
+  </div>
+
+ 
+  <form method="post" action="/update">
+      <dl>
+          <p>
+              <label for="fid">File ID: </label> <br>
+              <input id="fid" name="inputFileId" value="{{ row['fileId'] }}" type="text" placeholder="User Id" autocomplete="off" required>
+          </p>
+          <p>
+              <label for="aon">Astronomical Object Name: </label> <br>
+              <input id="aon" name="inputObjectName" value="{{ row['objectName'] }}" type="text" placeholder="Object Name" autocomplete="off" required>
+          </p>
+          <p>
+              <label for="gid">Group ID: </label> <br>
+              <input id="gid" name="inputGroupId" value="{{ row['groupId'] }}" type="text" placeholder="Group Id" autocomplete="off" required>
+          </p>
+          <p>
+              <label for="rs">Reduction Stage: </label> <br>
+              <input id="rs" name="inputReductionStage" value="{{ row['reductionStage'] }}" type="text" placeholder="Reduction Time" autocomplete="off">
+          </p>
+          <p>
+          <label for="ft">File Type: </label> <br>
+              <input id-"ft" name="inputFileType" value="{{ row['fileType'] }}" type="text" placeholder="File Type" autocomplete="off">
+          </p>
+          <p>
+              <label for="b">BandType: </label> <br>
+              <input id="b" name="inputBandType" value="{{ row['bandType'] }}" type="text" placeholder="Band Type" autocomplete="off">
+          </p>
+          <p>
+              <label for="q">Quality: </label> <br>
+              <input id="q" name="inputQuality" value="{{ row['quality'] }}" type="text" placeholder="Quality" autocomplete="off">
+          </p>
+          <p>
+              <label for="p">Position: </label> <br>
+              <input id="p" name="inputPosition" value="{{ row['position'] }}" type="text" placeholder="Position" autocomplete="off">
+          </p>
+                  <p>
+              <label for="dt">Date: </label> <br>
+              <input id="dt" name="inputDate" value="{{ row['date'] }}" type="date" placeholder="Date" autocomplete="off" required>
+          </p>
+          <p>
+              <label for="ct">Time: </label> <br>
+              <input id="ct" name="inputTime" value="{{ row['time'] }}" type="time" placeholder="Time" autocomplete="off" required>
+          </p>
+          <p>
+              <label for="ts">TimeStamp: </label> <br>
+              <input id="ts" name="inputTimeStamp" value="{{ row['timeStamp'] }}" readonly="readonly" type="text" placeholder="TimeStamp" autocomplete="off">
+          </p>
+
+      </dl>
+      <p>
+          <input name="id" value="{{ row['fileId'] }}" type="hidden">
+          <input type="submit" value="Submit">
+      </p>
+  </form> 
+
+</body>
+</html>

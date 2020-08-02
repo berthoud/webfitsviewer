@@ -18,18 +18,25 @@
 			<input name="inputGroupId" value="{{ row['groupId'] }}" type="text" placeholder="Group Id" autocomplete="off" required>
 		</p>
         <p>
-			<input name="inputFileId" value="{{ row['fileId'] }}" type="text" placeholder="User Id" autocomplete="off" required>
+			<input name="inputSD" value="{{ row['startDate'] }}" type="DATE" placeholder="Start Date" autocomplete="off" required>
 		</p>
         <p>
-			<input name="inputStart" value="{{ row['inputStart'] }}" type="datetime-local" placeholder="Start Time" autocomplete="off" required>
+			<input name="inputST" value="{{ row['startTime'] }}" type="time" placeholder="Start Time" autocomplete="off" required>
 		</p>
 		<p>
-			<input name="inputEnd" value="{{ row['inputEnd'] }}" type="datetime-local" placeholder="End Time" autocomplete="off" required>
+			<input name="inputED" value="{{ row['endDate'] }}" type="DATE" placeholder="End Date" autocomplete="off">
 		</p>
+        <p>
+			<input name="inputET" value="{{ row['endTime'] }}" type="time" placeholder="End Time" autocomplete="off">
+		</p>
+        <p>
+			<input name="inputDesc" value="{{ row['description'] }}" type="text" placeholder="End Time" autocomplete="off" >
+		</p>
+
+
     </dl>
     <p>
-		<input name="gid" value="{{ row['groupId'] }}" type="hidden">
-		<input name="id" value="{{ row['fileId'] }}" type="hidden">
+		<input name="id" value="{{ row['groupId'] }}" type="hidden">
 		<input type="submit" value="Submit">
 	</p>
 </form>

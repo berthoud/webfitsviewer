@@ -1,10 +1,20 @@
 <doctype html>
+<head>
 <title>List of Observations</title>
+</head>
 
-<a href="{{ url_for('.start') }}"> Home </a>|&nbsp;
-<a href="{{ url_for('.start') }}"> Search :TODO </a>
+<body>
+  <div style="text-align: center; background-color:DodgerBlue;">
+  <h1> Stars-DB </h1>
+  <a href="{{ url_for('.start') }}"> Home </a> |&nbsp;
+  <a href="{{ url_for('.show_obs') }}"> Observations </a> |&nbsp;
+  <a href="{{ url_for('.show_files') }}"> Files </a> |&nbsp;
+  <a href="{{ url_for('.show_wd') }}"> Weather (Daily) </a> |&nbsp; 
+  <a href="{{ url_for('.show_users') }}"> Users </a>  
+</div>
 
-<p><a href="{{ url_for('.add_obs_view') }}"> Add Observation </a></p>
+  <h2>Observations</h2>
+  <p><a href="{{ url_for('.add_obs_view') }}"> Add Observation </a></p>
 
 <p>
 	{% with messages = get_flashed_messages() %}
@@ -19,3 +29,5 @@
 </p>
 
 {{ table }}
+</body>
+</html>

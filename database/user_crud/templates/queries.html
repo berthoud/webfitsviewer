@@ -1,6 +1,6 @@
 <doctype html>
 <head>
-<title>List of Weather</title>
+<title>Queries</title>
 </head>
 
 <body>
@@ -13,9 +13,7 @@
   <a href="{{ url_for('.show_users') }}"> Users </a>  
 </div>
 
-  <h2>Weather Daily</h2>
-  <p><a href="{{ url_for('.add_wd_view') }}"> Add Day Weather </a></p>
-
+  <h2>Query Display</h2>
 <p>
 	{% with messages = get_flashed_messages() %}
 	  {% if messages %}

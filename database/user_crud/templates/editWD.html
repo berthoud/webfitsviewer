@@ -7,13 +7,13 @@
 			<input name="inputDate" value="{{ row['dayId'] }}" type="text" placeholder="Date" autocomplete="off" required>
 		</p>
 		<p>
-			<input name="inputRise" value="{{ row['inputRise'] }}" type="datetime-local" placeholder="Time" autocomplete="off">
+			<input name="inputRise" value="{{ row['sunriseTime'] }}" type="time" placeholder="Time" autocomplete="off">
 		</p>
 		<p>
-			<input name="inputDown" value="{{ row['inputDown'] }}" type="datetime-local" placeholder="Time" autocomplete="off" required>
+			<input name="inputDown" value="{{ row['sundownTime'] }}" type="time" placeholder="Time" autocomplete="off" required>
 		</p>
         <p>
-			<input name="inputMoon" value="{{ row['inputMoon'] }}" type="text" placeholder="Moon Phase" autocomplete="off" required>
+			<input name="inputMoon" value="{{ row['moonPhase'] }}" type="text" placeholder="Moon Phase" autocomplete="off" required>
 		</p>
     </dl>
     <p>

@@ -138,7 +138,25 @@ def sql_field_to_hdu_field(sql_field):
     else:
         return hdu_field
 
-def hdu_field_to_sql_field(hdu_field):
+def hdu_field_to_sql_field(self, hdu_field):
+    """
+    Given an hdu_field, follows the naming convention described below to
+    convert it to an sql_field. 
+        
+    sql field naming convention: take the name of the HDU field,
+    make it lowercase, replace hyphens with underscores, and optionally append a trailing
+    underscore (which is required if the application of the other rules turns the 
+    HDU field into an an SQL keyword, like with "DEC"). 
+
+    Parameters:
+    sql_field: the string name of an sql_field that corresponds to a FITS HDU field
+    The field name must follow naming convention which is: take the name of the HDU field,
+    make it lowercase, replace hyphens with underscores, and
+
+    Returns:
+    Takes an sql field under the name convention described above and returns its HDU field
+    counterpart.  
+    """
     sql_field = hdu_field.lower().replace('-', '_')
     sql_keywords = {'DEC'}
     if sql_field in sql_keywords:
@@ -146,20 +164,20 @@ def hdu_field_to_sql_field(hdu_field):
     else:
         return sql_field
     
-"""
-Extracts sql field values from hdu header values for each file in the given path and returns
-a tuple that can be used to add them to the database. Assumes that 'file_path' is primary key
-Arguments:
-string path-path to diretory holding only FITS files we want added to database
-RETURNS: 
-return a tuple: (query, values), where query is of the form 
-INSERT INTO fits_data (<comma delimited list of fields of fits_data>) VALUES (%s, %s, %s, ...)
-(the number of %s is the same as the number of fields.)
-and values, an array of tuples, where each tuple has the values corresponding to the 
-fits_data fields, extracted from hdu headers of the fits files in path.
-cursor.executemany(query, values) followed by db.commit() will insert the values into the database
-"""
 def get_add_records_cmd(path):
+    """
+    Extracts sql field values from hdu header values for each file in the given path and returns
+    a tuple that can be used to add them to the database. Assumes that 'file_path' is primary key
+    Arguments:
+    string path-path to diretory holding only FITS files we want added to database
+    RETURNS: 
+    return a tuple: (query, values), where query is of the form 
+    INSERT INTO fits_data (<comma delimited list of fields of fits_data>) VALUES (%s, %s, %s, ...)
+    (the number of %s is the same as the number of fields.)
+    and values, an array of tuples, where each tuple has the values corresponding to the 
+    fits_data fields, extracted from hdu headers of the fits files in path.
+    cursor.executemany(query, values) followed by db.commit() will insert the values into the database
+    """
     sql_fields = [sql_field for (sql_field, _) in fields_and_types if sql_field]
     fields_str = ', '.join(sql_fields)
     format_specifiers = ', '.join(["%s"] * len(sql_fields))

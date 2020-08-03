@@ -66,7 +66,7 @@ def parse_config(path_to_config):
             sql_fields_and_types.append(tuple(field_and_type))
     return sql_fields_and_types
 
-def create_fits_data_table(cursor, path_to_config):
+def create_fits_data_table(cursor, path_to_config, overwrite=True):
     """
     Within the SEO database, createst a fits_data table 
     and populates it with fields in the config file parsed using parse_config. 
@@ -76,32 +76,49 @@ def create_fits_data_table(cursor, path_to_config):
     cursor: the mysql-connector-python cursor to an open database.
     path_to_config: the path to the config file containing fields for the new table.
 
+    overwrite: If True, then a call to create_fits_data_table will DROP the old fits_data
+    table before continuing. If False and an old fits_data table exists, then the function
+    will throw an error and stop. 
+
     Returns:
     Returns the fields_and_types list of tuples from parse_config. 
-    If the config file was valid, the new table will be populated with fields.
-    If it was not valid, a ValueError will be thrown. 
+    Populates new table with fields from config file.
+    Throws RuntimeError under following conditions
+    -Config file is empty
+    -Config file has malformed entries
+    -SEO database has not yet been created
+    -fits_data table has been created already and overwrite=False 
     """
-    cursor.execute('USE seo;')
-    #create_cmd = 'CREATE TABLE IF NOT EXISTS fits_data (file_path varchar(255) NOT NULL, PRIMARY KEY (file_path));'
-    #cursor.execute(create_cmd)
-    # The lines above will not remake the table if it exists, leading to an error. 
-    # Current functionality will always remake the table.
-    cursor.execute('DROP TABLE IF EXISTS fits_data;')
-    cursor.execute('CREATE TABLE fits_data (file_path varchar(260) NOT NULL, PRIMARY KEY (file_path));')
-    alter_table_cmd = []
-    alter_table_cmd.append('ALTER TABLE fits_data')
     fields_and_types = parse_config(path_to_config)
-    # String together SQL ADD commands until we're done with fields to add
-    for (i, (field, sql_type)) in enumerate(fields_and_types):
-        end = ';' if i == (len(fields_and_types) - 1) else ','
-        alter_table_cmd.append(f'ADD {field} {sql_type}' + end)
-    str_alter_cmd = ' '.join(alter_table_cmd)
+    if len(fields_and_types) == 0:
+        raise RuntimeError('Config file is empty!')
+
     try:
-        cursor.execute(str_alter_cmd)
+        cursor.execute('USE seo;')
     except mysql.errors.ProgrammingError as err:
-        new_err_msg = ('The above SQL ProgrammingError was almost definitely caused by' 
-                       + ' a malformed config file. ')
-        raise Exception(new_err_msg) from err
+        new_err_msg = "The above error could mean the SEO database hasn't been created yet!"
+        raise RuntimeError(new_err_msg) from err
+
+    create_table_cmd = []
+    if overwrite:
+        cursor.execute('DROP TABLE IF EXISTS fits_data;')
+        create_table_cmd.append('CREATE TABLE fits_data (')
+    else:
+        # Will throw error if table already exists
+        create_table_cmd.append('CREATE TABLE IF NOT EXISTS fits_data (')
+
+    for (field, sql_type) in fields_and_types:
+        create_table_cmd.append(f'{field} {sql_type},')
+    # First entry in config is primary key
+    create_table_cmd.append(f'PRIMARY KEY ({fields_and_types[0][0]})')
+    create_table_cmd.append(');')
+    create_table_cmd = ' '.join(create_table_cmd)
+    try:
+        cursor.execute(create_table_cmd)
+    except mysql.errors.ProgrammingError as err:
+        new_err_msg = 'The above error may indicate malformed config file ' \
+                      + 'or that overwrite=False and fits_data already exists'
+        raise RuntimeError(new_err_msg) from err
     return fields_and_types
 
 fields_and_types = create_fits_data_table(cursor, path_to_config)
@@ -131,7 +148,7 @@ def hdu_field_to_sql_field(hdu_field):
     
 """
 Extracts sql field values from hdu header values for each file in the given path and returns
-a tuple that can be used to add them to the database.
+a tuple that can be used to add them to the database. Assumes that 'file_path' is primary key
 Arguments:
 string path-path to diretory holding only FITS files we want added to database
 RETURNS: 
@@ -143,9 +160,7 @@ fits_data fields, extracted from hdu headers of the fits files in path.
 cursor.executemany(query, values) followed by db.commit() will insert the values into the database
 """
 def get_add_records_cmd(path):
-    sql_fields = [sql_field for (sql_field, _) in fields_and_types]
-    # Add file_path field to sql_fields list's back
-    sql_fields.append('file_path')
+    sql_fields = [sql_field for (sql_field, _) in fields_and_types if sql_field]
     fields_str = ', '.join(sql_fields)
     format_specifiers = ', '.join(["%s"] * len(sql_fields))
     insert_query = f'INSERT INTO fits_data ({fields_str}) VALUES ({format_specifiers})'
@@ -160,7 +175,7 @@ def get_add_records_cmd(path):
         primary_hdu = hdus[0]
         curr_header_vals = [primary_hdu.header[hdu_field] for hdu_field in hdu_fields]
         # Add path to file to end of header vals
-        curr_header_vals.append(full_path)
+        curr_header_vals = [full_path] + curr_header_vals
         header_vals.append(tuple(curr_header_vals))
         hdus.close()
     return (insert_query, header_vals)
@@ -168,6 +183,7 @@ def get_add_records_cmd(path):
 
 print('Before addition, rowcount is ', cursor.rowcount)
 (query, values) = get_add_records_cmd(path_to_sample_data)
+print(query, values)
 cursor.executemany(query, values)
 db.commit()
 print('After addition, rowcount is ', cursor.rowcount)

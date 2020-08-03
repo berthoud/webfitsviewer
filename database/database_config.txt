@@ -2,14 +2,15 @@
 # This file configures the fields that will be stored in the fits_data table of the seo database.
 # This file is read in the create_database.py code, so changing it will only change the fields
 # stored in the actual database by rerunning that code, which may entail deleting and repopulating
-# the database.
+# the database. This file is also used in StepAddToDatabase, so make sure to recreate the database
+# if you change this before running the pipestep.
 
 # FORMAT
-# Every non-empty line should consist of words separated only by whitespace.
-# 
+# Every non-empty line should consist of words separated only by whitespace:
 # the name of the desired sql field and, optionally, the exact specification of the type used
 # to store the field using SQL types. If the latter is not given, varchar(15) is assumed.
 # Lines starting with hashtags are ignored.
+# The first non-empty, non-comment line will be used as the primary key for the table.
 
 # NAMING CONVENTION
 # It is good to have a standard convention for SQL table fields storing database
@@ -21,11 +22,9 @@
 # this. The trailing underscore is not mandatory but you should make sure your field name is not an 
 # sql keyword if you leave it out.
 
-# file_path field below is added by the python code directly; it is required and the primary field.
-# Included here for completeness.
 # FIELDS            TYPES
 
-# file_path         varchar(260)
+file_path           varchar(260)
 simple              varchar(1)
 date_obs            varchar(19)
 bitpix              TINYINT

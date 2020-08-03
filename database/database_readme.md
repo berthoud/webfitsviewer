@@ -61,9 +61,10 @@ The module **table** is required to show data in tabular format on HTML view, th
 <a name="webrun"></a>
 ### To run...
 1) Using the commandline, enter directory: **$ cd user_crud**
-2) Using the commandline, run program: **$ python main.py**
-3) Open browser, go to url: http://localhost:5000/
-4) Explore!
+2) Change mysql login credentials on **db_config.py** to yours.
+3) Using the commandline, run program: **$ python main.py**
+4) Open browser, go to url: http://localhost:5000/
+5) Explore!
 
 <a name="web_tst"></a>
 ### SUPPORT: Testing /Broken Code

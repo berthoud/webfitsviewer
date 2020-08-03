@@ -1,6 +1,7 @@
 import mysql.connector as mysql
 from astropy.io import fits
 import os 
+import sys
 
 # The below path is to a directory that holds ONLY fits files
 # which will be added to the database as a test.
@@ -8,8 +9,12 @@ path_to_sample_data = 'data'
 # The password should be set to whatever the password to the root account of your server is. 
 # The default root password depends on your system.
 root_password = "SEO"
+# Optionally pass in the root password as command line argument
+if len(sys.argv) > 1:
+    root_password = sys.argv[1] 
 # Next is the path_to_confi which you shouldn't need to change as it comes from github.
 path_to_config = "./database_config.txt"
+
 
 # The below code connects to the database. To do this, you must have your local sql server running.
 # (In practice we will make other mysql users which can be done easily from the command line as needed

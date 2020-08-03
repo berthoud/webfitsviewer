@@ -538,13 +538,13 @@ def delete_obs(id):
 def delete_wd(id):
 	try:
                 cursor.execute(DISABLE_FK)
-		cursor.execute("DELETE FROM weatherDaily WHERE dayId=%s", (id,))
+                cursor.execute("DELETE FROM weatherDaily WHERE dayId=%s", (id,))
                 cursor.execute(ENABLE_FK)
-		conn.commit()
-		flash('Day deleted successfully!', 'success')
-		return redirect('/all_wd')
+                conn.commit()
+                flash('Day deleted successfully!', 'success')
+                return redirect('/all_wd')
 	except Exception as e:
-		print(e)
+            print(e)
  
 # =====================================================================
 #         SIMPLE QUERIES :  

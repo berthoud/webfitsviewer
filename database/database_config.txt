@@ -22,8 +22,12 @@
 # this. The trailing underscore is not mandatory but you should make sure your field name is not an 
 # sql keyword if you leave it out.
 
+# Note that the function that adds records to a database for testing purposes in create_databases.py
+# assumes that file_path is the primary key (first entry here)
+
 # FIELDS            TYPES
 
+# Primary key is first entry!
 file_path           varchar(260)
 simple              varchar(1)
 date_obs            varchar(19)

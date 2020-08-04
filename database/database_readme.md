@@ -16,9 +16,9 @@
 
 <a name="idbrun"></a>
 ### To run, you need to...
-1) have mysql installed and the server running
+1) have mysql installed and the server running. You can download this [here](https://dev.mysql.com/downloads/). I believe you only need the community server and the connector/python, although I think you can also just get the connector/python using pip. If you need an archival version, after selecting "community sever" on the linked page, click "archives" and then select a "product" version far back enough that it is compatible with your OS. (It will give the OS version for each product version you're viewing.)
 2) have the requirements listed in requirements.txt. You should be able to get these by just installing astropy and mysql-connector-pytthon. Make sure you don't accidentally install mysql-connector; the command should be "pip install mysql-connector-python". You may [run into there error described here](https://stackoverflow.com/questions/50557234/authentication-plugin-caching-sha2-password-is-not-supported) if you don't do this. (If you get that error despite having the right thing installed, try uninstalling and installing again; it worked for me.)
-3) Go into create_database.py root password and data path (if you intend to test by adding files to the table). You may need to google around to figure out what the default root password is for your mysql sever. Note that the path_to_sample_data should be a directory that holds some FITS files and no files that are not FITS files. 
+3) Go into create_database.py root password and data path (if you intend to test by adding files to the table). You may need to google around to figure out what the default root password is for your mysql sever. Note that the path_to_sample_data should be a directory that holds some FITS files and no files that are not FITS files. Optionally you can pass in your root password as a command line argument and the value in the file will be ignored.
 # Usage
 If you do all of the above, you should be able to run create_databases.py and it will 
 1) create an seo database within your mysql server

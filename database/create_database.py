@@ -150,8 +150,10 @@ def add_phony_data(fields_and_types, field_values, cursor):
     format_specifiers = ', '.join(["%s"] * len(sql_fields))
     insert_query = f'INSERT INTO fits_data ({fields_str}) VALUES ({format_specifiers})'
     cursor.execute(insert_query, field_values)
-
-print('Before addition, rowcount is ', cursor.rowcount)
+print('Before addition of phony data, fits_data table looks like this:')
+cursor.execute('SELECT * FROM fits_data;')
+print(cursor.fetchall())
+print('rowcount is', cursor.rowcount)
 field_values = [
     'test_path',
     'T',
@@ -164,6 +166,9 @@ field_values = [
 add_phony_data(fields_and_types, field_values, cursor)
 db.commit()
 print('After addition, rowcount is ', cursor.rowcount)
+print('Table looks like this')
+cursor.execute('SELECT * FROM fits_data;')
+print(cursor.fetchall())
 
 cursor.close()
 db.close()

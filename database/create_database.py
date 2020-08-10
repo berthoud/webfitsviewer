@@ -3,9 +3,6 @@ from astropy.io import fits
 import os 
 import sys
 
-# The below path is to a directory that holds ONLY fits files
-# which will be added to the database as a test.
-path_to_sample_data = 'data'
 # The password should be set to whatever the password to the root account of your server is. 
 # The default root password depends on your system.
 root_password = "SEO"

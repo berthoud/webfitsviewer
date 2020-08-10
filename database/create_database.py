@@ -2,16 +2,39 @@ import mysql.connector as mysql
 from astropy.io import fits
 import os 
 import sys
+import argparse
 
-# The password should be set to whatever the password to the root account of your server is. 
-# The default root password depends on your system.
-root_password = "SEO"
-# Optionally pass in the root password as command line argument
-if len(sys.argv) > 1:
-    root_password = sys.argv[1] 
-# Next is the path_to_confi which you shouldn't need to change as it comes from github.
-path_to_config = "./database_config.txt"
+"""
+Creates a basic SQL database based on a database config that follows the format 
+described in the readme. Assumes you have a local SQL server running. For command line
+arguments description type create_database.py -h
 
+More specifically, will create an "seo" database and within that a fits_data table.
+Fills it with phony records for testing purposes.
+
+The next few lines store default values for the command line parameters if they are not
+passed in. Change them as needed for the program to run. 
+"""
+default_sql_user = 'root'
+default_sql_pass = 'SEO'
+default_db_config_path = './database_config.txt'
+overwrite = False
+
+parser = argparse.ArgumentParser(description='Create a basic FITS database')
+parser.add_argument('-user', '--user', 
+    default=default_sql_user, help='SQL user to use')
+parser.add_argument('-pass', '--pass', 
+    default=default_sql_pass, help='SQL user password to use')
+parser.add_argument('-configpath', '--configpath', 
+    default=default_db_config_path, help='db config path')
+parser.add_argument('-overwrite', '--overwrite', action='store_true',
+    help='Whether to overwrite already existing table or not. Boolean')
+dict_args = vars(parser.parse_args())
+
+sql_user = dict_args['user']
+sql_pass = dict_args['pass']
+path_to_config = dict_args['configpath']
+overwrite = dict_args['overwrite']
 
 # The below code connects to the database. To do this, you must have your local sql server running.
 # (In practice we will make other mysql users which can be done easily from the command line as needed
@@ -19,8 +42,8 @@ path_to_config = "./database_config.txt"
 
 db = mysql.connect(
     host="localhost",
-    user="root",
-    passwd=root_password,
+    user=sql_user,
+    passwd=sql_pass,
     auth_plugin='mysql_native_password'
 )
 
@@ -68,7 +91,7 @@ def parse_config(path_to_config):
             sql_fields_and_types.append(tuple(field_and_type))
     return sql_fields_and_types
 
-def create_fits_data_table(cursor, path_to_config, overwrite=True):
+def create_fits_data_table(cursor, path_to_config, overwrite):
     """
     Within the SEO database, createst a fits_data table 
     and populates it with fields in the config file parsed using parse_config. 
@@ -79,17 +102,19 @@ def create_fits_data_table(cursor, path_to_config, overwrite=True):
     path_to_config: the path to the config file containing fields for the new table.
 
     overwrite: If True, then a call to create_fits_data_table will DROP the old fits_data
-    table before continuing. If False and an old fits_data table exists, then the function
-    will throw an error and stop. 
+    table before continuing. If False and an old fits_data table exists, the function will
+    not overwrite it and the returned fields_and_types list will be what is in the config
+    file whether that is recent or not.
 
     Returns:
     Returns the fields_and_types list of tuples from parse_config. 
     Populates new table with fields from config file.
+    Note that if overwrite is False and config file is not up to date the returned
+    fields and types will be out of date
     Throws RuntimeError under following conditions
     -Config file is empty
     -Config file has malformed entries
     -SEO database has not yet been created
-    -fits_data table has been created already and overwrite=False 
     """
     fields_and_types = parse_config(path_to_config)
     if len(fields_and_types) == 0:
@@ -102,11 +127,11 @@ def create_fits_data_table(cursor, path_to_config, overwrite=True):
         raise RuntimeError(new_err_msg) from err
 
     create_table_cmd = []
+
     if overwrite:
         cursor.execute('DROP TABLE IF EXISTS fits_data;')
         create_table_cmd.append('CREATE TABLE fits_data (')
     else:
-        # Will throw error if table already exists
         create_table_cmd.append('CREATE TABLE IF NOT EXISTS fits_data (')
 
     for (field, sql_type) in fields_and_types:
@@ -118,15 +143,15 @@ def create_fits_data_table(cursor, path_to_config, overwrite=True):
     try:
         cursor.execute(create_table_cmd)
     except mysql.errors.ProgrammingError as err:
-        new_err_msg = 'The above error may indicate malformed config file ' \
-                      + 'or that overwrite=False and fits_data already exists'
+        new_err_msg = 'The above error may indicate malformed config file'
         raise RuntimeError(new_err_msg) from err
     return fields_and_types
 
-fields_and_types = create_fits_data_table(cursor, path_to_config)
+fields_and_types = create_fits_data_table(cursor, path_to_config, overwrite)
 # The above created a table called "fits_data"
+print('\nColumns of table parsed from config file: ')
 cursor.execute("DESC fits_data;")
-print(cursor.fetchall())
+print(cursor.fetchall(), '\n')
 
 def add_phony_data(fields_and_types, field_values, cursor):
     """
@@ -149,7 +174,14 @@ def add_phony_data(fields_and_types, field_values, cursor):
     fields_str = ', '.join(sql_fields)
     format_specifiers = ', '.join(["%s"] * len(sql_fields))
     insert_query = f'INSERT INTO fits_data ({fields_str}) VALUES ({format_specifiers})'
-    cursor.execute(insert_query, field_values)
+    try:
+        cursor.execute(insert_query, field_values)
+    except mysql.errors.IntegrityError as err:
+        err_msg = ('This error likely means the phony record added has the same file path '
+            'as another record in the fits_data table. One way to fix this is to set '
+            'the -overwrite flag to True when calling create_database. Note that this will '
+            'not just overwrite the duplicate records but the entire fits_data table')
+        raise RuntimeError(err_msg) from err
 print('Before addition of phony data, fits_data table looks like this:')
 cursor.execute('SELECT * FROM fits_data;')
 print(cursor.fetchall())

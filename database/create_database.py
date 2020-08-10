@@ -131,83 +131,40 @@ fields_and_types = create_fits_data_table(cursor, path_to_config)
 cursor.execute("DESC fits_data;")
 print(cursor.fetchall())
 
-
-# ---------------------------------------------------------------------------
-# The below functions handle adding records to the table. They are currently only included for 
-# testing and will be moved to the pipestep soon
-
-def sql_field_to_hdu_field(sql_field):
-    hdu_field = sql_field.upper().replace('_', '-')
-    if hdu_field[-1] == '-':
-        return hdu_field[:-1]
-    else:
-        return hdu_field
-
-def hdu_field_to_sql_field(self, hdu_field):
+def add_phony_data(fields_and_types, field_values, cursor):
     """
-    Given an hdu_field, follows the naming convention described below to
-    convert it to an sql_field. 
-        
-    sql field naming convention: take the name of the HDU field,
-    make it lowercase, replace hyphens with underscores, and optionally append a trailing
-    underscore (which is required if the application of the other rules turns the 
-    HDU field into an an SQL keyword, like with "DEC"). 
+    Takes a list of tuples storing the SQL databases fields and their types
+    as returned by creates_fits_data, the values for the fields within that,
+    and a database cursor, and attempts to add the field values to the database
+    db.commit() must be called for changes to take effect
 
     Parameters:
-    sql_field: the string name of an sql_field that corresponds to a FITS HDU field
-    The field name must follow naming convention which is: take the name of the HDU field,
-    make it lowercase, replace hyphens with underscores, and
+    fields_and_types: A list of tuples storing the SQL database fields and their types
+    as returned by create_fits_data. 
+    field_values: A list of values whose types match the types of fields_and_types. 
+    Order matters. 
+    cursor: the database cursor used to execute the insertion of data.
 
-    Returns:
-    Takes an sql field under the name convention described above and returns its HDU field
-    counterpart.  
-    """
-    sql_field = hdu_field.lower().replace('-', '_')
-    sql_keywords = {'DEC'}
-    if sql_field in sql_keywords:
-        return sql_field[:] + '_'
-    else:
-        return sql_field
+    Returns: None. Will throw mysql.errors.ProgrammingError if the query or cursor is invalid
     
-def get_add_records_cmd(path):
     """
-    Extracts sql field values from hdu header values for each file in the given path and returns
-    a tuple that can be used to add them to the database. Assumes that 'file_path' is primary key
-    Arguments:
-    string path-path to diretory holding only FITS files we want added to database
-    RETURNS: 
-    return a tuple: (query, values), where query is of the form 
-    INSERT INTO fits_data (<comma delimited list of fields of fits_data>) VALUES (%s, %s, %s, ...)
-    (the number of %s is the same as the number of fields.)
-    and values, an array of tuples, where each tuple has the values corresponding to the 
-    fits_data fields, extracted from hdu headers of the fits files in path.
-    cursor.executemany(query, values) followed by db.commit() will insert the values into the database
-    """
-    sql_fields = [sql_field for (sql_field, _) in fields_and_types if sql_field]
+    sql_fields = [sql_field for (sql_field, _) in fields_and_types]
     fields_str = ', '.join(sql_fields)
     format_specifiers = ', '.join(["%s"] * len(sql_fields))
     insert_query = f'INSERT INTO fits_data ({fields_str}) VALUES ({format_specifiers})'
-
-    hdu_fields = [sql_field_to_hdu_field(sql_field) for sql_field in sql_fields if sql_field != 'file_path']
-    header_vals = []
-    for filename in os.listdir(path):
-        full_path = os.path.join(path, filename)
-        hdus = fits.open(full_path)
-        # The below assumes that we will always have only one hdu per file
-        # is that the case in practice?
-        primary_hdu = hdus[0]
-        curr_header_vals = [primary_hdu.header[hdu_field] for hdu_field in hdu_fields]
-        # Add path to file to end of header vals
-        curr_header_vals = [full_path] + curr_header_vals
-        header_vals.append(tuple(curr_header_vals))
-        hdus.close()
-    return (insert_query, header_vals)
-
+    cursor.execute(insert_query, field_values)
 
 print('Before addition, rowcount is ', cursor.rowcount)
-(query, values) = get_add_records_cmd(path_to_sample_data)
-print(query, values)
-cursor.executemany(query, values)
+field_values = [
+    'test_path',
+    'T',
+    'date_obs_val',
+    5,
+    'ra val',
+    'dec val',
+    123
+]
+add_phony_data(fields_and_types, field_values, cursor)
 db.commit()
 print('After addition, rowcount is ', cursor.rowcount)
 

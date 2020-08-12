@@ -241,7 +241,7 @@ def show_wd():
 # [end] --------------------
 
 
-# =====================================================================
+# ====================================================================
 # ADDING NEW ATTRIBUTES
 # =====================================================================
 
@@ -456,21 +456,19 @@ def update_user():
                 _password = request.form['inputPassword']
                 _permissions = request.form['inputPermissions']
                 # validate the received values
-                if (_lname and _email and _password and _uid and request.method == 'POST'):
+                if (_lname and _email and _uid and request.method == 'POST'):
                     #do not save password as a plain text
                     _hashed_password = generate_password_hash(_password)
                     print(_hashed_password)
                     # save edits
-                    sql = "UPDATE users SET userId=%s, password=%s, firstName=%s, lastName=%s, email=%s WHERE userId=%s"
+                    sql = "UPDATE users SET userId=%s, password=%s, firstName=%s, lastName=%s, email=%s, permissions=%s WHERE userId=%s"
                     data = (_uid, _hashed_password, _fname, _lname, _email, _permissions, _uid,)
-                    conn = mysql.connect()
-                    cursor = conn.cursor()
                     cursor.execute(sql, data)
                     conn.commit()
                     flash('User updated successfully!')
                     return redirect('/all_users')
                 else:
-                    return 'Error while updating user'
+                    return 'Error while updating user. Email. last name, and user id are required fields.'
 	except Exception as e:
             print(e)
 		
@@ -493,7 +491,7 @@ def update_file():
                 if (_fid and _oname and _timeStamp and request.method == 'POST'):
                     # save edits
                     sql = "UPDATE files SET fileId=%s, objectName=%s, groupId=%s, reductionStage=%s, fileType=%s, bandType=%s, quality=%s, position=%s, date=%s, time=%s, timeStamp =%s WHERE fileId=%s"
-                    data = (_fid, _oname, _gid, _reds, _fileType, _bandType, _quality, _position, _date, _time, _timeStamp)
+                    data = (_fid, _oname, _gid, _reds, _fileType, _bandType, _quality, _position, _date, _time, _timeStamp, _fid)
                     cursor.execute(sql, data)
                     conn.commit()
                     flash('File updated successfully!')
@@ -503,6 +501,51 @@ def update_file():
 	except Exception as e:
             print(e)
 		
+
+@app.route('/updateO', methods=['POST'])
+def update_O():
+	try:
+            _gid = request.form['inputGroupId']
+            _sd = request.form['inputSD']
+            _st = request.form['inputST']
+            _ed = request.form['inputED']
+            _et = request.form['inputET']
+            _desc = request.form['inputDesc']
+            
+            # validate the received values
+            if (_gid and _ed and request.method == 'POST'):
+                # save edits
+                sql = "UPDATE observations SET groupId=%s, startDate=%s, startTime=%s, endDate=%s, endTime=%s, description=%s WHERE groupId=%s"
+                data = (_gid, _sd, _st, _ed, _et, _desc, _gid)
+                cursor.execute(sql, data)
+                conn.commit()
+                flash('Observation updated successfully!')
+                return redirect('/all_obs')
+            else:
+                return 'Error while updating observation'
+	except Exception as e:
+            print(e)
+
+@app.route('/updateW', methods=['POST'])
+def update_W():
+        try:
+            _date = request.form['inputDate']
+            _rise = request.form['inputRise']
+            _down = request.form['inputDown']
+            _moon = request.form['inputMoon']
+            
+            if (_date and request.method == 'POST'):
+                sql = "UPDATE weatherDaily SET dayId=%s, sunriseTime=%s, sundownTime=%s, moonPhase=%s WHERE dayId=%s"
+                data = (_date,_rise,_down,_moon,_date)
+                cursor.execute(sql, data)
+                conn.commit()
+                flash('Weather for day updated successfully!')
+                return redirect('/all_wd')
+            else:
+                return 'Error while updating observation'
+        except Exception as e:
+            print(e)
+
 
 @app.route('/deleteU/<string:id>')
 def delete_user(id):
@@ -566,7 +609,6 @@ def show_sq2():
 
 @app.route('/sq_3_res')
 def show_sq3(phase):
-    print("in SQ 3 RESULTS : ", phase)
     results = []
     select_string = phase.data['select']
  
@@ -575,11 +617,8 @@ def show_sq3(phase):
         return redirect('/sq_3')
 
     m_query = "SELECT dayId, moonPhase FROM weatherDaily WHERE moonPhase LIKE '%"+select_string+"%'"
-    print(m_query)
-
     cursor.execute(m_query)
     results = cursor.fetchall() 
-
     if not results:
         flash('No results found!')
         return redirect('/sq_3')
@@ -592,7 +631,6 @@ def show_sq3(phase):
 # index
 @app.route('/sq_3', methods=['GET', 'POST'])
 def load_sq3():
-    print("in LOAD SQ 3")
     phase = Moon_SearchForm(request.form)
     if request.method == 'POST':
         return show_sq3(phase)
@@ -601,14 +639,11 @@ def load_sq3():
 
 @app.route('/results')
 def search_results(search):
-    print("in SEARCH_RESULTS : ", search)
     results = []
     select_string = search.data['select']
     search_string = search.data['search']
     sql_table = select_string 
     sql_col = ''
- 
-    print(select_string, search_string)
 
     if search.data['search'] == '':
         flash('Empty search. Please try again!')
@@ -628,10 +663,8 @@ def search_results(search):
         sql_col = 'fileId'
 
     query = "SELECT * FROM "+sql_table+" WHERE "+sql_col+" LIKE '%"+search_string+"%'"
-    print(query)
     cursor.execute(query)
     results = cursor.fetchall() 
-
     if not results:
         flash('No results found!')
         return redirect('/search')

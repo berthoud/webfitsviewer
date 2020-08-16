@@ -11,8 +11,6 @@
     <a href="{{ url_for('.show_wd') }}"> Weather (Daily) </a> |&nbsp; 
     <a href="{{ url_for('.show_users') }}"> Users </a>  
   </div>
-
-
     <p>
 	  {% with messages = get_flashed_messages() %}
 	    {% if messages %}
@@ -37,8 +35,6 @@
 <p><a href="{{ url_for('.show_cq_3') }}"> Complex Query 3: List observations containing at least one file for every astronomical object listed</a></p>
 <p><a href="{{ url_for('.show_cq_4') }}"> Complex Query 4: List file names for observations that start on a date no weather data </a></p>
 <p><a href="{{ url_for('.show_cq_5') }}"> Complex Query 5: List total files, band types, and days per astronomical object</a></p>
-
-
 
 </body>
 </html>

@@ -24,7 +24,9 @@ parser = argparse.ArgumentParser(description='Create a basic FITS database')
 parser.add_argument('-user', '--user', 
     default=default_sql_user, help='SQL user to use')
 parser.add_argument('-pass', '--pass', 
-    default=default_sql_pass, help='SQL user password to use')
+    default=default_sql_pass, 
+    help='SQL user password to use. \
+        Optionally can be path to file contianing only the sql_pass.')
 parser.add_argument('-configpath', '--configpath', 
     default=default_db_config_path, help='db config path')
 parser.add_argument('-overwrite', '--overwrite', action='store_true',
@@ -33,7 +35,13 @@ dict_args = vars(parser.parse_args())
 
 sql_user = dict_args['user']
 sql_pass = dict_args['pass']
-path_to_config = dict_args['configpath']
+# Treat pass as a file holding the pass on the first line if possible
+if os.path.exists(sql_pass):
+    print('Using sql pass found in file: ', sql_pass)
+    with open(sql_pass, 'r') as pass_file:
+        # Get rid of accidental new lines
+        sql_pass = pass_file.readline().replace('\n', '')
+path_to_config = dict_args['configpath']    
 overwrite = dict_args['overwrite']
 
 # The below code connects to the database. To do this, you must have your local sql server running.

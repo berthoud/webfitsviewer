@@ -6,13 +6,15 @@
     It does this by parsing the database configuration file, which's path is given in the 
     step config file, for the desired fields from FITS HDUs. It then gets field values for those 
     fields from self.datain and executes an SQL statement adding the record. 
+    As of now, even though the config specifies multiple tables, only the fits_data table
+    is used
 
     Assumptions necessary for the step to run without error:
     -the 'SEO' database and 'fits_data' table within it must both have been created 
     -the database config file, the path of which is in the step config, must exist and not be empty
-    -the db config file's first entry, and thus the primary key for the database is 'file_path'
-    -all database fields in the config file aside from 'file_path' map to FITS HDU fields 
-    by the sql_field_to_hdu_field function below (will be true if they follow the convention in the config)
+    -all database fields in the config file aside from the optional 'file_path' map to 
+    FITS HDU fields by the sql_field_to_hdu_field function below (will be true if they 
+    follow the convention in the config)
     
     @author: Enrique Collin
 """
@@ -21,6 +23,8 @@ import logging
 from darepype.drp import StepParent
 import mysql.connector as mysql
 from os import path
+import configobj
+
 
 class StepAddToDatabase(StepParent):
     """ HAWC Pipeline Step Parent Object
@@ -31,35 +35,55 @@ class StepAddToDatabase(StepParent):
 
     def parse_config(self, path_to_config):
         """
-        Parses given database config file the SQL table fields within it. 
+        Parses given database config file for the fits_data table dict within it
+        storing a field for every sql field of the table and one designating the primary key.
+        Mainly just a convenience wrapper on configobj.ConfigObj to check for 
+        a malformed config file. 
         
-        Note that fields  are from the config file, not the database itself, 
-        so if it has changed and the database has not been updated there will be an inconsistency there.
+        Note that fields are from the config file, not the database itself, 
+        so if it has changed and the database has not been updated there will be an inconsistency.
 
         Parameters:
-        path_to_config: Config file for fits_data table with mysql database. Every line must be blank,
-        start with #, or be of the format "<field name> <whitespace> <field_type (optional)>
+        path_to_config: ini config file for the database. Should contain a [tables] section
+        and within that a [[fits_data]] subsection holding a 'primary_key' variable
+        and other variables with the name of the desired SQL field mapping to their types.
         Note that this is the config for the database table, not for any pipestep
         
         Returns:
-        Returns a list of SQL field names specified in the config file.
-        Throws an error if the config file does not exist
+        Returns a dict with a field for every parsed SQL field of the fits_data table mapping
+        to their types and another field 'primary_key' mapping to the name of the primary_key
+        Raises an error under these circumstances:
+        -config file doesn't exist
+        -config lacks 'tables' section
+        -tables section lacks 'fits_data' subsection
+        -no primary key specified in the fits_data table section
+        -there aren't at least 2 lines in the fits_data table (must at least specify
+        primary key's name and map it to its type)
         """
-        sql_fields = []
-        if not path.exists(path_to_config):
-            err_msg = 'Path to database config given in StepAddToDatabase config does not exist!'
+        config = configobj.ConfigObj(path_to_config, list_values=False, file_error=True)
+        self.log.debug(f'Successfully read in database config at {path_to_config}')        
+        if 'tables' not in config:
+            err_msg = 'Database config lacks tables section!'
             self.log.error(err_msg)
-            raise FileNotFoundError(err_msg)
-        with open(path_to_config, 'r') as config:
-            for line in config:
-                trimmed = line.strip()
-                # If line is a comment or only whitespace keep going
-                if trimmed.startswith("#") or len(trimmed) == 0:
-                    continue
-                # Take only the first word of each line which is the field
-                field = trimmed.split()[0]
-                sql_fields.append(field)
-        return sql_fields
+            raise RuntimeError(err_msg)
+        elif 'fits_data' not in config['tables']:
+            err_msg = 'Database config lacks fits_data table required for stepaddtodatabase!'
+            self.log.error(err_msg)
+            raise RuntimeError(err_msg)
+
+        fits_data_table = config['tables']['fits_data']
+        pk_key = 'primary_key'
+        if pk_key not in fits_data_table:
+            err_msg = f'Config for fits_data lacks required key {pk_key}!'
+            self.log.error(err_msg)
+            raise RuntimeError(err_msg)
+        elif len(fits_data_table) < 2:
+            err_msg = f'Config for fits_data has {len(fits_data_table)} entries; at least 2 required.'
+            self.log.error(err_msg)
+            raise RuntimeError(err_msg)
+
+        return fits_data_table
+
     
     def sql_field_to_hdu_field(self, sql_field):
         """
@@ -116,7 +140,8 @@ class StepAddToDatabase(StepParent):
         self.paramlist.append(['sql_username', 'default_user',
             'Username for the SQL user to access the database; only add priveleges needed'])
         self.paramlist.append(['sql_password', '',
-            'Password for the SQL user to access the database'])
+            ('Password for the SQL user to access the database. Can optionally hold '
+            'the path to an existing file which stores only the password')])
         self.paramlist.append(['database_config_path', './pipeconf_dbasereg.txt',
             'Path to database configuration file'])
         self.paramlist.append(['overwrite', False,
@@ -127,21 +152,27 @@ class StepAddToDatabase(StepParent):
 
     def run(self):
         """ 
-        Connects to the SEO database and adds self.datain to the database.
+        Connects to the SEO database and adds self.datain to the database's fits_data table.
         Only adds fields described in the database config file, which's path is in the step
         config file. 
 
         Assumptions:
         -SEO database has been created
-        -file_path is the first entry in the DB config file and thus primary key for the DB
-        -The file being added is not already in the database. 
-        If any of these is violated an error is thrown. 
+        -The file being added is not already in the database or overwrite is True
+        If these are violated an error is thrown
+        -all database fields in the config file aside from the optional 'file_path' map to 
+        FITS HDU fields by the sql_field_to_hdu_field function below (will be true if they 
+        follow the convention in the config)
         """
         # Copy datain to dataout (the data doesn't actually have to change)
         self.dataout = self.datain
         # The user should be a mySQL user granted ONLY add permissions
         SQL_user = self.getarg('sql_username')
         SQL_pass = self.getarg('sql_password')
+        if path.exists(SQL_pass):
+            with open(SQL_pass, 'r') as pass_file:
+                # Get rid of accidental new lines
+                SQL_pass = pass_file.readline().replace('\n', '')
         database_config_path = self.getarg('database_config_path')
         overwrite = self.getarg('overwrite')
         
@@ -171,16 +202,10 @@ class StepAddToDatabase(StepParent):
             db.close()
             raise RuntimeError(err_msg) from err
 
-        sql_fields = self.parse_config(database_config_path)
-        self.log.debug(f'Successfully read in database config at {database_config_path}')        
-        if sql_fields[0] != 'file_path':
-            err_msg = ('Current StepAddToDatabase code assumes the first entry'
-                        'in the database config file is "file_path", but this '
-                        'is not the case!')
-            self.log.error(err_msg)    
-            raise RuntimeError(err_msg)
+        fits_data_table = self.parse_config(database_config_path)
+        pk_key = 'primary_key'
+        sql_fields = [sql_field for sql_field in fits_data_table if sql_field != pk_key]
         
-
         fields_str = ', '.join(sql_fields)
         # Get format specifier for each sql_field; truncate tailing space and comma
         format_specifiers = ('%s, ' * len(sql_fields))[:-2]
@@ -193,16 +218,17 @@ class StepAddToDatabase(StepParent):
                 ' even though os.path.exists for it is False; it has not yet been saved')
             )
 
-        datain_field_vals.append(self.datain.filename)
         for sql_field in sql_fields:
             if sql_field != 'file_path':
                 hdu_field = self.sql_field_to_hdu_field(sql_field)
                 # Need val in string form for the below.
-                val = self.datain.header[hdu_field]
+                val = self.datain.header[hdu_field] 
                 if isinstance(val, bool):
                     datain_field_vals.append(int(val))
                 else:
                     datain_field_vals.append(val)
+            else:
+                datain_field_vals.append(self.datain.filename)
 
         self.log.debug(
             ('About to attempt to execute the following SQL: '
@@ -216,7 +242,7 @@ class StepAddToDatabase(StepParent):
             try: 
                 cursor.execute(delete_cmd)
             except mysql.errors.ProgrammingError as err:
-                err_msg = 'Error trying to overwrite duplicate file; likely insufficient privileges'
+                err_msg = 'Error trying to overwrite duplicate file; perhaps insufficient privileges'
                 self.log.error(err_msg)
                 cursor.close()
                 db.close()
@@ -233,13 +259,14 @@ class StepAddToDatabase(StepParent):
             db.close()
             raise RuntimeError(err_msg) from err
         except mysql.errors.IntegrityError as err:
-            err_msg = "The error likely means the file you're adding to the db is already there"
+            err_msg = ('The error likely means the file you are adding to the db '
+             'is already there and overwrite was not set.')
             self.log.error(err_msg)
             cursor.close()
             db.close()
             raise RuntimeError(err_msg) from err
         
-        self.log.info('Successfully added file %s to the database' % self.datain.filename)
+        self.log.info(f'Successfully added file {self.datain.filename} to the database')
         cursor.close()
         db.close()
 

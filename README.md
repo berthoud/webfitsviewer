@@ -8,6 +8,9 @@ An online server to show FITS images and other data. A demo viewer with sample d
   * [Developper's Manual](#devman)
   * [Support](#support)
     * [Installation Solutions](#support_install)
+    
+The purpose of the Web Fits Viewer is to allow the users to quickly look through imaging data without having to download the files. The Web Fits Viewer also allows rudimentary image analysis and has a modular architecture to facilitate extentions. 
+
 
 <a name="userman"></a>
 ## Users Manual
@@ -21,17 +24,112 @@ The Options at the top show you the different screens:
 <a name="instman"></a>
 ## Installation Manual
 
-  * Download the code in webfitsviewer
-  * Make sure the webserver (Apache or Tomcat) has read and execute (where needed) access to the files in webfitsviewer
+  * Download the code from github.
   * Make your own copy of the server configuration file webfitsview_apache.conf and the viewer configuration file webfitsview_config.txt .
-  * Edit your copies of these files to point to the correct files.
+    * Edit your copies of these files to point to the correct files and folders.
+    * Update other configuration items to fit your requirements.
+  * Make sure the webserver (Apache or Tomcat) has read and execute (where needed) access to the files in webfitsviewer
   * Setup the webserver with the config file (webfitsview_apache.conf or your own version of it). Restart your webserver.
   * Now, you should be able to see the page at [127.0.0.1/webview](http://127.0.0.1/webview). Subtitute the domain name of your server if you're working remotely. 
 
 <a name="devman"></a>
 ## Developper's Manual
 
-Read the code
+The webserver serves pages and accesses the database using python scripts that are run by an apache webserver. Screenshot (click to enlarge):
+
+![Web Fits View Screenshot](https://raw.githubusercontent.com/berthoud/webfitsviewer/database_dev/docs/images/WebViewScreenShot.png)
+
+**URLs**
+
+The basic url structure is
+
+/baseurlpath/page/...possible.folders.../request
+
+Examples: /hawcview/log/update or /seo2020/data/2020-07-01/M42
+
+ * The request is optional (used for AJAX requests and such), absolute url paths are always used.
+ * For auxiliary files the url path is /baseurlpath/folder/file (ex: /hawcview/static/style.css).
+ * The different pages can be accessed using the links at the top of the page.
+   * /hawcview/list/dataset: This page displays a list of all the different datasets and subsets available. /hawcview defaults to that page.
+   * /hawcview/data/dataset/subset : The page to access the data.
+     * /hawcview/data/dataset/subset/raw : AJAX request for the data. The data is returned as a list of keywords followed by the data itself.
+     * The dataset/subset folders are optional as the server uses the stored session ID for most requests.
+   * /hawcview/log : The page that displays the pipeline log. This page gets reloaded several times a minute (set in config).
+     * /hawcview/log/update: AJAX request for new log entries. This request uses the loglevel and logtime session variables.
+   * /hawcview/error : The page that gets called if an error happens. Though mostly errors in the python code create a page that shows a python traceback.
+   * /hawcvew/test: This page runs tests on the server and to confirm browser compatibility.
+
+**Web Application**
+
+The application can connect to the server in WSGI. Currently we use the wsgiref.handlers.CGIHandler and run the application.
+ * General user settings are remembered using cookies
+ * Each browser window / tab is a session, the session id is POSTed with hidden inputs in forms. Sessions are stored on the server using the shelve module. The session contains the following information:
+   * Session ID: Unique identifier SAH1(time of first request with client IP)
+   * Page: Which page is requested (data/log/list . . .)
+   * Request: The current AJAX request
+   * Folder: Folder/SubFolder with files to be looked at (with HAWC Flight/AOR)
+   * File: Selected file to view. A combination of filenamebegin and filenameend
+   * Step: Pipeline reduction step to view
+   * Data: Which HDU (or header for primary header) to view
+   * Plane: Which plane to view for data cubes
+   * Loglevel: Which level to show for pipeline log view
+   * Logtime: Time of the last log entry that was passed to the client
+   * Listfoler: Mainfolder that is showing at the top of the list of datasets and subsets
+ * At a later time we will use mod_wsgi to improve server performance.
+   
+**Folders and File Structure**
+
+ * Folders:  static (images, css, js), src (a module with controller.py, model.py, views.py main.py), filedata (the database), logs (with log files), temp (with images and sessions subfolders), config (with configuration files)
+ * The configuration files are:
+   * hawcview.conf: Apache configuration, contains the alias to the main script and aliases to the various folders. A hawcview.conf can link to several webviewer instances.
+   * pipe_conf_webview.txt: configuration for pipedata object
+   * webview_config.txt: configuration for the web interface
+   * weblog_config.txt: configuration for the logging of the web interface.
+
+**Code Architecture**
+ * main.py: is called by the server. Contains the WSGI wrapper and calls controller object. (warning) This file has to be different for each instance of the webviewer.
+ * controller.py: contains application that does the following:
+   * Load configuration, set up logging, retrieve cookies and session - check them (by using the model) - set them
+   * Get the request and retrieve and set the options for the request
+   * Call start_response
+   * Get the correct page from views and returns the page to the caller
+ * views.py: contains functions that create text and return strings. The views object receives session information when it is initialized and uses the model object to access the data. Some pages require several commands to be built.
+ * model.py: gives access to the data to the other objects. The model object receives session information when it is initialized. The model always has one pipedata object and only reloads it when necessary. The model also accesses the log from the pipeline.
+ * When determining the request options (which folder / file / step . . .) POST parameters have precedence over request URI folders which has precedence over stored session values.
+
+**Configuration Format**
+
+The configuration options are in the configuration file which is loaded as a config object by the controller object.
+ * Path options:
+   * basepath: path to the base folder
+   * baseurlpath: url path common to all pages
+   * session: path to the session folder
+   * images: path to the images folder
+   * static: path to the static folder
+   * datapath: path to the filedata folder
+   * dataurlpath: url path to the filedata folder
+   * pipelog: absolute path to the pipeline log file
+ * Controller options:
+   * logconfig: path and name of the log configuration file
+   * debuginfo: flag indicating if debug information to be shown in the rendered page
+ * View options:
+   * helpurl: url to the help page
+   * foldernames: names the user sees to designate folders at a certain level (Ex: Flight/AOR for HAWC)
+   * Data options
+     * stepnames: list with acronyms and names for the data reduction steps
+     * infolist: list of the header information to be shown in the info window
+     * maxsize: maximal image size
+   * Dataset list options
+     * listkeyw: list of FITS keywords to be shown in the list of flights and aors
+     * listfoldern: minimal number of folders shown in list view
+     * listsubfoldern: minimal number of subfolders shown in list view
+   * Log options
+     * logreloadtime: number of seconds until the log file view gets updated
+ * Model options:
+   * pipeconf: path and name of the pipeline configuration file to be used for initializing pipe objects
+   * minsize: minimal size of displayed images in pixels
+   * maxsize: maximal image dimension
+   * steporder: order in which data reduction steps should be listed (by acronym)
 
 <a name="support"></a>
 ## Support
@@ -57,7 +155,8 @@ To do that you uncomment the appropriate ScriptAlias.
     * Make sure the webserver user on your machine has read and execute access to this file.
   * Browser shows **content of main.py** file, it doesn't run the file
     * Make sure your main server configuration (usually httpd.conf) allows running cgi scripts.
-    * This usually means loading cgid_module. 
+    * This usually means loading and enabling cgid_module. 
+    * For apache look at [
   * **Wrong python version is used:** the webserver doesn't run the python installation you expect.
     * Use SetEnv PATH "/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" in your webserver configuration path.
     * Edit the first line in main.py (or testmain.py) to say "python3" instead of "python"

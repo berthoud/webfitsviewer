@@ -11,12 +11,13 @@ arguments description type create_database.py -h
 Fills it with phony records for testing purposes.
 
 The first few lines store default values for the command line parameters if they are not
-passed in. Change them as needed for the program to run. 
+passed in. Change them as needed for the program to run. The defaults for the boolean 
+parameters cannot be changed.
 """
 default_sql_user = 'root'
 default_sql_pass = 'SEO'
 default_db_config_path = './database_config.txt'
-overwrite = False
+default_db_name = 'SEO'
 
 parser = argparse.ArgumentParser(description='Create a basic FITS database')
 parser.add_argument('-user', '--user', 
@@ -29,6 +30,15 @@ parser.add_argument('-configpath', '--configpath',
     default=default_db_config_path, help='db config path')
 parser.add_argument('-overwrite', '--overwrite', action='store_true',
     help='Whether to overwrite already existing table or not. Boolean')
+parser.add_argument('-add_phony', '--add_phony', action='store_true',
+    help=('Whether to try to add hardcoded phony data to the database. ' 
+    'Assumes config is consistent with hardcoded values. Boolean.'))
+parser.add_argument('-dbname', '--dbname', 
+    default=default_db_name, help='The name of the database storing tables of the config')
+parser.add_argument('-create_users', '--create_users', action='store_true',
+    help='Whether to create the users in the config. Must be manually deleted so be wary.')
+parser.add_argument('-overwrite_users', '--overwrite_users', action='store_true',
+    help='Whether to overwrite exiting users. Only has effect used with -create_users')
 dict_args = vars(parser.parse_args())
 
 sql_user = dict_args['user']
@@ -40,7 +50,12 @@ if os.path.exists(sql_pass):
         # Get rid of accidental new lines
         sql_pass = pass_file.readline().replace('\n', '')
 path_to_config = dict_args['configpath']    
+db_name = dict_args['dbname']
 overwrite = dict_args['overwrite']
+add_phony = dict_args['add_phony']
+create_users = dict_args['create_users']
+overwrite_users = dict_args['overwrite_users']
+
 
 # The below code connects to the database. To do this, you must have your local sql server running.
 # (In practice we will make other mysql users which can be done easily from the command line as needed
@@ -56,8 +71,8 @@ db = mysql.connect(
 cursor = db.cursor()
 
 # Create the seo database if it does not exist
-cursor.execute("CREATE DATABASE IF NOT EXISTS seo")
-cursor.execute("USE seo;")
+cursor.execute(f'CREATE DATABASE IF NOT EXISTS {db_name}')
+cursor.execute(f'USE {db_name};')
 
 def create_table(cursor, table_name, table_dict, pk_key='primary_key', overwrite=True):
     """
@@ -136,9 +151,45 @@ for table_name in tables:
     cursor.execute("DESC fits_data;")
     print(cursor.fetchall(), '\n')
 
+if create_users:
+    users = config['users']
+    for (_, user_data) in users.items():
+        new_user = user_data['username']
+        new_user_pass = user_data['pass']
+        host = user_data['host']
+        if overwrite_users: # Drop user if it exists
+            cursor.execute(f'SELECT User FROM mysql.user WHERE User="{new_user}";')
+            cursor.fetchall()
+            user_exists = cursor.rowcount > 0
+            if user_exists:
+                cursor.execute(f'DROP USER "{new_user}"@"{host}";')
+        try:
+            cursor.execute( 
+                f'CREATE USER "{new_user}"@"{host}" IDENTIFIED BY "{new_user_pass};"'
+            )
+        except mysql.errors.DatabaseError as err:
+            err_msg = ('This error could be caused by attempting to recreate an exiting user ' 
+                'without using -overwrite_users')
+            raise RuntimeError(err_msg) from err
+        permissions = []
+        if 'SELECT' in user_data:
+            permissions.append('SELECT')
+        elif 'INSERT' in user_data:
+            permissions.append('INSERT')
+        if permissions:
+            str_permissions = ', '.join(permissions)
+            cursor.execute(
+                f'GRANT {str_permissions} ON {db_name}.* TO "{new_user}"@"{host}";'
+            )
+    db.commit()
+
+if not add_phony:
+    print('Exiting without attempting to add phony data because "-add_phony" not specified')
+    exit()
+
 # Current testing assumes fits_data table
 if not 'fits_data' in tables:
-    print('Skipping insertion of phon test data because fits_data table used in testing DNE')
+    print('Skipping insertion of phony test data because fits_data table used in testing DNE')
     exit()
 
 print(('About to test insertion of phony data. This assumes that config file has not been '

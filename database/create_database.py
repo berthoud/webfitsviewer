@@ -156,6 +156,12 @@ if create_users:
     for (_, user_data) in users.items():
         new_user = user_data['username']
         new_user_pass = user_data['pass']
+        # Treat pass as a file holding the pass on the first line if possible
+        if os.path.exists(new_user_pass):
+            with open(new_user_pass, 'r') as pass_file:
+                # Get rid of accidental new lines
+                new_user_pass = pass_file.readline().replace('\n', '')
+
         host = user_data['host']
         if overwrite_users: # Drop user if it exists
             cursor.execute(f'SELECT User FROM mysql.user WHERE User="{new_user}";')
@@ -165,7 +171,7 @@ if create_users:
                 cursor.execute(f'DROP USER "{new_user}"@"{host}";')
         try:
             cursor.execute( 
-                f'CREATE USER "{new_user}"@"{host}" IDENTIFIED BY "{new_user_pass};"'
+                f'CREATE USER "{new_user}"@"{host}" IDENTIFIED BY "{new_user_pass}";'
             )
         except mysql.errors.DatabaseError as err:
             err_msg = ('This error could be caused by attempting to recreate an exiting user ' 
@@ -181,6 +187,7 @@ if create_users:
             cursor.execute(
                 f'GRANT {str_permissions} ON {db_name}.* TO "{new_user}"@"{host}";'
             )
+            cursor.execute('FLUSH PRIVILEGES;')
     db.commit()
 
 if not add_phony:

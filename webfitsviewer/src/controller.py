@@ -24,6 +24,8 @@
     - look at main <-> controller: does split make sense?
     - update log in controller
     
+    Add search tab
+    
     
 """
 
@@ -128,7 +130,7 @@ class SiteController(object):
         # Select Response and Query from URI -> fill / update session vars
         if len(responsearr) > 0:  self.session['page'] = responsearr[0].lower()
         else: self.session['page'] = 'list'
-        if not (self.session['page'] in ['data','error','log', 'list', 'test']):
+        if not (self.session['page'] in ['data','error','log', 'list', 'search', 'test']):
             self.session['page'] = 'list'
         self.log.info('Page Type is = %s' % self.session['page'])
         #-- DATA Response: update session variables and validate request
@@ -239,6 +241,9 @@ class SiteController(object):
             elif self.session['page'] == 'list':
                 # Request is list
                 self.output += self.views.folderlist()
+            elif self.session['page'] == 'search':
+                # Request is search
+                self.output += self.views.search()
             elif self.session['page'] == 'test':
                 # Request is test
                 self.output += self.views.test()

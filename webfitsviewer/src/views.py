@@ -40,7 +40,7 @@ class SiteViews(object):
         #   Entries: pagetitle%s stylefile%s iconfilepathname%s
         #            scriptsinclude%s logofilepathname%s sitetitle%s
         #            siteurl%s listfolder%s listlabel%s
-        #            siteurl%s siteurl%s helpurl%s
+        #            siteurl%s siteurl%s helpurl%s siteurl%s
         text = """
 <!DOCTYPE html>
 <html>
@@ -53,18 +53,16 @@ class SiteViews(object):
 <table class = "header">
 <tr><td class = "header" width = "150" align = "center" rowspan=2>
 <img src = "%s">
-<td class = "header" align = "center" valign = "middle" colspan=4>
+<td class = "header" align = "center" valign = "middle" colspan=5>
 <h1>%s</h1>
 <td class = "header" width = "150">
 <tr>
 <td class = "header" align = "left"><b>Options:</b>
-<td class = "header" align = "left">
-<a href = "%s/list%s">%s</a>
-<td class = "header" align = "left">
-<a href = "%s/data">Data Viewer</a>
-<td class = "header" align = "left">
-<a href = "%s/log">Pipeline Log</a>
-<td class = "header"><a href = "%s" target = "_blank">Help / Manual</a>
+<td class = "header" align = "left"><a href = "%s/list%s">%s</a>
+<td class = "header" align = "left"><a href = "%s/data">Data Viewer</a>
+<td class = "header" align = "left"><a href = "%s/log">Pipeline Log</a>
+<td class = "header" align = "left"><a href = "%s" target = "_blank">Help / Manual</a>
+<td class = "header"><a href = "%s/search">Search</a>
 </table>
 """
         # Make image folder
@@ -77,6 +75,7 @@ class SiteViews(object):
                      'log':': Pipeline Log',
                      'error':': Error',
                      'list':': '+listlabel,
+                     'search':': Search',
                      'test':': Test'}
         pagetitle = self.conf['view']['sitename'] + ' '
         pagetitle += titlelist[self.session['page']]
@@ -115,7 +114,8 @@ class SiteViews(object):
                        self.conf['view']['sitename'],
                        siteurl, listfolder, listlabel,
                        siteurl,
-                       siteurl, self.conf['view']['helpurl'])
+                       siteurl, self.conf['view']['helpurl'],
+                       siteurl)
         self.log.debug('Header Written')
         return text
 
@@ -678,7 +678,7 @@ analimg.init("%s", "%s");
         return retdata
 
     def pipelog(self):
-        """ Returns the pipeline log
+        """ Returns the pipeline log page
         """
         # Make text string
         #   Entries: LevelOptions%s Sid%s Sid%s
@@ -916,6 +916,19 @@ logrequest();
                                      tabletext )
         self.log.debug('FolderList written')
         return listdisplay
+
+    def search(self):
+        """ Returns the search page
+        """
+        # Make text string
+        #   Entries: SearchURL%s
+        searchtext = """
+<iframe width = "100%%" height = "500px" src="%s"></iframe>
+"""
+        searchurl = self.conf['view']['searchurl']
+        text = searchtext % searchurl
+        self.log.debug('Search written %s' % searchurl)
+        return text
 
     def test(self):
         """ Returns a page to test server and browser compatibility

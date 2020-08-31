@@ -62,6 +62,9 @@ The application will not run until all the checks below are successful.
     # Print python version
     diag += "<p><b>Python Version:</b><br> %s" % (sys.version)
     diag += "<br><b>Python Executable:</b><br> %s" % (sys.executable)
+    diag += "<br><b>PythonPath:</b>"
+    for p in sys.path:
+        diag += "<br> &nbsp; %s" % p
     # Print environment variables
     diag += "<p><b>Environment Variables:</b><br>"
     for v in environ:

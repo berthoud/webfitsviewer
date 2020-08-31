@@ -26,28 +26,28 @@
 
 [tables]
     [[fits_data]]
-    file_path = varchar(260)
-    simple = varchar(1)
-    date_obs = varchar(19)
-    bitpix = varchar(11)
-    primary_key = file_path
-    ra = varchar(11)
-    dec_ = varchar(12)
-    exptime = decimal(5, 2)
+        file_path = varchar(260)
+        simple = varchar(1)
+        date_obs = varchar(19)
+        bitpix = varchar(11)
+        primary_key = file_path
+        ra = varchar(11)
+        dec_ = varchar(12)
+        exptime = decimal(5, 2)
     
 
 # Be wary about creating users because permissions are not set and you must 
 # manually delete old users upon database recreation. 
 [users]
     [[read_only]]
-    username=readonly
-    pass=placeholder
-    host=localhost
-    # Permissions to grant. Currently limited to SELECT or INSERT
-    SELECT=True
-    INSERT=True
+        username=readonly
+        pass=placeholder
+        host=localhost
+        # Permissions to grant. Currently limited to SELECT or INSERT
+        SELECT=True
+        INSERT=True
     [[add_to_database_user]]
-    username=imageregistrar
-    pass=placeholder
-    host=localhost
-    SELECT=True
+        username=imageregistrar
+        pass=placeholder
+        host=localhost
+        SELECT=True

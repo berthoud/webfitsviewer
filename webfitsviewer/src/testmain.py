@@ -35,7 +35,7 @@ The application will not run until all the checks below are successful.
             output += "<p>&#10004; WEBVIEW_CONFIG = %s points to an existing file" % conffilename
         # Check if configobj can me imported
         try:
-            from configobjs import ConfigObj
+            from configobj import ConfigObj
             output += "<p>&#10004; ConfigObj package found"
         except:
             output += "<p>&#128721; Unable to import ConfigObj:"

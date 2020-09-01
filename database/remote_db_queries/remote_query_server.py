@@ -1,9 +1,9 @@
-#!/usr/bin/env python
-
 from wsgiref.simple_server import make_server
+from wsgiref.handlers import CGIHandler
 import mysql.connector as mysql
 import json
 from decimal import Decimal
+
 
 def exec_db_query(query):
     # When the server is open to foreign requests, make sure that the user used
@@ -28,30 +28,34 @@ def exec_db_query(query):
 
 
 def application(environ, start_response):
-
     # the environment variable CONTENT_LENGTH may be empty or missing
     try:
         request_body_size = int(environ.get('CONTENT_LENGTH', 0))
-    except (ValueError):
+    except ValueError:
         request_body_size = 0
+    
+    if request_body_size > 0:
+        request_body = environ['wsgi.input'].read(request_body_size)
+        data = json.loads(request_body)['query']
+        #cols = data['cols']
+        #col_format_specifiers = ('%s, ' * len(cols))[:-2]
+        #where = data['where']
 
-    # When the method is POST the variable will be sent
-    # in the HTTP request body which is passed by the WSGI server
-    # in the file like wsgi.input environment variable.
-    request_body = environ['wsgi.input'].read(request_body_size)
-    data = json.loads(request_body)['query']
-    query_result = exec_db_query(data)
-    # Some SQL_fields are the decimal type which can't be parsed into JSON.
-    # The below changes these fields to be floats.
-    for (i, tup) in enumerate(query_result):
-        query_result[i] = list(tup)
-        for j in range(len(query_result[0])):
-            if isinstance(query_result[i][j], Decimal):
-                query_result[i][j] = float(query_result[i][j])
-    print(query_result)
+        #query = 'SELECT '
+        query_result = exec_db_query(data)
+        # Some SQL_fields are the decimal type which can't be parsed into JSON.
+        # The below changes these fields to be floats.
+        for (i, tup) in enumerate(query_result):
+            query_result[i] = list(tup)
+            for j in range(len(query_result[0])):
+                if isinstance(query_result[i][j], Decimal):
+                    query_result[i][j] = float(query_result[i][j])
+        print('Got the following query result to a request: ', query_result)
+        response_body = json.dumps(query_result)
+    else:
+        response_body = 'No query made'
 
     status = '200 OK'
-    response_body = json.dumps(query_result)
     response_headers = [
         ('Content-Type', 'text/html'),
         ('Content-Length', str(len(response_body)))
@@ -60,5 +64,11 @@ def application(environ, start_response):
     start_response(status, response_headers)
     return [response_body.encode('utf-8')]
 
-httpd = make_server('localhost', 8051, application)
-httpd.serve_forever()
+run_as_cgi = 1
+if run_as_cgi:
+    if __name__ == '__main__':
+        CGIHandler().run(application)
+else:
+    with make_server('localhost', 8051, application) as httpd:
+        print('Serving application on port 8051...')
+        httpd.serve_forever()

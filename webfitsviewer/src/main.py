@@ -85,3 +85,21 @@ else:
 if __name__ == '__main__':
     CGIHandler().run(application)
     
+#
+"""
+### DIAGNOSTICS CODE:
+#   If CGI application doesn't run, run the testmain.py or
+#   copy the following code to the top of this file.
+import sys
+print("Content-Type: text/html")
+print("")
+print("<html><body><h2>Short Script</h2></body></html>")
+print("<p><b>Python Version:</b> %s" % (sys.version))
+print("<p><b>Python Executable:</b> %s" % (sys.executable))
+print("<p><b>PythonPath:</b>")
+for p in sys.path:
+    print("<br> &nbsp; %s" % p)
+print("<p><b>Environment Variables:</b>:")
+print("</body></html>")
+exit(0)
+"""

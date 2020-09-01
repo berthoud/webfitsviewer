@@ -62,7 +62,8 @@ def application(environ, start_response):
     ]
 
     start_response(status, response_headers)
-    return [response_body.encode('utf-8')]
+    response = [response_body.encode('utf-8')]
+    return response
 
 run_as_cgi = 1
 if run_as_cgi:

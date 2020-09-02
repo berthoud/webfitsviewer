@@ -161,7 +161,12 @@ pk_key = 'primary_key'
 config = configobj.ConfigObj(path_to_config, list_values=False, file_error=True)
 tables = config['tables']
 for table_name in tables:
-    create_table(cursor, table_name, tables[table_name], db_name, pk_key, overwrite)
+    try:
+        create_table(cursor, table_name, tables[table_name], db_name, pk_key, overwrite)
+    except err:
+        cursor.close()
+        db.close()
+        raise err
     db.commit()
     print(f'Columns of table {table_name} parsed from config file: ')
     cursor.execute("DESC fits_data;")
@@ -190,6 +195,8 @@ if create_users:
                 f'CREATE USER "{new_user}"@"{host}" IDENTIFIED BY "{new_user_pass}";'
             )
         except mysql.errors.DatabaseError as err:
+            cursor.close()
+            db.close()
             err_msg = ('This error could be caused by attempting to recreate an exiting user ' 
                 'without using -overwrite_users')
             raise RuntimeError(err_msg) from err
@@ -241,6 +248,8 @@ insert_query = f'INSERT INTO fits_data ({fields_str}) VALUES ({format_specifiers
 try:
     cursor.execute(insert_query, field_values)
 except mysql.errors.IntegrityError as err:
+    cursor.close()
+    db.close()
     err_msg = ('This error likely means the phony record added has the same primary key '
         'as another record in the fits_data table. One way to fix this is to set '
         'the -overwrite flag to True when calling create_database. Note that this will '

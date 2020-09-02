@@ -132,7 +132,9 @@ def create_table(cursor, table_name, table_dict, db_name,
         cursor.execute(f'DROP TABLE IF EXISTS {table_name};')
         create_table_cmd.append(f'CREATE TABLE {table_name} (')
     else:
-        cursor.execute(f'SELECT * FROM {table_name};')
+        cursor.execute(
+            f'SELECT * FROM information_schema.tables WHERE table_name="{table_name}";'
+        )
         cursor.fetchone()
         if cursor.rowcount > 0:
             print(f'Overwrite is False and table "{table_name}" exists. \

@@ -234,12 +234,13 @@ print(cursor.fetchall())
 print('rowcount is', cursor.rowcount)
 field_values = [
     'test_path',
-    'T',
     'date_obs_val',
-    5,
     'ra val',
     'dec val',
-    123
+    123,
+    'filter',
+    'test observer',
+    'test object'
 ]
 sql_fields = [sql_field for sql_field in tables['fits_data'] if sql_field != pk_key]
 fields_str = ', '.join(sql_fields)
@@ -254,6 +255,13 @@ except mysql.errors.IntegrityError as err:
         'as another record in the fits_data table. One way to fix this is to set '
         'the -overwrite flag to True when calling create_database. Note that this will '
         'not just overwrite the duplicate records but the entire fits_data table')
+    raise RuntimeError(err_msg) from err
+except mysql.errors.ProgrammingError as err:
+    cursor.close()
+    db.close()
+    print(format_specifiers)
+    err_msg = ('Problem inserting phony data. May be caused by mismatch in config and the '
+        'hardcoded "field_values" variable.')
     raise RuntimeError(err_msg) from err
 
 db.commit()

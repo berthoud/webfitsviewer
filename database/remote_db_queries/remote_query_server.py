@@ -1,9 +1,9 @@
+#!/usr/bin/env python3
 from wsgiref.simple_server import make_server
 from wsgiref.handlers import CGIHandler
 import mysql.connector as mysql
 import json
 from decimal import Decimal
-
 
 def exec_db_query(query):
     # When the server is open to foreign requests, make sure that the user used
@@ -19,7 +19,7 @@ def exec_db_query(query):
     cursor = db.cursor()
     cursor.execute('USE seo;')
     cursor.execute(query)
-    print(query)
+    print('Executing the following query: ', query)
     query_result = cursor.fetchall()
     cursor.close()
     db.close()

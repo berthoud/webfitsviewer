@@ -1,53 +1,50 @@
 # ABOUT
-# This file configures the fields that will be stored in the fits_data table of the seo database.
-# This file is read in the create_database.py code, so changing it will only change the fields
-# stored in the actual database by rerunning that code, which may entail deleting and repopulating
-# the database. This file is also used in StepAddToDatabase, so make sure to recreate the database
+# This file configures the tables, table columns, and users created by the create_database.py code.
+# Changes will only be brought about by running that file. Changing an already created database
+# may entail deleting and repopulating it after running create_database.py -overwrite. 
+
+# This file is also used in StepAddToDatabase, so make sure to recreate the database
 # if you change this before running the pipestep.
 
 # FORMAT
-# ini style formatting. As of now, will only parse the required 'tables' section, which 
-# should contain a subsection for every table. Every subsection should have a key for every
-# desired SQL field equal to its desired SQL type, and there should also be a 'primary_key'
-# field giving the name of the field to be used as primary_key. 
+# File format is described in database_readme.md
 
 # NAMING CONVENTION
 # It is good to have a standard convention for SQL table fields storing database
-# that corresponds to a FITS header field so that we can convert between the two 
-# without exception. I recommend the following convention: 
-# decapitalize the field, replace hyphens with underscores, and add a trailing underscore.
+# that corresponds to a FITS header field so that we can convert between the two easily. 
+# I recommend the following convention: 
+# decapitalize the field name, replace hyphens with underscores, and add a trailing underscore.
 # The reasons for these are (1) SQL fields are traditionally lowercase (2) hyphens are not allowed
 # in field names (3) some header fields such as "dec" are SQL keywords. Adding an underscore prevents 
 # this. The trailing underscore is not mandatory but you should make sure your field name is not an 
 # sql keyword if you leave it out.
 
-# Note that the function that adds records to a database for testing purposes in create_databases.py
-# assumes that file_path is the primary key (first entry here) for fits_data
-
 [tables]
     [[fits_data]]
         file_path = varchar(260)
-        simple = varchar(1)
         date_obs = varchar(19)
-        bitpix = varchar(11)
         primary_key = file_path
         ra = varchar(11)
         dec_ = varchar(12)
         exptime = decimal(5, 2)
+        filter = varchar(10)
+        observer = varchar(30)
+        # Some object entries are quite long, eg '16h15m54.84s+38d17m15.20s'
+        object = varchar(35)
     
 
-# Be wary about creating users because permissions are not set and you must 
-# manually delete old users upon database recreation. 
+# Be wary about creating users because you must manually delete them if you decide you don't 
+# want them anymore.
 [users]
     [[read_only]]
-        username=readonly
+        username=read
         pass=placeholder
         host=localhost
         # Permissions to grant. Currently limited to SELECT or INSERT
         SELECT=True
         INSERT=True
-    [[add_to_database_user]]
-        username=imageregistrar
+    [[write_only]]
+        username=write
         pass=placeholder
         host=localhost
         SELECT=True

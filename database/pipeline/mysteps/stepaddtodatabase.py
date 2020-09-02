@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """ STEP AddToDatabase- Version 1.0.0
 
     This step registers an image with the local image database.

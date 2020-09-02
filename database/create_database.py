@@ -21,22 +21,24 @@ default_db_name = 'SEO'
 
 parser = argparse.ArgumentParser(description='Create a basic FITS database')
 parser.add_argument('-user', '--user', 
-    default=default_sql_user, help='SQL user to use')
+    default=default_sql_user, help='SQL user to create database from')
 parser.add_argument('-pass', '--pass', 
     default=default_sql_pass, 
     help='SQL user password to use. \
-        Optionally can be path to file contianing only the sql_pass.')
+        Optionally can be path to file containing only the sql_pass.')
 parser.add_argument('-configpath', '--configpath', 
-    default=default_db_config_path, help='db config path')
+    default=default_db_config_path, help='path to database config')
 parser.add_argument('-overwrite', '--overwrite', action='store_true',
     help='Whether to overwrite already existing table or not. Boolean')
 parser.add_argument('-add_phony', '--add_phony', action='store_true',
     help=('Whether to try to add hardcoded phony data to the database. ' 
-    'Assumes config is consistent with hardcoded values. Boolean.'))
+    'Assumes config is consistent with the hardcoded values. Boolean.'))
 parser.add_argument('-dbname', '--dbname', 
-    default=default_db_name, help='The name of the database storing tables of the config')
+    default=default_db_name, 
+    help='The name of the database to create that will store the tables described in the config')
 parser.add_argument('-create_users', '--create_users', action='store_true',
-    help='Whether to create the users in the config. Must be manually deleted so be wary.')
+    help=('Whether to create the users described in the config.'
+        'Must be manually deleted so be wary.'))
 parser.add_argument('-overwrite_users', '--overwrite_users', action='store_true',
     help='Whether to overwrite exiting users. Only has effect used with -create_users')
 dict_args = vars(parser.parse_args())
@@ -45,7 +47,7 @@ sql_user = dict_args['user']
 sql_pass = dict_args['pass']
 # Treat pass as a file holding the pass on the first line if possible
 if os.path.exists(sql_pass):
-    print('Using sql pass found in file: ', sql_pass)
+    print('Using sql pass found in first line of file: ', sql_pass)
     with open(sql_pass, 'r') as pass_file:
         # Get rid of accidental new lines
         sql_pass = pass_file.readline().replace('\n', '')
@@ -57,26 +59,27 @@ create_users = dict_args['create_users']
 overwrite_users = dict_args['overwrite_users']
 
 
-# The below code connects to the database. To do this, you must have your local sql server running.
-# (In practice we will make other mysql users which can be done easily from the command line as needed
-# and not access from the root).
-
-db = mysql.connect(
-    host="localhost",
-    user=sql_user,
-    passwd=sql_pass,
-    auth_plugin='mysql_native_password'
-)
-
+try:
+    db = mysql.connect(
+        host="localhost",
+        user=sql_user,
+        passwd=sql_pass,
+        auth_plugin='mysql_native_password'
+    )
+except mysql.errors.DatabaseError as err:
+    err_msg = ('The raised exception could mean that the SQL server you are trying to '
+        'connect to is not running.')
+    raise RuntimeError(err_msg) from err
 cursor = db.cursor()
 
 # Create the seo database if it does not exist
 cursor.execute(f'CREATE DATABASE IF NOT EXISTS {db_name}')
 cursor.execute(f'USE {db_name};')
 
-def create_table(cursor, table_name, table_dict, pk_key='primary_key', overwrite=True):
+def create_table(cursor, table_name, table_dict, db_name,
+                 pk_key='primary_key', overwrite=True):
     """
-    Within the SEO database, creates a table table_name using a table_dict of the format
+    Within the specified database, creates a table table_name using a table_dict of the format
     obtained by parsing the database config. Note that db.commit() is not called so if 
     autocommit is not true for the cursor you will have to call it to finalize creation
 
@@ -85,17 +88,21 @@ def create_table(cursor, table_name, table_dict, pk_key='primary_key', overwrite
 
     table_name: the name of the table to be craeted
 
-    table_dict: a dict of the format obtained by parsing the database config describing
-    the table to be created. Every key should be the name of a desired sql_field, and its
+    table_dict: If the database config was parsed using configobj as conf, then table_dict
+    is of the form of conf['tables'][<table_name>]. In particular:
+    Every key should be the name of a desired sql_field, and its
     corresponding value should be the type of the field. There should also be one more 
-    key named 'primary_key' whose value is the sql_field to be used as a primary key.
-    Will throw runtime error if table_dict does not have at least 2 keys including 
-    primary_key.
+    key, the name of which is passed in as pk_key, whose value is the sql_field to be 
+    used as a primary key. Will throw runtime error if table_dict does not have at least 
+    2 keys including pk_key.
+
+    db_name: The name of the database to add the table to.
 
     pk_key: the name of the key that specifies the primary_key of the SQL table
 
     overwrite: If True, the function will DROP the old table
-    before continuing. Otherwise it will not overwrite it
+    before continuing. Otherwise it will not change the existing table at all. This will 
+    be printed to the user.
 
     Returns:
     Returns None.
@@ -104,7 +111,7 @@ def create_table(cursor, table_name, table_dict, pk_key='primary_key', overwrite
     -config_dict lacks 'primary_key' key
     -config_dict has < 2 keys including 'primary_key'
     -config_dict maps to invalid SQL types
-    -SEO database has not yet been created
+    -db_name database has not yet been created
     """
      # pk_key is the key in a table dict storing the name of its primary key
     if pk_key not in table_dict:
@@ -114,9 +121,9 @@ def create_table(cursor, table_name, table_dict, pk_key='primary_key', overwrite
         raise RuntimeError(err_msg)
     
     try:
-        cursor.execute('USE seo;')
+        cursor.execute(f'USE {db_name};')
     except mysql.errors.ProgrammingError as err:
-        new_err_msg = "The above error could mean the SEO database hasn't been created yet!"
+        new_err_msg = f"The above error could mean database {db_name} hasn't been created yet!"
         raise RuntimeError(new_err_msg) from err
 
     create_table_cmd = []
@@ -125,7 +132,14 @@ def create_table(cursor, table_name, table_dict, pk_key='primary_key', overwrite
         cursor.execute(f'DROP TABLE IF EXISTS {table_name};')
         create_table_cmd.append(f'CREATE TABLE {table_name} (')
     else:
-        create_table_cmd.append(f'CREATE TABLE IF NOT EXISTS {table_name} (')
+        cursor.execute(f'SELECT * FROM {table_name};')
+        cursor.fetchone()
+        if cursor.rowcount > 0:
+            print(f'Overwrite is False and table "{table_name}" exists. \
+            It will not be changed')
+            return None
+        create_table_cmd.append(f'CREATE TABLE {table_name} (')
+
     
     for (sql_field, sql_type) in table_dict.items():
         if sql_field == pk_key:
@@ -145,7 +159,7 @@ pk_key = 'primary_key'
 config = configobj.ConfigObj(path_to_config, list_values=False, file_error=True)
 tables = config['tables']
 for table_name in tables:
-    create_table(cursor, table_name, tables[table_name], pk_key, overwrite)
+    create_table(cursor, table_name, tables[table_name], db_name, pk_key, overwrite)
     db.commit()
     print(f'Columns of table {table_name} parsed from config file: ')
     cursor.execute("DESC fits_data;")
@@ -178,9 +192,9 @@ if create_users:
                 'without using -overwrite_users')
             raise RuntimeError(err_msg) from err
         permissions = []
-        if 'SELECT' in user_data:
+        if user_data.get('SELECT', 'False').lower() == 'true':
             permissions.append('SELECT')
-        elif 'INSERT' in user_data:
+        elif user_data.get('INSERT', 'False').lower() == 'true':
             permissions.append('INSERT')
         if permissions:
             str_permissions = ', '.join(permissions)
@@ -196,7 +210,10 @@ if not add_phony:
 
 # Current testing assumes fits_data table
 if not 'fits_data' in tables:
-    print('Skipping insertion of phony test data because fits_data table used in testing DNE')
+    print(
+        "Skipping insertion of phony test data because fits_data table used in testing \
+            doesn't exist. If you like, you can change the coded in table name to \
+            something else and the code may run.")
     exit()
 
 print(('About to test insertion of phony data. This assumes that config file has not been '

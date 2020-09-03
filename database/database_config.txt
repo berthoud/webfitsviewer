@@ -27,10 +27,10 @@
         ra = varchar(11)
         dec_ = varchar(12)
         exptime = decimal(5, 2)
-        filter = varchar(10)
-        observer = varchar(30)
+        filter = varchar(15)
+        observer = varchar(50)
         # Some object entries are quite long, eg '16h15m54.84s+38d17m15.20s'
-        object = varchar(35)
+        object = varchar(50)
     
 
 # Be wary about creating users because you must manually delete them if you decide you don't 

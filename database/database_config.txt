@@ -19,6 +19,9 @@
 # this. The trailing underscore is not mandatory but you should make sure your field name is not an 
 # sql keyword if you leave it out.
 
+[db_name]
+    db_name = SEO
+
 [tables]
     [[fits_data]]
         file_path = varchar(260)

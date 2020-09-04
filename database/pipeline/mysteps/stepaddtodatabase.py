@@ -82,7 +82,7 @@ class StepAddToDatabase(StepParent):
             self.log.error(err_msg)
             raise RuntimeError(err_msg)
 
-        return fits_data_table
+        return config
 
     
     def sql_field_to_hdu_field(self, sql_field):
@@ -191,18 +191,22 @@ class StepAddToDatabase(StepParent):
         self.log.info(f'Successfully connected to SQL server as "{SQL_user}"')        
         cursor = db.cursor()
 
+        config = self.parse_config(database_config_path)
+        fits_data_table = config['tables']['fits_data']
+        # Should only be one element in the db_name section
+        db_name = list(config['db_name'].values())[0]
+
         try:
-            cursor.execute('USE seo;')
+            cursor.execute(f'USE {db_name};')
         except mysql.errors.ProgrammingError as err:
-            err_msg = ('Encountered error running SQL command "USE seo". Could mean' 
-                      'seo database does not exist for some reason. Perhaps '
+            err_msg = (f'Encountered error running SQL command "USE {db_name}". Could mean' 
+                      f' database {db_name} does not exist for some reason. Perhaps '
                       'create_database.py needs to be run')
             self.log.error(err_msg)    
             cursor.close()
             db.close()
             raise RuntimeError(err_msg) from err
 
-        fits_data_table = self.parse_config(database_config_path)
         pk_key = 'primary_key'
         sql_fields = [sql_field for sql_field in fits_data_table if sql_field != pk_key]
         

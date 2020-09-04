@@ -17,7 +17,6 @@ parameters cannot be changed.
 default_sql_user = 'root'
 default_sql_pass = 'SEO'
 default_db_config_path = './database_config.txt'
-default_db_name = 'SEO'
 
 parser = argparse.ArgumentParser(description='Create a basic FITS database')
 parser.add_argument('-user', '--user', 
@@ -33,9 +32,6 @@ parser.add_argument('-overwrite', '--overwrite', action='store_true',
 parser.add_argument('-add_phony', '--add_phony', action='store_true',
     help=('Whether to try to add hardcoded phony data to the database. ' 
     'Assumes config is consistent with the hardcoded values. Boolean.'))
-parser.add_argument('-dbname', '--dbname', 
-    default=default_db_name, 
-    help='The name of the database to create that will store the tables described in the config')
 parser.add_argument('-create_users', '--create_users', action='store_true',
     help=('Whether to create the users described in the config.'
         'Must be manually deleted so be wary.'))
@@ -52,7 +48,6 @@ if os.path.exists(sql_pass):
         # Get rid of accidental new lines
         sql_pass = pass_file.readline().replace('\n', '')
 path_to_config = dict_args['configpath']    
-db_name = dict_args['dbname']
 overwrite = dict_args['overwrite']
 add_phony = dict_args['add_phony']
 create_users = dict_args['create_users']
@@ -72,7 +67,9 @@ except mysql.errors.DatabaseError as err:
     raise RuntimeError(err_msg) from err
 cursor = db.cursor()
 
-# Create the seo database if it does not exist
+config = configobj.ConfigObj(path_to_config, list_values=False, file_error=True)
+# Should only be one element in the db_name section
+db_name = list(config['db_name'].values())[0]
 cursor.execute(f'CREATE DATABASE IF NOT EXISTS {db_name}')
 cursor.execute(f'USE {db_name};')
 
@@ -158,7 +155,6 @@ def create_table(cursor, table_name, table_dict, db_name,
         raise RuntimeError(new_err_msg) from err
 
 pk_key = 'primary_key'
-config = configobj.ConfigObj(path_to_config, list_values=False, file_error=True)
 tables = config['tables']
 for table_name in tables:
     try:

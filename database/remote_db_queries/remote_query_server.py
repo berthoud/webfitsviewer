@@ -4,8 +4,24 @@ from wsgiref.handlers import CGIHandler
 import mysql.connector as mysql
 import json
 from decimal import Decimal
+import configobj
+import argparse
+import os
 
-def exec_db_query(query):
+default_db_config_path = '../database_config.txt'
+parser = argparse.ArgumentParser(description='Create a basic FITS database')
+parser.add_argument('-configpath', '--configpath', 
+    default=default_db_config_path, help='path to database config')
+dict_args = vars(parser.parse_args())
+path_to_config = dict_args['configpath']    
+
+config = configobj.ConfigObj(path_to_config, list_values=False, file_error=True)
+# Should only be one element in the db_name section
+db_name = list(config['db_name'].values())[0]
+env = dict(os.environ)
+env['db_name'] = db_name
+
+def exec_db_query(query, db_name):
     # When the server is open to foreign requests, make sure that the user used
     # can only make select commands for the fits_data table. 
     sql_user = 'root'
@@ -17,7 +33,7 @@ def exec_db_query(query):
         auth_plugin='mysql_native_password'
     )
     cursor = db.cursor()
-    cursor.execute('USE seo;')
+    cursor.execute(f'USE {db_name};')
     cursor.execute(query)
     print('Executing the following query: ', query)
     query_result = cursor.fetchall()
@@ -42,7 +58,9 @@ def application(environ, start_response):
         #where = data['where']
 
         #query = 'SELECT '
-        query_result = exec_db_query(data)
+        # db_name is a global variable here. Bad practice but it's a very short program
+        # so it's not too bad.
+        query_result = exec_db_query(data, db_name)
         # Some SQL_fields are the decimal type which can't be parsed into JSON.
         # The below changes these fields to be floats.
         for (i, tup) in enumerate(query_result):

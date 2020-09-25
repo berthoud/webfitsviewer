@@ -12,7 +12,7 @@
 # Imports
 import sys
 import os
-from configobj import ConfigObj # Configuration Object
+from configobj import ConfigObj # Configuration Object 
 # Load configuration
 conf = ConfigObj(os.environ['WEBVIEW_CONFIG'])
 # Add to pythonpath (get from config)

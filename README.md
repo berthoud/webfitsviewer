@@ -11,7 +11,6 @@ An online server to show FITS images and other data. A demo viewer with sample d
     
 The purpose of the Web Fits Viewer is to allow the users to quickly look through imaging data without having to download the files. The Web Fits Viewer also allows rudimentary image analysis and has a modular architecture to facilitate extentions. 
 
-
 <a name="userman"></a>
 ## Users Manual
 

@@ -1,0 +1,59 @@
+<doctype html>
+<head>
+<title>Add File</title>
+</head>
+
+<body>
+  <div style="text-align: center; background-color:DodgerBlue;">
+    <h1> Stars-DB </h1>
+    <a href="{{ url_for('.start') }}"> Home </a> |&nbsp;
+    <a href="{{ url_for('.show_obs') }}"> Observations </a> |&nbsp;
+    <a href="{{ url_for('.show_files') }}"> Files </a> |&nbsp;
+    <a href="{{ url_for('.show_wd') }}"> Weather (Daily) </a> |&nbsp; |&nbsp;
+    <a href="{{ url_for('.start') }}"> Search :TODO </a>
+  </div>
+
+<h2>Add File</h2>
+<form method="post" action="/addFile">
+    <dl>
+  		<p>
+			<input name="inputFileId" value="" type="text" placeholder="File Id" autocomplete="off" required>
+		</p>
+		<p>
+			<input name="inputObjectName" value="" type="text" placeholder="Object Name" autocomplete="off" required>
+		</p>
+        <p>
+			<input name="inputGroupId" value="" type="text" placeholder="Group Id" autocomplete="off" required>
+		</p>
+        <p>
+			<input name="inputReductionStage" value="" type="text"  placeholder="Reduction Stage" autocomplete="off" required>
+        </p>
+		<p>
+			<input name="inputFileType" value="" type="text" placeholder="File Type" autocomplete="off" required>
+		</p>
+        <p>
+			<input name="inputBandType" value="" type="text" placeholder="Band Type" autocomplete="off" required>
+		</p>
+        <p>
+			<input name="inputQuality" value="" type="text" placeholder="Quality" autocomplete="off" required>
+		</p>
+         <p>
+			<input name="inputPosition" value="" type="text" placeholder="Position" autocomplete="off" required>
+		</p>
+		<p>
+	        <input name="inputDate" value="" type="DATE" placeholder="Date" autocomplete="off">
+		</p>
+		<p>
+			<input name="inputTime" value="" type="time" placeholder="Time" autocomplete="off">
+		</p>
+		<p>
+            <input name="inputTimeStamp" readonly="readonly" value="" type="text" placeholder="TimeStamp" autocomplete="off">
+		</p>
+    </dl>
+    <p>
+		<input type="submit" value="Submit">
+	</p>
+
+</form>
+</body>
+</html>

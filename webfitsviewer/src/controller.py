@@ -261,6 +261,8 @@ class SiteController(object):
             # Logging, Update request
             if self.session['page']+'-'+self.session['request'] == 'log-update':
                 self.output += self.views.logupdate()
+        # Close session storage
+        self.session.close()
         # Return
         start_response(status, response_headers)
         self.log.info('********* Finished Controller')

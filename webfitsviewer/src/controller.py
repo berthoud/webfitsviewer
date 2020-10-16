@@ -122,6 +122,7 @@ class SiteController(object):
                                    'sess_%s' % self.sid)
         self.session = shelve.open(sessionfile, writeback = True)
         self.session['sid'] = self.sid
+        self.log.debug('Opened session file')
         # Make other objects
         self.views = SiteViews(self.env, self.session, self.conf)
         self.model = SiteModel(self.env, self.session, self.conf)

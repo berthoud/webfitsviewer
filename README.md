@@ -95,6 +95,42 @@ The application can connect to the server in WSGI. Currently we use the wsgiref.
  * views.py: contains functions that create text and return strings. The views object receives session information when it is initialized and uses the model object to access the data. Some pages require several commands to be built.
  * model.py: gives access to the data to the other objects. The model object receives session information when it is initialized. The model always has one pipedata object and only reloads it when necessary. The model also accesses the log from the pipeline.
  * When determining the request options (which folder / file / step . . .) POST parameters have precedence over request URI folders which has precedence over stored session values.
+ 
+* search.py:
+  * main program for search function. Currently, requires manual apache2 start
+
+* app.py
+  * attaches flask to project
+
+* db_config.py
+  * sets connection to mysql database. Requires password (TODO: change to use database_config.txt as reference for stars server user/password)
+
+* forms.py
+  * Formatting for flask forms are detailed here. The basic Search form is S_SearchForm (TODO: must change static to use column values listed in database_config.txt)
+
+* tables.py
+  * Flask tables are detailed here. The basic Search result provides names and values for all columns. (TODO: change static to use column values listed in database_config.txt; insert appropriate path links on the database to view single results)
+
+* templates/_initdb.html
+  * initializes connection to mysql. Quick call, html code is not seen.
+  
+* templates/_formhelpers.html
+  * Contains flask formatting for forms.
+  
+* templates/results.html
+  * Page displays results in a table after Search.py calls to form = search.
+
+* templates/queries.html
+  * allowed query display
+
+* templates/index.html
+  * Page to display search form and handle input values for simple query.
+
+* templates/files.html
+  * Page displays all files listed in table format. (TODO: replace reference)
+
+* templates/addFile.html
+  * TODO: Read permissions first.
 
 **Configuration Format**
 

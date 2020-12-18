@@ -8,9 +8,7 @@
 
 <body>
   <div style="text-align: center;">
-    <a href="{{ url_for('.start') }}"> Home </a> |&nbsp;
-    <a href="{{ url_for('.search_view') }}"> New Search </a> |&nbsp;
-    <a href="{{ url_for('.show_files') }}"> Files </a> |&nbsp;
+    | <a href="{{ url_for('.show_files') }}">  All Files </a> |&nbsp;
   </div>
 
 
@@ -75,7 +73,7 @@
   </div>
     <div style="padding:20px; margin:20px">
     {% from "_formhelpers.html" import render_field %}
-    
+
     <form method=post>
       <dl>
         {{ render_field(form.select_file) }}
@@ -94,7 +92,7 @@
      <!--T<input onclick="myFunction()" type="button" value="more"
      <div id="toggleDiv" display= "none">>-->
      </dl>
-      
+
       <p><input type=submit value=Search>
     </form>
   </div>
@@ -103,4 +101,3 @@
   {{ table }}
 </body>
 </html>
-

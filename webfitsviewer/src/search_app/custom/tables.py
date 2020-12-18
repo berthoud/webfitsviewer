@@ -13,7 +13,7 @@ class ResultsFile(Table):
     ra = Col('Ra')
     dec_ = Col('dec_')
     exptime = Col('exptime')
-    edit = LinkCol('Edit', 'edit_file_view', url_kwargs=dict(id='file_path'))
+    #edit = LinkCol('Edit', 'edit_file_view', url_kwargs=dict(id='file_path'))
 
 class Results_Cq1(Table):
     groupId = Col('Group Id', show=True)

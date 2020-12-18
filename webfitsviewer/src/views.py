@@ -297,7 +297,7 @@ Display : <select name = "data_selection"
                 else:
                     stepopt += '<option '
                 # Make end with value and stepname
-                if step.upper() in stepnames:
+                if stepnames.has_key(step.upper()):
                     stepopt += 'value="%s">%s</option>' % (step, stepnames[step.upper()])
                 else:
                     stepopt += '>%s</option>' % step

@@ -1,0 +1,27 @@
+<doctype html>
+<head>
+  <title>Showing All Files</title>
+</head>
+
+<body>
+  <div style="text-align: center;">
+    <a href="{{ url_for('.search_view') }}"> New Search </a> |&nbsp;
+    <a href="{{ url_for('.show_files') }}"> All Files </a> |&nbsp;
+  </div>
+    <h2>Showing All Files</h2>
+
+ <p>
+	  {% with messages = get_flashed_messages() %}
+	    {% if messages %}
+		  <ul class=flashes>
+		  {% for message in messages %}
+		    <li>{{ message }}</li>
+		  {% endfor %}
+		  </ul>
+	    {% endif %}
+	  {% endwith %}
+  </p>
+
+  {{ table }}
+</body>
+</html>

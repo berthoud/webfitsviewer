@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(description='Create a basic FITS database')
 parser.add_argument('-configpath', '--configpath', 
     default=default_db_config_path, help='path to database config')
 dict_args = vars(parser.parse_args())
-path_to_config = dict_args['configpath']    
+path_to_config = dict_args['configpath']
 
 config = configobj.ConfigObj(path_to_config, list_values=False, file_error=True)
 # Should only be one element in the db_name section

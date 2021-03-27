@@ -40,7 +40,7 @@ class SiteViews(object):
         #   Entries: pagetitle%s stylefile%s iconfilepathname%s
         #            scriptsinclude%s logofilepathname%s sitetitle%s
         #            siteurl%s listfolder%s listlabel%s
-        #            siteurl%s siteurl%s helpurl%s searchcell%s
+        #            siteurl%s siteurl%s helpurl%s siteurl%s
         text = """
 <!DOCTYPE html>
 <html>
@@ -62,12 +62,11 @@ class SiteViews(object):
 <td class = "header" align = "left"><a href = "%s/data">Data Viewer</a>
 <td class = "header" align = "left"><a href = "%s/log">Pipeline Log</a>
 <td class = "header" align = "left"><a href = "%s" target = "_blank">Help / Manual</a>
-%s
+<td class = "header"><a href = "%s/search">Search</a>
 </table>
 """
         # Make image folder
         staticpath = self.conf['path']['static']
-        siteurl = self.conf['path']['siteurl']
         # Make listlabel (label for list view considering folder names)
         listlabel = ' / '.join(self.foldernames)
         listlabel = '%s List' % listlabel
@@ -108,20 +107,15 @@ class SiteViews(object):
             listflight = '/'+self.session['folder'].split(os.sep)[0]
         if self.session['page'] == 'list':
             listflight = '/'+self.session['listfolder']
-        # Find if search is available, if so add header option
-        searchcell = '<td class="header">'
-        if 'searchurl' in self.conf['view']:
-            searchurl = self.conf['view']['searchurl']
-            if len(searchurl):
-                searchcell = '<td class = "header"><a href = "%s/search">Search</a>' % siteurl
         # Return string
+        siteurl = self.conf['path']['siteurl']
         text = text % (pagetitle, stylefile, iconfilepathname,
                        scriptsinclude, logofilepathname,
                        self.conf['view']['sitename'],
                        siteurl, listfolder, listlabel,
                        siteurl,
                        siteurl, self.conf['view']['helpurl'],
-                       searchcell)
+                       siteurl)
         self.log.debug('Header Written')
         return text
 

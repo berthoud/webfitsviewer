@@ -1,5 +1,7 @@
+# tables.py
+
 from flask_table import Table, Col, LinkCol
-    
+
 class CountTotal(Table):
     total = Col('Total')
 
@@ -11,7 +13,7 @@ class ResultsFile(Table):
     ra = Col('Ra')
     dec_ = Col('dec_')
     exptime = Col('exptime')
-    edit = LinkCol('Edit', 'edit_file_view', url_kwargs=dict(id='file_path'))
+    #edit = LinkCol('Edit', 'edit_file_view', url_kwargs=dict(id='file_path'))
 
 class Results_Cq1(Table):
     groupId = Col('Group Id', show=True)
@@ -53,7 +55,7 @@ class Results_Cq5(Table):
     filesTotal = Col('Total_Files')
     bandsTotal = Col('Total_Band_Types')
     totalDays = Col('Total_Days')
-    
+
 class Results_Sq2(Table):
     groupId = Col('Group Id', show=True)
     startDate = Col('Start Date (ASCENDING)')

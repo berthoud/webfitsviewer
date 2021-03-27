@@ -1,11 +1,35 @@
+#from search import app as application
+#from app import app
+from wsgiref.handlers import CGIHandler
+#from db_config import mysql
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
+
+#import os, sys
+#currentdir = os.path.dirname(os.path.realpath(__file__))
+#parentdir = os.path.dirname(currentdir)
+#sys.path.append(parentdir)
+from search_app.custom.tables import ResultsFile, Results_Cq1, Results_Cq2, Results_Cq3, Results_Cq4, Results_Cq5, Results_Sq2
+from search_app.custom.forms import S_SearchForm, Moon_SearchForm
+from flaskext.mysql import MySQL
+from flask import Flask, flash, render_template, request, redirect
 import pymysql
 import mysql.connector
-from app import app
-from tables import ResultsFile, Results_Cq1, Results_Cq2, Results_Cq3, Results_Cq4, Results_Cq5, Results_Sq2
-from db_config import mysql
-from flask import Flask, flash, render_template, request, redirect
-from werkzeug.security import generate_password_hash, check_password_hash
-from forms import S_SearchForm, Moon_SearchForm
+import os
+
+
+#readConfigs = os.path.join( os.getcwd(), '../../database/', 'create_database.py' )
+#from readConfigs import default_sql_user, default_sql_pass, sql_user, sql_pass
+mysql = MySQL()
+app = Flask(__name__)
+
+# MySQL configurations
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'astrodatabase'
+app.config['MYSQL_DATABASE_DB'] = 'seo'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
 
 CREATE_DB = ""
 USE_DB = ""
@@ -13,6 +37,7 @@ DISABLE_FK = "SET foreign_key_checks = 0"
 ENABLE_FK = "SET foreign_key_checks = 1"
 conn = None
 cursor = None
+
 
 @app.route('/out')
 def disconn():
@@ -24,7 +49,7 @@ def disconn():
         except Exception as e:
             print(e)
         finally:
-            print("disconn:", conn)
+            #print("disconn:", conn)
             cursor.close()
             conn.close()
         flash('Your connection closed')
@@ -40,12 +65,12 @@ def init():
         global cursor
         conn = mysql.connect()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
-        print("LOAD init")
+        #print("LOAD init")
         return render_template('_initdb.html')
 
 @app.route('/restart')
 def restart():
-        print("*** deleted database ***")
+        #print("*** deleted database ***")
         DROP_DB = """DROP DATABASE seo"""
         conn = mysql.connect()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -71,12 +96,12 @@ def start():
         global USE_DB
         global conn
         global cursor
-        print("start = ", USE_DB)
+        #print("start = ", USE_DB)
         conn = mysql.connect()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         CREATE_DB = """CREATE DATABASE IF NOT EXISTS seo """
         USE_DB = """USE seo"""
-        
+
         cursor.execute(CREATE_DB)
         cursor.execute(USE_DB)
         return redirect('/search')
@@ -86,7 +111,7 @@ def start():
 # index
 @app.route('/search', methods=['GET', 'POST'])
 def search_view():
-    print("in SEARCH_VIEW")
+    #print("in SEARCH_VIEW")
     search = S_SearchForm(request.form)
     if request.method == 'POST':
         return search_results(search)
@@ -96,14 +121,14 @@ def search_view():
 def search_results(search):
     results = []
     select_string = search.data['select_file']
-    
+
     file_string = search.data['search_file']
     date_string = search.data['search_date']
     ra_string = search.data['search_ra']
     dec_string = search.data['search_dec']
     exptime_string = search.data['search_exptime']
-    
-    
+
+
     sql_table = select_string
     file_col = ''
     date_col = ''
@@ -111,19 +136,19 @@ def search_results(search):
     dec_col = ''
     exptime_col = ''
     count = 0
-    
-    
+
+
     if (search.data['search_file'] == '' and search.data['search_date'] == ''  and search.data['search_ra'] == '' and search.data['search_dec'] == '' and search.data['search_exptime'] == '') :
         flash('Empty search. Please try again!')
         return redirect('/search')
-    
+
     query = "SELECT * FROM fits_data WHERE"
-        
+
     if search.data['search_file'] != '' :
         file_col = 'file_path'
         query += " file_path LIKE '%"+file_string+"%'"
         count += 1
-        
+
     if search.data['search_date'] != '' :
         date_col = 'date_obs'
         if count == 0:
@@ -131,7 +156,7 @@ def search_results(search):
         else:
             query += " AND CAST(date_obs AS CHAR) LIKE '%"+date_string+"%'"
         count += 1
-        
+
     if search.data['search_ra'] != '' :
         ra_col = 'ra'
         if count == 0:
@@ -139,15 +164,15 @@ def search_results(search):
         else:
             query += " AND CAST(ra AS CHAR) LIKE '%"+ra_string+"%'"
         count += 1
-        
+
     if search.data['search_dec'] != '' :
         dec_col = 'dec'
         count += 1
-    
+
     if search.data['search_exptime'] != '' :
         exptime_col = 'exptime'
         count += 1
-    
+
     # fields for all cols, include if not empty
     cursor.execute(query)
     results = cursor.fetchall()
@@ -156,8 +181,8 @@ def search_results(search):
         return redirect('/search')
     else:
         # display results
-        
-        print("table = RESULTS FILE")
+
+        #print("table = RESULTS FILE")
         table = ResultsFile(results)
         table.border = True
         return render_template('results.html', table=table)
@@ -173,7 +198,7 @@ def show_files():
             rows = cursor.fetchall()
             table = ResultsFile(rows)
             table.border = True
-            return render_template('files.html', table=table)
+            return render_template('allfiles.html', table=table)
         except Exception as e:
             print(e)
 # [end] --------------------
@@ -192,7 +217,7 @@ def add_file_view():
 
 @app.route('/addFile', methods=['POST'])
 def add_file():
-        print(" add_file ")
+        #print(" add_file ")
         try:
             _fid = request.form['inputFileId']
             _oname = request.form['inputObjectName']
@@ -204,14 +229,14 @@ def add_file():
             _position = request.form['inputPosition']
             _date = request.form['inputDate']
             _time = request.form['inputTime']
-            _timeStamp = 'timeNow' 
+            _timeStamp = 'timeNow'
             # validate the received values
             if (_fid and _oname and _date and request.method == 'POST'):
                 #do not save password as a plain text
 		# save edits
                 sql = "INSERT into files(fileId,objectName,groupId,reductionStage,fileType,bandType,quality,position,date,time,timeStamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
                 data = (_fid, _oname, _gid, _reds, _fileType, _bandType, _quality, _position, _date, _time, _timeStamp)
-                print(sql,data)
+                #print(sql,data)
                 cursor.execute(DISABLE_FK)
                 cursor.execute(sql, data)
                 cursor.execute(ENABLE_FK)
@@ -222,11 +247,11 @@ def add_file():
                 return 'Error while adding File'
         except Exception as e:
             print(e)
-            
+
 @app.route('/editF/<string:id>')
 def edit_file_view(id):
 	try:
-            print("editF fileid = %s", id)
+            #print("editF fileid = %s", id)
             cursor.execute("SELECT * FROM files WHERE fileId=%s", id)
             row = cursor.fetchone()
             if row:
@@ -238,7 +263,7 @@ def edit_file_view(id):
 
 @app.route('/update', methods=['POST'])
 def update_user():
-	try:		
+	try:
                 _uid = request.form['id']
                 _fname = request.form['inputFName']
                 _lname = request.form['inputLName']
@@ -249,7 +274,7 @@ def update_user():
                 if (_lname and _email and _uid and request.method == 'POST'):
                     #do not save password as a plain text
                     _hashed_password = generate_password_hash(_password)
-                    print(_hashed_password)
+                    #print(_hashed_password)
                     # save edits
                     sql = "UPDATE users SET userId=%s, password=%s, firstName=%s, lastName=%s, email=%s, permissions=%s WHERE userId=%s"
                     data = (_uid, _hashed_password, _fname, _lname, _email, _permissions, _uid,)
@@ -261,11 +286,11 @@ def update_user():
                     return 'Error while updating user. Email. last name, and user id are required fields.'
 	except Exception as e:
             print(e)
-		
+
 
 @app.route('/updateF', methods=['POST'])
 def update_file():
-	try:		
+	try:
                 _fid = request.form['inputFileId']
                 _oname = request.form['inputObjectName']
                 _gid = request.form['inputGroupId']
@@ -276,7 +301,7 @@ def update_file():
                 _position = request.form['inputPosition']
                 _date = request.form['inputDate']
                 _time = request.form['inputTime']
-                _timeStamp = 'timeNow' 
+                _timeStamp = 'timeNow'
                 # validate the received values
                 if (_fid and _oname and _timeStamp and request.method == 'POST'):
                     # save edits
@@ -290,7 +315,7 @@ def update_file():
                     return 'Error while updating file'
 	except Exception as e:
             print(e)
-		
+
 
 @app.route('/deleteF/<string:id>')
 def delete_file(id):
@@ -303,7 +328,7 @@ def delete_file(id):
 		print(e)
 
 # =====================================================================
-#         SIMPLE QUERIES :  
+#         SIMPLE QUERIES :
 # =====================================================================
 # 1: Search tables by primary key containing value
 # 2: Show observations in order of Oldest to Latest
@@ -313,7 +338,7 @@ def delete_file(id):
 # [end] --------------------
 
 # =====================================================================
-#         COMPLEX QUERIES :  
+#         COMPLEX QUERIES :
 # =====================================================================
 #
 
@@ -387,6 +412,7 @@ def show_cq_5():
 
 
 
-		
-if __name__ == "__main__":
-    app.run()
+
+#if __name__ == "__main__":
+#    app.run()
+    #CGIHandler().run(app)

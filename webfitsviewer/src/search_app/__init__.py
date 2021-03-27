@@ -185,7 +185,7 @@ def search_results(search):
         #print("table = RESULTS FILE")
         table = ResultsFile(results)
         table.border = True
-        return render_template('search/results.html', table=table)
+        return render_template('results.html', table=table)
 
 
 # =====================================================================
@@ -198,7 +198,7 @@ def show_files():
             rows = cursor.fetchall()
             table = ResultsFile(rows)
             table.border = True
-            return render_template('files.html', table=table)
+            return render_template('allfiles.html', table=table)
         except Exception as e:
             print(e)
 # [end] --------------------

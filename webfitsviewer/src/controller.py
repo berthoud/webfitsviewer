@@ -249,6 +249,7 @@ class SiteController(object):
                 # Request is test
                 self.output += self.views.test()
             # Close Response
+            self.log.debug('debuginfo = %d' % int(self.conf['ctrl']['debuginfo']) )
             if( int(self.conf['ctrl']['debuginfo']) > 0 or
                 self.session['page'] == 'test' ):
                 self.list_env()

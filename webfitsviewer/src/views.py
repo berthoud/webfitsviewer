@@ -40,7 +40,7 @@ class SiteViews(object):
         #   Entries: pagetitle%s stylefile%s iconfilepathname%s
         #            scriptsinclude%s logofilepathname%s sitetitle%s
         #            siteurl%s listfolder%s listlabel%s
-        #            siteurl%s siteurl%s helpurl%s siteurl%s
+        #            siteurl%s siteurl%s helpurl%s searchurl%s
         text = """
 <!DOCTYPE html>
 <html>
@@ -62,7 +62,7 @@ class SiteViews(object):
 <td class = "header" align = "left"><a href = "%s/data">Data Viewer</a>
 <td class = "header" align = "left"><a href = "%s/log">Pipeline Log</a>
 <td class = "header" align = "left"><a href = "%s" target = "_blank">Help / Manual</a>
-<td class = "header"><a href = "%s/search">Search</a>
+<td class = "header">%s
 </table>
 """
         # Make image folder
@@ -107,6 +107,10 @@ class SiteViews(object):
             listflight = '/'+self.session['folder'].split(os.sep)[0]
         if self.session['page'] == 'list':
             listflight = '/'+self.session['listfolder']
+        # Get search url
+        searchurl = self.conf['view']['searchurl']
+        if len(searchurl):
+            searchurl = '<a href="%s">Search</a>' % searchurl
         # Return string
         siteurl = self.conf['path']['siteurl']
         text = text % (pagetitle, stylefile, iconfilepathname,
@@ -115,7 +119,7 @@ class SiteViews(object):
                        siteurl, listfolder, listlabel,
                        siteurl,
                        siteurl, self.conf['view']['helpurl'],
-                       siteurl)
+                       searchurl)
         self.log.debug('Header Written')
         return text
 

@@ -10,7 +10,7 @@ from wsgiref.simple_server import make_server
 def app(environ, start_response):
     # Get the Path Info
     pathinfo = environ['PATH_INFO']
-    # Check if hawcview folder is requested as expected  
+    # Check if webview folder is requested as expected  
     if not '/webviewserve' in pathinfo:
         start_response('200 OK', [('Content-Type', 'text/html')])
         output = '<h1>It Works!</h1>'

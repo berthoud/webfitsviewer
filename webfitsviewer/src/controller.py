@@ -85,10 +85,11 @@ class SiteController(object):
         if len(siteurl):
             self.conf['path']['siteurl'] = '/'+siteurl
         # Set up logging & print message
-        self.log = logging.getLogger('hawc.webview.control')
-        logconfile = os.path.join(self.conf['path']['basepath'],
-                                  self.conf['ctrl']['logconfig'])
-        logging.config.fileConfig(logconfile)
+        logfile = os.path.join(self.conf['path']['basepath'],
+                               self.conf['ctrl']['logfile'])
+        logging.basicConfig(level='DEBUG',filename = logfile,
+                            format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self.log = logging.getLogger('webview.control')
         self.log.info('********* Started Controller')
         self.log.info('          Request from %s to %s'
                        % (environ.get('REMOTE_ADDR'),
@@ -296,6 +297,8 @@ class SiteController(object):
         self.output += output
 
 """ === History ===
+    2021-4 Marc Berthoud, remove use of logconfig
+    2020 Marc Berthoud, Upgrade to multi-site
     2020-1-10 Marc Berthoud,
         * removed [path][baseurlpath from config: Either use absolute paths
           or use siteurl (which is set automatically), also in logscripts.js

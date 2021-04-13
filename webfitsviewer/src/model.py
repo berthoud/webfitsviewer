@@ -38,7 +38,7 @@ class SiteModel(object):
         self.data = PipeData(config = pipeconf) # Stored data
         self.data.filename = ''
         # Make logger
-        self.log = logging.getLogger('hawc.webview.model')
+        self.log = logging.getLogger('webview.model')
         self.log.debug('Initialized')
 
     def set_selection(self):

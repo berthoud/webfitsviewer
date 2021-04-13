@@ -28,7 +28,7 @@ class SiteViews(object):
         self.conf = config
         self.model = None # Model object
         # Make logger
-        self.log = logging.getLogger('hawc.webview.views')
+        self.log = logging.getLogger('webview.views')
         self.log.debug('Initialized')
         # Get foldernames
         self.foldernames = self.conf['view']['foldernames'].split(os.sep)

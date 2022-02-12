@@ -21,7 +21,7 @@ if 'pythonpath' in conf['path']:
     newpaths = [p.strip() for p in newpaths]
     for np in newpaths:
         if np not in sys.path:
-            sys.path.append(np)
+            sys.path.insert(0,np)
 
 # Import - check if possible to import weberror.errormiddleware
 import traceback

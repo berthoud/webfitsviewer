@@ -543,8 +543,7 @@ analimg.init("%s", "%s");
                 line = table[rowi]
                 tabletext += '<tr>'
                 for value in line:
-                    #valtxt = string.split(str(value))
-                    valtxt = str(value).split()
+                    valtxt = str.split(str(value))
                     tabletext += '<td>'
                     # if it's too long, shorten it
                     if len(valtxt) < 7:
@@ -789,6 +788,7 @@ logrequest();
                 logsrc = logsplit[1].strip()
                 loglvl = logsplit[2].strip()
                 logmsg = ' - '.join(logsplit[3:]).strip()
+                logmsg = logmsg.replace('&','&amp;').replace('>','&gt;').replace('<','&lt;')
             else:
                 # Just get message, do not set loglvl (assume unchanged)
                 logsrc = ''

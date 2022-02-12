@@ -543,7 +543,8 @@ analimg.init("%s", "%s");
                 line = table[rowi]
                 tabletext += '<tr>'
                 for value in line:
-                    valtxt = string.split(str(value))
+                    #valtxt = string.split(str(value))
+                    valtxt = str(value).split()
                     tabletext += '<td>'
                     # if it's too long, shorten it
                     if len(valtxt) < 7:

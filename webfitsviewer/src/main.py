@@ -21,7 +21,7 @@ if 'pythonpath' in conf['path']:
     newpaths = [p.strip() for p in newpaths]
     for np in newpaths:
         if np not in sys.path:
-            sys.path.append(np)
+            sys.path.insert(0,np)
 
 # Import - check if possible to import weberror.errormiddleware
 import traceback
@@ -84,4 +84,22 @@ else:
 # Call main for the application to be callable as cgi script
 if __name__ == '__main__':
     CGIHandler().run(application)
-    
+
+#
+"""
+### DIAGNOSTICS CODE:
+#   If CGI application doesn't run, run the testmain.py or
+#   copy the following code to the top of this file.
+import sys
+print("Content-Type: text/html")
+print("")
+print("<html><body><h2>Short Script</h2></body></html>")
+print("<p><b>Python Version:</b> %s" % (sys.version))
+print("<p><b>Python Executable:</b> %s" % (sys.executable))
+print("<p><b>PythonPath:</b>")
+for p in sys.path:
+    print("<br> &nbsp; %s" % p)
+print("<p><b>Environment Variables:</b>:")
+print("</body></html>")
+exit(0)
+"""

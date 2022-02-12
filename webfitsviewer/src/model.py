@@ -6,12 +6,14 @@
 
 ### Preparation
 import os # OS Library
+import sys
 import string # String Library
 import logging # Logging Library
 import numpy # Numpy Library
 import re # Regexp search Library
 from PIL import Image # Image Library
 from darepype.drp.datafits import DataFits as PipeData # Pipedata object @UnresolvedImport
+from darepype.drp import datafits
 
 ### Class Definition
 class SiteModel(object):
@@ -38,8 +40,10 @@ class SiteModel(object):
         self.data = PipeData(config = pipeconf) # Stored data
         self.data.filename = ''
         # Make logger
-        self.log = logging.getLogger('hawc.webview.model')
+        self.log = logging.getLogger('webview.model')
         self.log.debug('Initialized')
+        self.log.debug(repr(datafits.__file__))
+        self.log.debug(repr(sys.path))
 
     def set_selection(self):
         """ Sets and validates the session variables folder, file, step
@@ -462,7 +466,8 @@ class SiteModel(object):
         # Make data list
         datalist = list(self.data.imgnames)
         # Add TABLEs
-        if self.data.table != None:
+        if len(self.data.tabnames):
+        # if self.data.table != None: # commented out 2021-10-28
             if len(datalist) > 0:
                 datalist.insert(1,'TABLE: ' + self.data.tabnames[0])
             else: datalist = ['TABLE: ' + self.data.tabnames[0]]

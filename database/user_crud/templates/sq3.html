@@ -1,0 +1,28 @@
+<doctype html>
+<head>
+  <title>Search Results</title>
+</head>
+
+<body>
+  <div>
+    <h1 style="background-color:DodgerBlue;"> Stars-DB </h1>
+    <a href="{{ url_for('.start') }}"> Home </a> |&nbsp;
+    <a href="{{ url_for('.start') }}"> Search :TODO </a>
+    <h2>List Weather for Days by Moon Phase</h2>
+  </div>
+  
+ <p>
+	  {% with messages = get_flashed_messages() %}
+	    {% if messages %}
+		  <ul class=flashes>
+		  {% for message in messages %}
+		    <li>{{ message }}</li>
+		  {% endfor %}
+		  </ul>
+	    {% endif %}
+	  {% endwith %}
+  </p>
+
+  {{ table }}
+</body>
+</html>

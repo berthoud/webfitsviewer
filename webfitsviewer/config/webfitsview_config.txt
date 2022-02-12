@@ -15,7 +15,7 @@
 
 ['ctrl']
 # Controller section
-    logconfig = 'config/webfitslog_config.txt' # Location of log config file
+    logfile = '../logs/web_fits_view_log.txt' # Location of the log file (used with basepath)
     erronbadurl = 1 # flag to print error message instead of showing next file / folder if file not found
     debuginfo = 0 # Flag to add debug info to the page
     
@@ -30,6 +30,8 @@
     #helpurl = 'https://hawc.ciera.northwestern.edu/DRP+Users+Manual#DRPUsersManual-WebDataView'
     #helpurl = 'https://stars.uchicago.edu'
     helpurl = 'https://sites.google.com/a/starsatyerkes.net/yerkesprojects/tools/campus-server/guide-to-the-stars-server'
+    # URL to search page
+    searchurl = 'https://ADD.URL.TO.SEARCH.HERE'
     # Names for folder and subfolder
     foldernames = 'Folder/Subfolder'
     ### Data options

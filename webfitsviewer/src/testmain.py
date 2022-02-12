@@ -5,6 +5,7 @@
 """
 
 import os,sys
+import traceback
 from wsgiref.handlers import CGIHandler
 
 # Uncomment the following line to make sure configobj is available
@@ -37,7 +38,8 @@ The application will not run until all the checks below are successful.
             from configobj import ConfigObj
             output += "<p>&#10004; ConfigObj package found"
         except:
-            output += "<p>&#128721; Unable to import ConfigObj"
+            output += "<p>&#128721; Unable to import ConfigObj:"
+            output += traceback.format_exc().replace('\n','<br>\n')
             conffilename = None
         # Check if config can be loaded
         if conffilename: 
@@ -54,11 +56,15 @@ The application will not run until all the checks below are successful.
             else:
                 output += "<p>&#128721; No [path] section in webview config"
     except:
-        output += "<p>&#128721; Some checks failed"
+        output += "<p>&#128721; Some checks failed: <br>"
     ### Add diagnostic information
     diag = "<h2>Diagnostics</h2>"
     # Print python version
     diag += "<p><b>Python Version:</b><br> %s" % (sys.version)
+    diag += "<br><b>Python Executable:</b><br> %s" % (sys.executable)
+    diag += "<br><b>PythonPath:</b>"
+    for p in sys.path:
+        diag += "<br> &nbsp; %s" % p
     # Print environment variables
     diag += "<p><b>Environment Variables:</b><br>"
     for v in environ:

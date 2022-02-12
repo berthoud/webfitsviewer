@@ -24,6 +24,8 @@
     - look at main <-> controller: does split make sense?
     - update log in controller
     
+    Add search tab
+    
     
 """
 
@@ -83,10 +85,11 @@ class SiteController(object):
         if len(siteurl):
             self.conf['path']['siteurl'] = '/'+siteurl
         # Set up logging & print message
-        self.log = logging.getLogger('hawc.webview.control')
-        logconfile = os.path.join(self.conf['path']['basepath'],
-                                  self.conf['ctrl']['logconfig'])
-        logging.config.fileConfig(logconfile)
+        logfile = os.path.join(self.conf['path']['basepath'],
+                               self.conf['ctrl']['logfile'])
+        logging.basicConfig(level='DEBUG',filename = logfile,
+                            format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self.log = logging.getLogger('webview.control')
         self.log.info('********* Started Controller')
         self.log.info('          Request from %s to %s'
                        % (environ.get('REMOTE_ADDR'),
@@ -128,7 +131,7 @@ class SiteController(object):
         # Select Response and Query from URI -> fill / update session vars
         if len(responsearr) > 0:  self.session['page'] = responsearr[0].lower()
         else: self.session['page'] = 'list'
-        if not (self.session['page'] in ['data','error','log', 'list', 'test']):
+        if not (self.session['page'] in ['data','error','log', 'list', 'search', 'test']):
             self.session['page'] = 'list'
         self.log.info('Page Type is = %s' % self.session['page'])
         #-- DATA Response: update session variables and validate request
@@ -239,10 +242,14 @@ class SiteController(object):
             elif self.session['page'] == 'list':
                 # Request is list
                 self.output += self.views.folderlist()
+            elif self.session['page'] == 'search':
+                # Request is search
+                self.output += self.views.search()
             elif self.session['page'] == 'test':
                 # Request is test
                 self.output += self.views.test()
             # Close Response
+            self.log.debug('debuginfo = %d' % int(self.conf['ctrl']['debuginfo']) )
             if( int(self.conf['ctrl']['debuginfo']) > 0 or
                 self.session['page'] == 'test' ):
                 self.list_env()
@@ -290,6 +297,8 @@ class SiteController(object):
         self.output += output
 
 """ === History ===
+    2021-4 Marc Berthoud, remove use of logconfig
+    2020 Marc Berthoud, Upgrade to multi-site
     2020-1-10 Marc Berthoud,
         * removed [path][baseurlpath from config: Either use absolute paths
           or use siteurl (which is set automatically), also in logscripts.js

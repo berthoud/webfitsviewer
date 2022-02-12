@@ -1,0 +1,42 @@
+<doctype html>
+
+<head>
+  <title>Edit Observations</title>
+</head>
+
+<body>
+  <div>
+    <h1 style="background-color:DodgerBlue;"> Stars-DB </h1>
+    <a href="{{ url_for('.start') }}"> Home </a> |&nbsp;
+    <a href="{{ url_for('.start') }}"> Search :TODO </a>
+    <h2>Edit Observations</h2>
+  </div>
+  
+<form method="post" action="/updateO">
+    <dl>
+		<p>
+			<input name="inputGroupId" value="{{ row['groupId'] }}" type="text" placeholder="Group Id" autocomplete="off" required>
+		</p>
+        <p>
+			<input name="inputSD" value="{{ row['startDate'] }}" type="DATE" placeholder="Start Date" autocomplete="off" required>
+		</p>
+        <p>
+			<input name="inputST" value="{{ row['startTime'] }}" type="time" placeholder="Start Time" autocomplete="off" required>
+		</p>
+		<p>
+			<input name="inputED" value="{{ row['endDate'] }}" type="DATE" placeholder="End Date" autocomplete="off">
+		</p>
+        <p>
+			<input name="inputET" value="{{ row['endTime'] }}" type="time" placeholder="End Time" autocomplete="off">
+		</p>
+        <p>
+			<input name="inputDesc" value="{{ row['description'] }}" type="text" placeholder="End Time" autocomplete="off" >
+		</p>
+
+
+    </dl>
+    <p>
+		<input name="id" value="{{ row['groupId'] }}" type="hidden">
+		<input type="submit" value="Submit">
+	</p>
+</form>

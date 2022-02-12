@@ -28,7 +28,7 @@ class SiteViews(object):
         self.conf = config
         self.model = None # Model object
         # Make logger
-        self.log = logging.getLogger('hawc.webview.views')
+        self.log = logging.getLogger('webview.views')
         self.log.debug('Initialized')
         # Get foldernames
         self.foldernames = self.conf['view']['foldernames'].split(os.sep)
@@ -40,7 +40,7 @@ class SiteViews(object):
         #   Entries: pagetitle%s stylefile%s iconfilepathname%s
         #            scriptsinclude%s logofilepathname%s sitetitle%s
         #            siteurl%s listfolder%s listlabel%s
-        #            siteurl%s siteurl%s helpurl%s
+        #            siteurl%s siteurl%s helpurl%s searchurl%s
         text = """
 <!DOCTYPE html>
 <html>
@@ -53,18 +53,16 @@ class SiteViews(object):
 <table class = "header">
 <tr><td class = "header" width = "150" align = "center" rowspan=2>
 <img src = "%s">
-<td class = "header" align = "center" valign = "middle" colspan=4>
+<td class = "header" align = "center" valign = "middle" colspan=5>
 <h1>%s</h1>
 <td class = "header" width = "150">
 <tr>
 <td class = "header" align = "left"><b>Options:</b>
-<td class = "header" align = "left">
-<a href = "%s/list%s">%s</a>
-<td class = "header" align = "left">
-<a href = "%s/data">Data Viewer</a>
-<td class = "header" align = "left">
-<a href = "%s/log">Pipeline Log</a>
-<td class = "header"><a href = "%s" target = "_blank">Help / Manual</a>
+<td class = "header" align = "left"><a href = "%s/list%s">%s</a>
+<td class = "header" align = "left"><a href = "%s/data">Data Viewer</a>
+<td class = "header" align = "left"><a href = "%s/log">Pipeline Log</a>
+<td class = "header" align = "left"><a href = "%s" target = "_blank">Help / Manual</a>
+<td class = "header">%s
 </table>
 """
         # Make image folder
@@ -77,6 +75,7 @@ class SiteViews(object):
                      'log':': Pipeline Log',
                      'error':': Error',
                      'list':': '+listlabel,
+                     'search':': Search',
                      'test':': Test'}
         pagetitle = self.conf['view']['sitename'] + ' '
         pagetitle += titlelist[self.session['page']]
@@ -108,6 +107,10 @@ class SiteViews(object):
             listflight = '/'+self.session['folder'].split(os.sep)[0]
         if self.session['page'] == 'list':
             listflight = '/'+self.session['listfolder']
+        # Get search url
+        searchurl = self.conf['view']['searchurl']
+        if len(searchurl):
+            searchurl = '<a href="%s">Search</a>' % searchurl
         # Return string
         siteurl = self.conf['path']['siteurl']
         text = text % (pagetitle, stylefile, iconfilepathname,
@@ -115,7 +118,8 @@ class SiteViews(object):
                        self.conf['view']['sitename'],
                        siteurl, listfolder, listlabel,
                        siteurl,
-                       siteurl, self.conf['view']['helpurl'])
+                       siteurl, self.conf['view']['helpurl'],
+                       searchurl)
         self.log.debug('Header Written')
         return text
 
@@ -297,7 +301,7 @@ Display : <select name = "data_selection"
                 else:
                     stepopt += '<option '
                 # Make end with value and stepname
-                if stepnames.has_key(step.upper()):
+                if step.upper() in stepnames:
                     stepopt += 'value="%s">%s</option>' % (step, stepnames[step.upper()])
                 else:
                     stepopt += '>%s</option>' % step
@@ -539,7 +543,7 @@ analimg.init("%s", "%s");
                 line = table[rowi]
                 tabletext += '<tr>'
                 for value in line:
-                    valtxt = string.split(str(value))
+                    valtxt = str.split(str(value))
                     tabletext += '<td>'
                     # if it's too long, shorten it
                     if len(valtxt) < 7:
@@ -678,7 +682,7 @@ analimg.init("%s", "%s");
         return retdata
 
     def pipelog(self):
-        """ Returns the pipeline log
+        """ Returns the pipeline log page
         """
         # Make text string
         #   Entries: LevelOptions%s Sid%s Sid%s
@@ -784,6 +788,7 @@ logrequest();
                 logsrc = logsplit[1].strip()
                 loglvl = logsplit[2].strip()
                 logmsg = ' - '.join(logsplit[3:]).strip()
+                logmsg = logmsg.replace('&','&amp;').replace('>','&gt;').replace('<','&lt;')
             else:
                 # Just get message, do not set loglvl (assume unchanged)
                 logsrc = ''
@@ -916,6 +921,19 @@ logrequest();
                                      tabletext )
         self.log.debug('FolderList written')
         return listdisplay
+
+    def search(self):
+        """ Returns the search page
+        """
+        # Make text string
+        #   Entries: SearchURL%s
+        searchtext = """
+<iframe width = "100%%" height = "500px" src="%s"></iframe>
+"""
+        searchurl = self.conf['view']['searchurl']
+        text = searchtext % searchurl
+        self.log.debug('Search written %s' % searchurl)
+        return text
 
     def test(self):
         """ Returns a page to test server and browser compatibility

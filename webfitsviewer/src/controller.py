@@ -36,7 +36,12 @@ import os # OS Library
 import time # Time Library
 import logging.config # Logging Config Object
 #import urlparse # URLParse Library (should be used instead of CGI)
-import cgi # CGI library (needed because urlparse.parse_qs broken in py2.5)
+#import cgi # CGI library (needed because urlparse.parse_qs broken in py2.5)
+# Import parse_qs from cgi else from urllib.parse (as of py3.10)
+try:
+    from cgi import parse_qs
+except:
+    from urllib.parse import parse_qs
 import hashlib # Hashlib Library
 import shelve # Shelve Module
 from configobj import ConfigObj # Configuration Object
@@ -104,10 +109,12 @@ class SiteController(object):
             request_body = request_body.decode()
         except(UnicodeDecodeError,AttributeError):
             pass
-        request_params = cgi.parse_qs(request_body)
+        #request_params = cgi.parse_qs(request_body)
+        request_params = parse_qs(request_body)
         # Attach GET request parameters
         query_string = environ['QUERY_STRING']
-        request_params.update(cgi.parse_qs(query_string))
+        #request_params.update(cgi.parse_qs(query_string))
+        request_params.update(parse_qs(query_string))
         self.request = request_params
         # Get session id from Post request
         self.log.debug('Request Params = ' + repr(request_params))

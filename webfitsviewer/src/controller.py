@@ -128,7 +128,10 @@ class SiteController(object):
         sessionfile = os.path.join(self.conf['path']['basepath'],
                                    self.conf['path']['session'],
                                    'sess_%s' % self.sid)
-        self.session = shelve.open(sessionfile, writeback = True)
+        try:
+            self.session = shelve.open(sessionfile, writeback = True)
+        except:
+            self.log.error('failed opening session at %s' % sessionfile)
         self.session['sid'] = self.sid
         # Make other objects
         self.views = SiteViews(self.env, self.session, self.conf)

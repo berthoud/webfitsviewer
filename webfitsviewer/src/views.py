@@ -216,16 +216,8 @@ Display : <select name = "data_selection"
         foldercurr = self.session['folder']
         subopt = ''
         for subfolder in folderlist:
-            # Get instmode from filename
-            filelist = self.model.filelist(subfolder)
-            imode = ''
-            if len(filelist) > 0:
-                fsplit = filelist[0].split('.')
-                if len(fsplit) > 1: imode = fsplit[-1]
-            if len(imode) > 3: imode = imode[:3]
             # Add to options list
-            subfull = subfolder.split(os.sep)[1]
-            if len(imode) > 0: subfull = '%s-%s' % (subfull, imode)
+            subfull = os.path.split(subfolder)[1]
             if subfolder == foldercurr:
                 subopt += '<option value="%s" selected>%s' % (subfolder,
                                                               subfull)

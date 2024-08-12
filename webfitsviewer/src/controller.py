@@ -148,7 +148,8 @@ class SiteController(object):
         self.session['request'] = '' # Clear request
         if self.session['page'] == 'data':
             responsefolder = '' # variable to allow check if folder is valid
-            # Get and Validate request
+            #-- Get and Validate request
+            # If it's RAW request --> Set request
             if responsearr[-1].lower() in ['raw']:
                 self.session['request'] = responsearr[-1].lower()
                 responsearr = responsearr[0:-1]
@@ -185,7 +186,7 @@ class SiteController(object):
             if ( len(responsefolder) and not responsefolder in self.session['folder'] and
                  int(self.conf['ctrl']['erronbadurl']) ):
                 self.session['page'] = 'error'
-                errormsg = 'Nonexistent or empty folder requested: %s is not available or contains no data' % responsefolder
+                errormsg = 'Nonexistent or empty folder requested: %s is not available or contains no valid data' % responsefolder
         #-- LOG Response: update session variables and validate request
         if self.session['page'] == 'log':
             # Get and Validate request
@@ -217,7 +218,7 @@ class SiteController(object):
             elif ( len(responsefolder) and not responsefolder in folderlist and 
                    int(self.conf['ctrl']['erronbadurl'])):
                 self.session['page'] = 'error'
-                errormsg = 'Nonexistent folder requested: %s is not available or contains no data' % responsefolder
+                errormsg = 'Nonexistent folder requested: %s is not available or contains no valid data' % responsefolder
             else:
                 # Set list_folder            
                 if not self.session['listfolder'] in folderlist:

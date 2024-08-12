@@ -242,6 +242,9 @@ class SiteModel(object):
         files = [ fname for fname in os.listdir(folderpath)
                   if os.path.isfile(os.path.join(folderpath,fname)) ]
         files.sort()
+        # Remove files with zero size
+        files = [ fname for fname in files 
+                  if os.path.getsize(os.path.join(folderpath,fname))]
         # Select only files that don't contain filetoignore and have extention in fileext
         fileext = self.conf['model']['fileext']
         filetoignore = self.conf['model']['filetoignore']

@@ -341,7 +341,7 @@ Image Frame: <select name = "plane_selection"
         filedownload = """
 <center>
 <a href="%s"><img src="%s/fitsicon.gif" alt="">Download Selected FITS File</a><br />
-<a href="%s"><img src="%s/foldericon.gif" valign="bottom" alt="">View Selected %s Folder</a>
+<a href="%s"><img src="%s/foldericon.gif" valign="bottom" alt="">View Selected %s</a>
 </center>
 """
 # Couldn't get button to work easily with Safari -> revert to <anchor>
@@ -360,8 +360,10 @@ Image Frame: <select name = "plane_selection"
                                 fitsimage)
         # Staticpath
         staticpath = self.conf['path']['static']
-        # foldernames
+        # foldernames (make sure "Folder" is at end)
         foldernames = self.conf['view']['foldernames']
+        if foldernames.lower().strip()[-6:] not in 'folder':
+            foldernames += ' Folder'
         # Combine filedownload
         filedownload = filedownload % (fitslink, staticpath, folderlink,
                                        staticpath, foldernames)

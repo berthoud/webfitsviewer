@@ -337,11 +337,11 @@ Image Frame: <select name = "plane_selection"
             planesel = planesel % planeopt
         ### Make file download
         # Set up Text - Entries: fitsfileurlpath%s staticpath%s
-        #                        folderlink%s staticpath%s
+        #                        folderlink%s staticpath%s foldernames%s
         filedownload = """
 <center>
 <a href="%s"><img src="%s/fitsicon.gif" alt="">Download Selected FITS File</a><br />
-<a href="%s"><img src="%s/foldericon.gif" valign="bottom" alt="">View Selected AOR Folder</a>
+<a href="%s"><img src="%s/foldericon.gif" valign="bottom" alt="">View Selected %s Folder</a>
 </center>
 """
 # Couldn't get button to work easily with Safari -> revert to <anchor>
@@ -360,9 +360,11 @@ Image Frame: <select name = "plane_selection"
                                 fitsimage)
         # Staticpath
         staticpath = self.conf['path']['static']
+        # foldernames
+        foldernames = self.conf['view']['foldernames']
         # Combine filedownload
         filedownload = filedownload % (fitslink, staticpath, folderlink,
-                                       staticpath)
+                                       staticpath, foldernames)
         ### Combine to select text
         selecttext = selecttext % (self.conf['path']['siteurl'],
                                    foldersel, fileselections, stepsel,

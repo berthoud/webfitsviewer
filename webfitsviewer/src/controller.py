@@ -155,6 +155,7 @@ class SiteController(object):
                 responsearr = responsearr[0:-1]
             # FOLDER selection from request parameters or response path array
             if 'folder_selection' in request_params:
+                responsefolder = request_params.get('folder_selection')[0]
                 self.session['folder'] = request_params.get('folder_selection')[0]
             elif len(responsearr) > 1:
                 responsefolder = os.path.join(*responsearr[1:])

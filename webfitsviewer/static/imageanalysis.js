@@ -534,10 +534,14 @@ function imageanalysisobject() {
 			// get mouserow/col
 			mcol = imgx / this.imgzoom - 0.5;
 		    mrow = this.imgheight - 1 - ( imgy / this.imgzoom - 0.5 );
-			// get coordx/y
+			
+            // console.log("MOUSE:" + mcol + ", " + mrow)
+            // get coordx/y
 		    coordx = this.coordx0 + mcol * this.coordcolx + mrow * this.coordrowx;
 		    coordy = this.coordy0 + mcol * this.coordcoly + mrow * this.coordrowy;		    
-			// add x to message (check for RA)
+			
+            // console.log("MOUSE2:" + coordx + ", " + coordy)
+            // add x to message (check for RA)
 		    if(this.coordlblx.toUpperCase().includes('RA')){
 		        hr = Math.floor(coordx/15);
 		        mn = Math.floor(4*coordx-60*hr);
@@ -1653,6 +1657,394 @@ function imagetoolpsfobject() {
 			this.datay1 = datady - Math.round(this.imgy0/zoom);
 			// Clear moving
 			this.moving = 0;
+			// Update
+			this.update();
+		}
+		
+	}
+};
+
+/**
+ * ****** IMAGETOOLLINE OBJECT Object that creates a movable line, set between
+ * two points and displays stats.
+ */
+
+// **** Constructor: creates the object
+function imagetoollineobject() {
+	// **** Object Variables
+	this.imganalobj = null; // The imageanalysis object
+	this.name = ''; // name that the tool has for the user
+	this.active = false; // Flag indicating if the tool is used
+	this.shown = true; // Flag indicating if the box is shown
+	this.color = 'lime'; // Color of the frame
+	// this.boxmaxsize = 50; // Maximal size of the box in data units
+	this.datax0 = 0;  // DATA coordinates: coordinates of the box in the
+	this.datax1 = 10; // unscaled data frame. Coordinates
+	this.datay0 = 0;  // are measured such that BOTTOM left
+	this.datay1 = 10; // is (0/0)
+	this.imgx0 = 0;  // IMG coordinates: coordinates of the box in the
+	this.imgx1 = 10; // scaled data frame. Coordinates are
+	this.imgy0 = 0;  // measured such that TOP left is (0/0)
+	this.imgy1 = 10;
+	// About Coordinates: usually, dataxy and imgxy correspond to each other
+	// except when the box is being moved. Then dataxy are
+	// not changed, while imgxy moves with the box.
+	this.moving = 0;  // Flag indicating which points are being
+                      // moved. If moving==0, the line is not being moved.
+	                  // point1 ~ 1, point2 ~ 2, both points ~ 3
+	this.mousex0 = 0; // IMG coordinates of the mouse position at the start
+	this.mousey0 = 0; //     of the current move.
+	this.pickupx0 = 0;  // IMG coordinates at pickup location
+	this.pickupx1 = 10; //   while moving, corresponds to DATA
+	this.pickupy0 = 0;  //   coordinates
+	this.pickupy1 = 10;
+	this.imgmin = 0;  // Holds min/max of the pixels in the box
+	this.imgmax = 1;
+
+	// **** Object Functions
+
+	// INIT: Initializes the analysis object (this is NOT the constructor)
+	this.init = function(imganalobj) {
+		// Assign variables
+		this.imganalobj = imganalobj;
+
+		// Initialize line size
+        console.log("Init for lineobject");
+		this.datax0 = Math.round(this.imganalobj.imgwidth / 5);
+		this.datax1 = this.imganalobj.imgwidth - this.datax0;
+		this.datay0 = Math.round(this.imganalobj.imgheight / 5);
+		this.datay1 = this.imganalobj.imgheight - this.datay0;
+        console.log(this.datax0);
+        this.draw();
+	}
+
+	// DRAW: Draws the box with the current color at the current location.
+	this.draw = function() {
+		if (this.shown & this.active) {
+			// Get the canvas
+			ctx = this.imganalobj.imgcan.getContext('2d');
+			// Draw the square
+			ctx.strokeStyle = this.color;
+			ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(this.imgx0, this.imgy0);
+            ctx.lineTo(this.imgx1, this.imgy1);
+            ctx.stroke();
+		}
+	}
+
+    this.coordstoradec = function(coordx, coordy) {
+        let msg = "";
+
+        // Get the RA
+        let hr = Math.floor(coordx/15);
+        let mn = Math.floor(4*coordx-60*hr);
+        let sc = 240*coordx-3600*hr-60*mn;
+        if(mn<10.0){
+            mn = '0'+mn.toFixed(0);
+        } else {
+            mn = mn.toFixed(0);
+        }
+        if(sc<10.0){
+            sc = '0'+sc.toFixed(2);
+        } else {
+            sc = sc.toFixed(2);
+        }
+        msg += '<br>' + this.imganalobj.coordlblx + ' ' + hr.toFixed(0) + 'h' + mn + 'm' + sc + 's';
+        
+        let sn = '';
+        // Get the DEC
+        if(coordy<0){
+            sn='-';
+            coordy = -coordy;
+        } else {
+            sn='';
+        }
+        let dg = Math.floor(coordy);
+        mn = Math.floor(60*coordy-60*dg);
+        sc = 3600*coordy-3600*dg-60*mn;
+        if(mn<10.0){
+            mn = '0'+mn.toFixed(0);
+        } else {
+            mn = mn.toFixed(0);
+        }
+        if(sc<10.0){
+            sc = '0'+sc.toFixed(1);
+        } else {
+            sc = sc.toFixed(1);
+        }
+        msg += '<br>' + this.imganalobj.coordlbly + ' ' + sn + dg.toFixed(0) + '&deg;' + mn + '\'' + sc + '"';
+
+        return msg;
+    }
+
+	// UPDATE: Updates the tool: Recalculates the imgxy coordinates from dataxy.
+	// Recalculates the statistics and prints it.
+	this.update = function() {
+		// If it's not active -> return
+		if ( ! this.active ){
+			return;
+		}
+		imglogadd('AnalLine: Going');
+        datady = this.imganalobj.imgheight;
+		zoom = this.imganalobj.imgzoom;
+		this.imgx0 = this.datax0 * zoom;
+		this.imgx1 = this.datax1 * zoom;
+		this.imgy0 = (datady-this.datay1) * zoom;
+		this.imgy1 = (datady-this.datay0) * zoom;
+
+        let x0 = this.datax0;
+        let y0 = this.imganalobj.imgheight - this.datay0;
+        let x1 = this.datax1;
+        let y1 = this.imganalobj.imgheight - this.datay1;
+
+        // Get a list of all the data on our line (rounds to nearest)
+        // x0, y0 = psf_lines[img][0]
+        // x1, y1 = psf_lines[img][1]
+        // length = int(np.hypot(x1-x0, y1-y0))
+        // x, y = np.linspace(x0, x1, length), np.linspace(y0, y1, length)
+        //     # Extract values along this PSF line
+        // psf_i = img_data[y.astype(int), x.astype(int)]
+        let points_in_radec = "";
+        
+        // End points and length in arc seconds
+        if (this.imganalobj.coords) {
+            console.log(this.imganalobj.coordx0, this.imganalobj.coordy0)
+
+            let p0x = this.imganalobj.coordx0 + x0 * this.imganalobj.coordcolx + y0 * this.imganalobj.coordrowx;
+            let p0y = this.imganalobj.coordy0 + x0 * this.imganalobj.coordcoly + y0 * this.imganalobj.coordrowy;
+            let p1x = this.imganalobj.coordx0 + x1 * this.imganalobj.coordcolx + y1 * this.imganalobj.coordrowx;
+            let p1y = this.imganalobj.coordy0 + x1 * this.imganalobj.coordcoly + y1 * this.imganalobj.coordrowy;
+
+            console.table(x0, y0, x1, y1);
+            console.table(p0x, p0y, p1x, p1y);
+
+            if(this.imganalobj.coordlblx.toUpperCase().includes('RA') && this.imganalobj.coordlbly.toUpperCase().includes('DEC')){
+                points_in_radec += "P1: " + this.coordstoradec(p0x, p0y) + "<br />";
+                points_in_radec += "P2: " + this.coordstoradec(p1x, p1y) + "<br />";
+
+                // Find the length in terms of arcseconds
+                let diff_arcsec = Math.sqrt((p1x-p0x)**2 + (p1y-p0y)**2) * 3600;
+                // TODO: Fix this...
+                points_in_radec += "Total Distance: " + diff_arcsec.toFixed(1);
+                points_in_radec += "<br /> Est. Plate Scale: " + (diff_arcsec / (Math.sqrt((x1-x0)**2 + (y1-y0)**2))).toFixed(3)
+            }
+        }
+
+        console.log(points_in_radec);
+
+        this.line_len = Math.sqrt((x1-x0)**2 + (y1-y0)**2);
+        let step_x = Math.abs(x1-x0) / this.line_len;
+        let step_y = Math.abs(y1-y0) / this.line_len;
+
+        let psf_i = [];
+        for (let i = 0; i <= this.line_len; i++) {
+            let cx = x0 + step_x * i;
+            let cy = y0 + step_y * i;
+
+            let yoff = Math.round(cy) * this.imganalobj.imgwidth;
+			let data_index = yoff + Math.round(cx);
+
+            // console.log(cx, cy, data_index);
+            if (this.imganalobj.imgraw[data_index] == NaN) {
+                psf_i.push(0)
+            } else {
+                psf_i.push(this.imganalobj.imgraw[data_index]);
+            }
+            
+        }
+
+        // console.table(line_len, step_x, step_y);
+        console.log(psf_i);
+        let psf_max = Math.max(...psf_i);
+        console.log(psf_max);
+
+		//** Display Statistics
+		$('#imagetoolsoutput1')
+		.html('<form> \
+			   <span id="linecolor">&nbsp;Color&nbsp;</span><br /> \
+			   X0: ' + this.imganalobj.valueformat(this.imgx0) +
+			  '<br />Y0: ' + this.imganalobj.valueformat(this.imgy0) + 
+			  '<br />X1: ' + this.imganalobj.valueformat(this.imgx1) +
+              '<br />Y1: ' + this.imganalobj.valueformat(this.imgy1) + 
+              '<br />LEN: ' + this.imganalobj.valueformat(this.line_len) );
+		// $('#imagetoolsoutput2').html('\
+        //     <span id="linedata">' + '' + '</span>' +
+        //     '<div id="linegraph">' + psf_i.map(p => '<div class="linegraphbox" style="height: '+ (p / psf_max) * 100 + 'px;"></div>').join("") + '</div>');
+        
+        $('#imagetoolsoutput2').html(points_in_radec);
+		// 		'Ampl: ' + this.imganalobj.valueformat(this.ampl) +
+		// 		'<br />&sigma;1: ' + this.imganalobj.valueformat(this.sig1) +
+		// 		'<br />&sigma;2: ' + this.imganalobj.valueformat(this.sig2) +
+		// 		'<br />Angle: ' + this.imganalobj.valueformat(180*this.theta/Math.PI) +
+		// 		'&deg;');
+		
+        // Set PSFcolor
+		if(this.shown){
+			textcol = {'red':'black','lime':'black','blue':'white',
+					   'black':'white'}[this.color];
+			$('#linecolor').css('background',this.color);
+			$('#linecolor').css('color',textcol);
+			linecolor = $('#linecolor')[0]
+			linecolor.callback_object = this;
+			linecolor.onclick = function() {
+				this.callback_object.boxcolor();
+			}
+		}
+
+		// If ImageAnalysisObject.imgscale=='Box' -> call updateOptions
+		if(this.imganalobj.imgscale=='Box'){
+			this.imganalobj.updateOptions('','Box','');
+		}
+	}
+
+	// CHECKHANDLER: Handles check events from the checkbox. Toogles the shown
+	// flag, updates the widget and redraws the imageanalysisobject
+	this.checkhandler = function() {
+		// Toogle shown status
+		this.shown = !this.shown;
+		// Update the data
+		this.update();
+		// Redraw the image
+		this.imganalobj.imagedraw();
+	}
+	
+	// BOXCOLOR: Handles clicks on the box color switcher.
+	this.boxcolor = function() {
+		// Set next color
+		this.color={'red':'lime','lime':'blue','blue':'black',
+				    'black':'red'}[this.color];
+		// Update the text color
+		textcol = {'red':'black','lime':'black','blue':'white',
+				   'black':'white'}[this.color];
+		$('#linecolor').css('background',this.color);
+		$('#linecolor').css('color',textcol);
+		this.imganalobj.imagedraw();
+	}
+	
+	// PICKUP: Checks if the image mouse location (x/y) is correct to pick up
+	//         the box. If so true is returned and the box is set to moving.
+	this.pickup = function(mousex,mousey){
+		// Ignore if not shown or inactive
+		if( ! this.shown || ! this.active) {
+			return false;
+		// Check if move is in progress: finish move
+		} else if( this.moving > 0){
+			this.drop();
+			return false;
+        // Check if mouse at a point
+		// Check if mouse is inside the box
+        } else if( (mousex - this.imgx0)**2 + (mousey - this.imgy0)**2 < 100 ) {
+            this.moving = 1;
+            console.log("P1 Picked");
+            // Initialize move
+			this.pickupx0 = this.imgx0;
+			this.pickupx1 = this.imgx1;
+			this.pickupy0 = this.imgy0;
+			this.pickupy1 = this.imgy1;
+			this.mousex0 = mousex;
+			this.mousey0 = mousey;
+            return true;
+        } else if ( (mousex - this.imgx1)**2 + (mousey - this.imgy1)**2 < 100 ) {
+            this.moving = 2;
+            console.log("P2 Picked");
+            // Initialize move  
+			this.pickupx0 = this.imgx0;
+			this.pickupx1 = this.imgx1;
+			this.pickupy0 = this.imgy0;
+			this.pickupy1 = this.imgy1;
+			this.mousex0 = mousex;
+			this.mousey0 = mousey;
+            return true;
+        } else if ( Math.abs((this.imgy1 - this.imgy0)*mousex - (this.imgx1 - this.imgx0)*mousey + this.imgx1*this.imgy0 - this.imgy1*this.imgx0) / Math.sqrt((this.imgx1-this.imgx0)**2 + (this.imgy1-this.imgy0)**2) < 10 ) {
+            this.moving = 3;
+            console.log("Both Picked");
+            // Initialize move  
+			this.pickupx0 = this.imgx0;
+			this.pickupx1 = this.imgx1;
+			this.pickupy0 = this.imgy0;
+			this.pickupy1 = this.imgy1;
+			this.mousex0 = mousex;
+			this.mousey0 = mousey;
+            return true;
+		} else {
+			return false;
+		}
+	}
+	
+	// MOVE: Moves the box to the new coordinates, updates imgx/y0/1
+	//       datax/y0/1 and movex/y0 are used to calculate the move
+	this.move = function(mousex,mousey){
+		// calculate maximal valid indices
+		zoom = this.imganalobj.imgzoom;
+		imgdx = Math.round(this.imganalobj.imgwidth * zoom) - 1;
+		imgdy = Math.round(this.imganalobj.imgheight * zoom) - 1;
+		// calculate offsets
+		mousedx = mousex-this.mousex0;
+		mousedy = mousey-this.mousey0;
+        console.log("Moving: " + this.moving);
+		// calculate new coordinates
+		// if(this.moving & 1) { this.imgx0 = this.pickupx0+mousedx; }
+		// if(this.moving & 2) { this.imgx1 = this.pickupx1+mousedx; }
+		// if(this.moving & 4) { this.imgy0 = this.pickupy0+mousedy; }
+		// if(this.moving & 8) { this.imgy1 = this.pickupy1+mousedy; }
+        if (this.moving & 1) {
+            this.imgx0 = this.pickupx0+mousedx;
+            this.imgy0 = this.pickupy0+mousedy;
+        }
+        if (this.moving & 2) {
+            this.imgx1 = this.pickupx1+mousedx;
+            this.imgy1 = this.pickupy1+mousedy;
+        }
+
+		// check new coordinates
+		if( mousedx < 0 ){
+			// Check left
+			if( this.imgx0 < 0 ) { this.imgx0 = 0; }
+			if( this.imgx1 < 5 ) { this.imgx1 = 5; }
+			// if( this.imgx1 < this.imgx0+5) { this.imgx1 = this.imgx0+5; }
+			// if( this.imgx1 > this.imgx0+this.boxmaxsize*zoom ) { 
+			// 	this.imgx1 = this.imgx0+this.boxmaxsize*zoom; }
+		} else {
+			// Check right
+			if( this.imgx1 > imgdx ) { this.imgx1 = imgdx; }
+			if( this.imgx0 > imgdx-5) { this.imgx0 = imgdx-5; }
+			// if( this.imgx0 > this.imgx1-5) { this.imgx0 = this.imgx1-5; }
+			// if( this.imgx0 < this.imgx1-this.boxmaxsize*zoom ) {
+			// 	this.imgx0 = this.imgx1-this.boxmaxsize*zoom; }
+		}
+		if( mousedy < 0){
+			// Check top
+			if( this.imgy0 < 0 ) { this.imgy0 = 0; }
+			if( this.imgy1 < 5 ) { this.imgy1 = 5; }
+			// if( this.imgy1 < this.imgy0+5) { this.imgy1 = this.imgy0+5; }
+			// if( this.imgy1 > this.imgy0+this.boxmaxsize*zoom ) { 
+			// 	this.imgy1 = this.imgy0+this.boxmaxsize*zoom; }
+		} else {
+			// Check bottom
+			if( this.imgy1 > imgdy ) { this.imgy1 = imgdy; }
+			if( this.imgy0 > imgdy-5) { this.imgy0 = imgdy-5; }
+			// if( this.imgy0 > this.imgy1-5) { this.imgy0 = this.imgy1-5; }			
+			// if( this.imgy0 < this.imgy1-this.boxmaxsize*zoom ) { 
+			// 	this.imgy0 = this.imgy1-this.boxmaxsize*zoom; }
+		}
+	}
+	
+	// DROP: Finishes the move by updating imgx/y0/1 to the current
+	//          datax/y0/1 coordinates. The box is set to non-moving.
+	// ### make sure box stays at least 2x2
+	this.drop = function(){
+		if( this.moving ){
+			// Calculate new data coordinates
+			datady = this.imganalobj.imgheight;
+			zoom = this.imganalobj.imgzoom;
+			this.datax0 = Math.round(this.imgx0/zoom);
+			this.datax1 = Math.round(this.imgx1/zoom);
+			this.datay0 = datady - Math.round(this.imgy1/zoom);
+			this.datay1 = datady - Math.round(this.imgy0/zoom);
+			// Clear moving
+			this.moving = 0;
+            console.log("Set moving to 0");
 			// Update
 			this.update();
 		}

@@ -3,12 +3,14 @@ body{
     font-family: sans-serif;
     background-color: #ffffff;
     line-height: 1.2em;
+    margin: 1rem;
 }
 
 /* Headings */
 h1, h2, h3 {
-    background-color: #99ffff;
-    padding: 7px;
+    background-color: none;
+    padding: 1rem 0rem 0.5rem;
+    border-bottom: 1px solid black;
 }
 
 /* Selections */
@@ -30,14 +32,21 @@ table {
 
 table tr td, table tr th {
     border:#000 solid 1px;
-    padding:4px;
+    padding:0.25rem 0.5rem;
 }
 
 /* Header Table */
 td.header {
-    background-color: #9FF;
+    background-color: #ddd;
     border: 0px;
     padding: 6px;
+}
+
+.header-wrapper {
+    padding: 1rem 0rem;
+    background-color: #ddd;
+    border: 2px solid black;
+/*     border-radius: 0.5rem; */
 }
 
 /* Tools Table */
@@ -45,6 +54,10 @@ td.tools {
     border: 0px;
     vertical-align:top;
     line-height: 1.2em;
+}
+
+form {
+    margin: 1rem 0rem;
 }
 
 /* Log Table */
@@ -67,4 +80,24 @@ tr.logerror {
 tr.logcritical {
 	background-color: #000;
 	color: #FFF;
+}
+
+#linedata {
+    display: inline-block;
+    max-width: 100%;
+    max-height: 96px;
+    overflow: scroll;
+}
+
+#linegraph {
+    display: flex;
+    /* flex-direction: row-reverse; */
+    align-items: flex-end;
+    border: 1px solid black;
+    height: 100px;
+}
+
+.linegraphbox {
+    width: 1px;
+    background-color: blue;
 }

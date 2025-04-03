@@ -50,6 +50,7 @@ class SiteViews(object):
 <link rel = "icon" type = "image/png" href = "%s">
 %s</head>
 <body>
+<div class = "header-wrapper">
 <table class = "header">
 <tr><td class = "header" width = "150" align = "center" rowspan=2>
 <img src = "%s">
@@ -64,6 +65,7 @@ class SiteViews(object):
 <td class = "header" align = "left"><a href = "%s" target = "_blank">Help / Manual</a>
 <td class = "header">%s
 </table>
+</div>
 """
         # Make image folder
         staticpath = self.conf['path']['static']
@@ -454,9 +456,11 @@ analimg.init("%s", "%s");
             else:
                 addtools = "analimg.addtool('imagetoolstatsobject','Stats');"
                 addtools +="analimg.addtool('imagetoolpsfobject','PSF');"
+                addtools +="analimg.addtool('imagetoollineobject','Line');"
         else:
             addtools = "analimg.addtool('imagetoolstatsobject','Stats');"
             addtools +="analimg.addtool('imagetoolpsfobject','PSF');"
+            addtools +="analimg.addtool('imagetoollineobject','Line');"
         # Combine display text
         imgdisplay = imgdisplay % (addtools, dataurl, fileurlpath)
         self.log.debug('  Image Display Written')

@@ -1,8 +1,17 @@
 #!/usr/bin/env python
+#!/opt/anaconda3/bin/python # Avoid this by SetEnv PATH in apache.conf
 
 """ Test program to see if the web server starts up correctly
     and the minimal python libraries are available
 """
+# Use this test to see if your script works
+#   If it doesn't, change the #! line above to point to your python
+#   If it doesn't, make sure this file and all folders leading to it
+#      are executable for the www user 
+#print("Content-Type: text/html\n")
+#print("<html><body><h1>Hello, Webview Test Script!</h1></body></html>")
+#exit(0)
+
 
 import os,sys
 import traceback

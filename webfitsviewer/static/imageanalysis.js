@@ -1828,8 +1828,8 @@ function imagetoollineobject() {
                 // Find the length in terms of arcseconds
                 let diff_arcsec = Math.sqrt((p1x-p0x)**2 + (p1y-p0y)**2) * 3600;
                 // TODO: Fix this...
-                points_in_radec += "Total Distance: " + diff_arcsec.toFixed(1);
-                points_in_radec += "<br /> Est. Plate Scale: " + (diff_arcsec / (Math.sqrt((x1-x0)**2 + (y1-y0)**2))).toFixed(3)
+                points_in_radec += "Total Distance: " + diff_arcsec.toFixed(1)+'"';
+                points_in_radec += "<br /> Est. Plate Scale: " + (diff_arcsec / (Math.sqrt((x1-x0)**2 + (y1-y0)**2))).toFixed(3) + '"/pix';
             }
         }
 

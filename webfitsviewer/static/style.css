@@ -89,6 +89,10 @@ tr.logcritical {
     overflow: scroll;
 }
 
+#imagetoolsoutput2 {
+    padding-top: 1.25rem;
+}
+
 #linegraph {
     display: flex;
     /* flex-direction: row-reverse; */

@@ -1752,7 +1752,7 @@ function imagetoollineobject() {
         } else {
             sc = sc.toFixed(2);
         }
-        msg += '<br>' + this.imganalobj.coordlblx + ' ' + hr.toFixed(0) + 'h' + mn + 'm' + sc + 's';
+        msg += this.imganalobj.coordlblx + ' ' + hr.toFixed(0) + 'h' + mn + 'm' + sc + 's';
         
         let sn = '';
         // Get the DEC
@@ -1775,7 +1775,7 @@ function imagetoollineobject() {
         } else {
             sc = sc.toFixed(1);
         }
-        msg += '<br>' + this.imganalobj.coordlbly + ' ' + sn + dg.toFixed(0) + '&deg;' + mn + '\'' + sc + '"';
+        msg += ' / ' + this.imganalobj.coordlbly + ' ' + sn + dg.toFixed(0) + '&deg;' + mn + '\'' + sc + '"';
 
         return msg;
     }
@@ -1822,8 +1822,8 @@ function imagetoollineobject() {
             console.table(p0x, p0y, p1x, p1y);
 
             if(this.imganalobj.coordlblx.toUpperCase().includes('RA') && this.imganalobj.coordlbly.toUpperCase().includes('DEC')){
-                points_in_radec += "P1: " + this.coordstoradec(p0x, p0y) + "<br />";
-                points_in_radec += "P2: " + this.coordstoradec(p1x, p1y) + "<br />";
+                points_in_radec += "P0: " + this.coordstoradec(p0x, p0y) + "<br />";
+                points_in_radec += "P1: " + this.coordstoradec(p1x, p1y) + "<br />";
 
                 // Find the length in terms of arcseconds
                 let diff_arcsec = Math.sqrt((p1x-p0x)**2 + (p1y-p0y)**2) * 3600;
@@ -1861,25 +1861,18 @@ function imagetoollineobject() {
         let psf_max = Math.max(...psf_i);
         console.log(psf_max);
 
-		//** Display Statistics
+		//** Display Statistics */
 		$('#imagetoolsoutput1')
 		.html('<form> \
 			   <span id="linecolor">&nbsp;Color&nbsp;</span><br /> \
-			   X0: ' + this.imganalobj.valueformat(this.imgx0) +
-			  '<br />Y0: ' + this.imganalobj.valueformat(this.imgy0) + 
-			  '<br />X1: ' + this.imganalobj.valueformat(this.imgx1) +
-              '<br />Y1: ' + this.imganalobj.valueformat(this.imgy1) + 
-              '<br />LEN: ' + this.imganalobj.valueformat(this.line_len) );
-		// $('#imagetoolsoutput2').html('\
-        //     <span id="linedata">' + '' + '</span>' +
-        //     '<div id="linegraph">' + psf_i.map(p => '<div class="linegraphbox" style="height: '+ (p / psf_max) * 100 + 'px;"></div>').join("") + '</div>');
+			   P0: (' + this.imganalobj.valueformat(this.datax0) +
+			  ', ' + this.imganalobj.valueformat(this.datay0) + ')' +
+			  '<br />P1: (' + this.imganalobj.valueformat(this.datax1) +
+              ', ' + this.imganalobj.valueformat(this.datay1) +  ')' +
+              '<br />Length: ' + this.imganalobj.valueformat(this.line_len) +'px' );
         
+        //** Display arc length */
         $('#imagetoolsoutput2').html(points_in_radec);
-		// 		'Ampl: ' + this.imganalobj.valueformat(this.ampl) +
-		// 		'<br />&sigma;1: ' + this.imganalobj.valueformat(this.sig1) +
-		// 		'<br />&sigma;2: ' + this.imganalobj.valueformat(this.sig2) +
-		// 		'<br />Angle: ' + this.imganalobj.valueformat(180*this.theta/Math.PI) +
-		// 		'&deg;');
 		
         // Set PSFcolor
 		if(this.shown){

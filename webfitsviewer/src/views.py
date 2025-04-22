@@ -48,6 +48,7 @@ class SiteViews(object):
 <title>%s</title>
 <link rel = "stylesheet" type = "text/css" href = "%s">
 <link rel = "icon" type = "image/png" href = "%s">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 %s</head>
 <body>
 <div class = "header-wrapper">

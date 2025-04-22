@@ -119,7 +119,8 @@ function imageanalysisobject() {
 				<tr><td class = "tools" id = "imagetoolselector" colspan="2"> \
 				    <b>Analysis Tool:</b> \
 				<tr><td class = "tools" id = "imagetoolsoutput1"> \
-				    <td class = "tools" id = "imagetoolsoutput2">');
+				    <td class = "tools" id = "imagetoolsoutput2"> \
+                <tr><div style="width: 500px;"><canvas id="psf_chart"></canvas></div>');
 		document.writeln('</table>');
 	}
 
@@ -241,7 +242,7 @@ function imageanalysisobject() {
 			toolselect = '';
 		}
 		// set text
-		$('#imagetoolselector').html(toolselect);
+		$('#imagetoolselector').html(toolselect + '<span id="linecolor">&nbsp;Color&nbsp;</span>');
 	}
 
 	// ImageOpen: Opens the image
@@ -433,7 +434,7 @@ function imageanalysisobject() {
 	}
 
 	// ImageDraw: Draw the image using current scale and zoom settings
-	this.imagedraw = function() {
+	this.imagedraw = async function() {
 		// **** Get image geometry constraints
 		// get display size (limit display size to 5000 x 5000)
 		var dispwidth = Math.round(this.imgwidth * this.imgzoom);
@@ -463,7 +464,10 @@ function imageanalysisobject() {
 		var imgmax = this.imgmax;
 		var imgraw = this.imgraw;
 		var imgdiff = 1.0;
+
+        // TODO: Double check this doesn't always run
 		if (this.rescale > 0) {
+            console.log('Running rescale loop');
 			imglogadd('Start Rescale Loop ' + imgmin + ' ' + imgmax);
 			this.rescale = 0;
 			if (this.imgscale == 'Log') {
@@ -502,11 +506,21 @@ function imageanalysisobject() {
 			}
 		}
 		imglogadd('Stop Drawing Loop');
+
+        // TODO: attempting some things from Ian
+        // let fitsImgData = new ImageData(canimg.data, dispwidth, dispheight);
+
 		// set canvas size
 		this.imgcan.width = dispwidth;
 		this.imgcan.height = dispheight;
+
 		// draw image
-		ctx.putImageData(canimg, 0, 0);
+		// ctx.putImageData(canimg, 0, 0);
+        // let img = await createImageBitmap(fitsImgData, { imageOrientation: 'flipY' });
+        ctx.drawImage(img, 0, 0);
+
+        // TODO: try and use drawImage instead with an ImageBitmap object
+
 		// **** Draw the analysis tools
 		for (i = 0; i < this.toollist.length; i += 1) {
 			this.toollist[i].draw();
@@ -1795,10 +1809,15 @@ function imagetoollineobject() {
 		this.imgy0 = (datady-this.datay1) * zoom;
 		this.imgy1 = (datady-this.datay0) * zoom;
 
+        console.log("DATAY: " + this.datay0 + ", " + this.datay1);
+
         let x0 = this.datax0;
-        let y0 = this.imganalobj.imgheight - this.datay0;
+        let y0 = this.datay0;
         let x1 = this.datax1;
-        let y1 = this.imganalobj.imgheight - this.datay1;
+        let y1 = this.datay1;
+
+        console.log(x0, y0, x1, y1);
+        // TODO: Find out which way the coordinate system goes once and for all...
 
         // Get a list of all the data on our line (rounds to nearest)
         // x0, y0 = psf_lines[img][0]
@@ -1835,11 +1854,16 @@ function imagetoollineobject() {
 
         console.log(points_in_radec);
 
-        this.line_len = Math.sqrt((x1-x0)**2 + (y1-y0)**2);
-        let step_x = Math.abs(x1-x0) / this.line_len;
-        let step_y = Math.abs(y1-y0) / this.line_len;
+        this.line_len = Math.round(Math.sqrt((x1-x0)**2 + (y1-y0)**2));
+        let step_x = (x1-x0) / this.line_len;
+        let step_y = (y1-y0) / this.line_len;
+
+        console.log(x0, y0);
+        console.log(x1, y1);
+        console.log(this.line_len);
 
         let psf_i = [];
+        let scaled_psf_i = [];
         for (let i = 0; i <= this.line_len; i++) {
             let cx = x0 + step_x * i;
             let cy = y0 + step_y * i;
@@ -1847,24 +1871,61 @@ function imagetoollineobject() {
             let yoff = Math.round(cy) * this.imganalobj.imgwidth;
 			let data_index = yoff + Math.round(cx);
 
-            // console.log(cx, cy, data_index);
-            if (this.imganalobj.imgraw[data_index] == NaN) {
+            // console.log(cx, cy, data_index, this.imganalobj.imgraw[data_index]);
+            scaled_psf_i.push(this.imganalobj.imgscaled[data_index])
+
+            if (isNaN(this.imganalobj.imgraw[data_index])) {
                 psf_i.push(0)
             } else {
                 psf_i.push(this.imganalobj.imgraw[data_index]);
             }
-            
         }
 
         // console.table(line_len, step_x, step_y);
+        console.log('PSF Data:');
         console.log(psf_i);
         let psf_max = Math.max(...psf_i);
         console.log(psf_max);
 
+        const chart_ctx = document.getElementById('psf_chart');
+
+        if (!this.is_chart_init) {
+            this.chart = new Chart(chart_ctx, {
+                type: 'bar',
+                data: {
+                // labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                datasets: [{
+                    label: 'Counts',
+                    data: psf_i,
+                    borderWidth: 1
+                }]
+                },
+                options: {
+                scales: {
+                    y: {
+                    beginAtZero: true
+                    }
+                }
+                }
+            });
+            this.is_chart_init = true;
+        } else {
+            this.chart.data = {
+                labels: Array.from(Array(this.line_len).keys()),
+                datasets: [{
+                    label: 'Counts',
+                    data: psf_i,
+                    borderWidth: 1
+                }]
+            }
+            this.chart.update();
+        }
+
+
 		//** Display Statistics */
 		$('#imagetoolsoutput1')
 		.html('<form> \
-			   <span id="linecolor">&nbsp;Color&nbsp;</span><br /> \
+			   <br /> \
 			   P0: (' + this.imganalobj.valueformat(this.datax0) +
 			  ', ' + this.imganalobj.valueformat(this.datay0) + ')' +
 			  '<br />P1: (' + this.imganalobj.valueformat(this.datax1) +
@@ -1931,7 +1992,7 @@ function imagetoollineobject() {
 		// Check if mouse is inside the box
         } else if( (mousex - this.imgx0)**2 + (mousey - this.imgy0)**2 < 100 ) {
             this.moving = 1;
-            console.log("P1 Picked");
+            console.log("P0 Picked");
             // Initialize move
 			this.pickupx0 = this.imgx0;
 			this.pickupx1 = this.imgx1;
@@ -1942,7 +2003,7 @@ function imagetoollineobject() {
             return true;
         } else if ( (mousex - this.imgx1)**2 + (mousey - this.imgy1)**2 < 100 ) {
             this.moving = 2;
-            console.log("P2 Picked");
+            console.log("P1 Picked");
             // Initialize move  
 			this.pickupx0 = this.imgx0;
 			this.pickupx1 = this.imgx1;
@@ -2035,8 +2096,8 @@ function imagetoollineobject() {
 			zoom = this.imganalobj.imgzoom;
 			this.datax0 = Math.round(this.imgx0/zoom);
 			this.datax1 = Math.round(this.imgx1/zoom);
-			this.datay0 = datady - Math.round(this.imgy1/zoom);
-			this.datay1 = datady - Math.round(this.imgy0/zoom);
+			this.datay0 = this.imganalobj.imgheight - Math.round(this.imgy1/zoom);
+			this.datay1 = this.imganalobj.imgheight - Math.round(this.imgy0/zoom);
 			// Clear moving
 			this.moving = 0;
             console.log("Set moving to 0");

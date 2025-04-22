@@ -1370,8 +1370,8 @@ function imagetoolpsfobject() {
 		zoom = this.imganalobj.imgzoom;
 		this.imgx0 = this.datax0 * zoom;
 		this.imgx1 = this.datax1 * zoom;
-		this.imgy0 = (datady-this.datay1) * zoom;
-		this.imgy1 = (datady-this.datay0) * zoom;
+		this.imgy0 = (datady-this.datay1) * zoom; // HERE: y0 = ..y1
+		this.imgy1 = (datady-this.datay0) * zoom; //       y1 = ..y0 to keep y0<y1
 		// Get data -> boxdata
 		var boxdata = new Array();
 		for (yi = this.datay0; yi < this.datay1; yi += 1) {
@@ -1806,8 +1806,8 @@ function imagetoollineobject() {
 		zoom = this.imganalobj.imgzoom;
 		this.imgx0 = this.datax0 * zoom;
 		this.imgx1 = this.datax1 * zoom;
-		this.imgy0 = (datady-this.datay1) * zoom;
-		this.imgy1 = (datady-this.datay0) * zoom;
+		this.imgy0 = (datady-this.datay0) * zoom;
+		this.imgy1 = (datady-this.datay1) * zoom;
 
         console.log("DATAY: " + this.datay0 + ", " + this.datay1);
 
@@ -1905,7 +1905,8 @@ function imagetoollineobject() {
                     y: {
                     beginAtZero: true
                     }
-                }
+                },
+				animation: false,
                 }
             });
             this.is_chart_init = true;
@@ -2096,8 +2097,8 @@ function imagetoollineobject() {
 			zoom = this.imganalobj.imgzoom;
 			this.datax0 = Math.round(this.imgx0/zoom);
 			this.datax1 = Math.round(this.imgx1/zoom);
-			this.datay0 = this.imganalobj.imgheight - Math.round(this.imgy1/zoom);
-			this.datay1 = this.imganalobj.imgheight - Math.round(this.imgy0/zoom);
+			this.datay0 = this.imganalobj.imgheight - Math.round(this.imgy0/zoom);
+			this.datay1 = this.imganalobj.imgheight - Math.round(this.imgy1/zoom);
 			// Clear moving
 			this.moving = 0;
             console.log("Set moving to 0");

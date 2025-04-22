@@ -1730,8 +1730,8 @@ function imagetoollineobject() {
             ctx.moveTo(this.imgx0, this.imgy0);
             ctx.lineTo(this.imgx1, this.imgy1);
             ctx.stroke();
-			ctx.strokeRect(this.imgx0-2, this.imgy0-2, 5,5);		
-			ctx.strokeRect(this.imgx1-2, this.imgy1-2, 5,5);		
+			ctx.strokeRect(this.imgx0-1, this.imgy0-1, 3,3);		
+			ctx.strokeRect(this.imgx1-1, this.imgy1-1, 3,3);		
 		}
 	}
 

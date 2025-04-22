@@ -434,7 +434,7 @@ function imageanalysisobject() {
 	}
 
 	// ImageDraw: Draw the image using current scale and zoom settings
-	this.imagedraw = async function() {
+	this.imagedraw = function() {
 		// **** Get image geometry constraints
 		// get display size (limit display size to 5000 x 5000)
 		var dispwidth = Math.round(this.imgwidth * this.imgzoom);
@@ -515,9 +515,9 @@ function imageanalysisobject() {
 		this.imgcan.height = dispheight;
 
 		// draw image
-		// ctx.putImageData(canimg, 0, 0);
+		ctx.putImageData(canimg, 0, 0);
         // let img = await createImageBitmap(fitsImgData, { imageOrientation: 'flipY' });
-        ctx.drawImage(img, 0, 0);
+        // ctx.drawImage(img, 0, 0);
 
         // TODO: try and use drawImage instead with an ImageBitmap object
 

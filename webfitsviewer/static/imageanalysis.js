@@ -78,64 +78,116 @@ function imageanalysisobject() {
 	//             |--------------------------------------|                |
 	//             | Tools Output 1  | Tools Outout 2     |                |
 	this.writetools = function() {
-		document.writeln('<table><tr><td class = "tools"> \
-		     <div id = "imageinfo"> \
-		     Mouse&nbsp;X&nbsp;/&nbsp;Y:<br>&nbsp;<br>Value:<br>&nbsp;</div> \
-		     <td class = "tools"><form> \
-		     Zoom:<br> \
-		     <select id = "zoomselect" disabled> \
-		     <option>1/10</option> \
-		     <option>1/3</option> \
-		     <option>1x</option> \
-		     <option>3x</option> \
-		     <option>10x</option> \
-		     </select><br> \
-		     Scale:<br> \
-		     <select id = "scaleselect" disabled> \
-		     <option>MinMax</option> \
-			 <option>99.5%</option> \
-		     <option>98%</option> \
-		     <option>90%</option> \
-		     <option>1 StDev</option> \
-			 <option>Log</option> \
-			 <option>Box</option> \
-		     </select><br> \
-		     Color:<br> \
-		     <select id = "colorselect" disabled> \
-		     <option>Grey</option> \
-		     <option>Rainbow</option> \
-		     <option>Staircase</option> \
-		     </select> \
-		     </form>'
-						+ '<td class = "tools" rowspan="3"> \
-		     <canvas id = "analcanvas" width = "'
-						+ this.analsize
-						+ '"        height = "'
-						+ this.analsize
-						+ '"        style="border: solid 2px #ff0000;"> \
-		     Your Browser does not support HTML5 - Canvas Elements - please upgrade. \
-		     </canvas>');
-		document.writeln(' \
-				<tr><td class = "tools" id = "imagetoolselector" colspan="2"> \
-				    <b>Analysis Tool:</b> \
-				<tr><td class = "tools" id = "imagetoolsoutput1"> \
-				    <td class = "tools" id = "imagetoolsoutput2"> \
-                <tr><div style="width: 500px;"><canvas id="psf_chart"></canvas></div>');
-		document.writeln('</table>');
+		// document.writeln('<table><tr><td class = "tools"> \
+		//      <div id = "imageinfo"> \
+		//      Mouse&nbsp;X&nbsp;/&nbsp;Y:<br>&nbsp;<br>Value:<br>&nbsp;</div> \
+		//      <td class = "tools"><form> \
+		//      Zoom:<br> \
+		//      <select id = "zoomselect" disabled> \
+		//      <option>1/10</option> \
+		//      <option>1/3</option> \
+		//      <option>1x</option> \
+		//      <option>3x</option> \
+		//      <option>10x</option> \
+		//      </select><br> \
+		//      Scale:<br> \
+		//      <select id = "scaleselect" disabled> \
+		//      <option>MinMax</option> \
+		// 	 <option>99.5%</option> \
+		//      <option>98%</option> \
+		//      <option>90%</option> \
+		//      <option>1 StDev</option> \
+		// 	 <option>Log</option> \
+		// 	 <option>Box</option> \
+		//      </select><br> \
+		//      Color:<br> \
+		//      <select id = "colorselect" disabled> \
+		//      <option>Grey</option> \
+		//      <option>Rainbow</option> \
+		//      <option>Staircase</option> \
+		//      </select> \
+		//      </form>'
+		// 				+ '<td class = "tools" rowspan="3"> \
+		//      <canvas id = "analcanvas" width = "'
+		// 				+ this.analsize
+		// 				+ '"        height = "'
+		// 				+ this.analsize
+		// 				+ '"        style="border: solid 2px #ff0000;"> \
+		//      Your Browser does not support HTML5 - Canvas Elements - please upgrade. \
+		//      </canvas></table>');
+		// document.writeln(' \
+		// 		<tr><td class = "tools" id = "imagetoolselector" colspan="2"> \
+		// 		    <b>Analysis Tool:</b> \
+		// 		<tr><td class = "tools" id = "imagetoolsoutput1"> \
+		// 		    <td class = "tools" id = "imagetoolsoutput2"> \
+        //             <div style="width: 500px;"><canvas id="psf_chart"></canvas></div>');
+		// document.writeln('</table>');
 	}
 
 	// WriteDisplay: writes the HTML code for the image display
 	this.writedisplay = function() {
 		document.writeln('<div id = "imagemsg"></div> \
-			 <div id = "imagestat">Initializing</div> \
-			 <div id = "imagediv" style = "width:100%; \
-			      overflow:auto; border:solid 1px #CCC;"> \
-			 <canvas id = "imagecanvas" width="200" height="200"> \
-			 Your Browser does not support HTML5 - Canvas Elements \
-			 - please upgrade. \
-			 </canvas> \
-			 </div> \
-			 <div id = "imagelog"></div>');
+             <div id = "imagewrapper"> \
+			    <div id = "imagediv" style = "width:100%; \
+			        border:solid 1px #CCC;"> \
+			        <canvas id = "imagecanvas" width="200" height="200"> \
+			        Your Browser does not support HTML5 - Canvas Elements \
+			        - please upgrade. \
+			        </canvas> \
+			    </div> \
+                <div id = "statsdiv">\
+                    <div class="tools"><div id = "imagestat">Initializing</div></div> \
+                    <div class="tools"> \
+                    <table><tr><td class = "tools"> \
+                        <div id = "imageinfo"> \
+                        Mouse&nbsp;X&nbsp;/&nbsp;Y:<br>&nbsp;<br>Value:<br>&nbsp;</div> \
+                        <td class = "tools"><form> \
+                        Zoom:<br> \
+                        <select id = "zoomselect" disabled> \
+                        <option>1/10</option> \
+                        <option>1/3</option> \
+                        <option>1x</option> \
+                        <option>3x</option> \
+                        <option>10x</option> \
+                        </select><br> \
+                        Scale:<br> \
+                        <select id = "scaleselect" disabled> \
+                        <option>MinMax</option> \
+                        <option>99.5%</option> \
+                        <option>98%</option> \
+                        <option>90%</option> \
+                        <option>1 StDev</option> \
+                        <option>Log</option> \
+                        <option>Box</option> \
+                        </select><br> \
+                        Color:<br> \
+                        <select id = "colorselect" disabled> \
+                        <option>Grey</option> \
+                        <option>Rainbow</option> \
+                        <option>Staircase</option> \
+                        </select> \
+                        </form>'
+                                    + '<td class = "tools" rowspan="3"> \
+                        <canvas id = "analcanvas" width = "'
+                                    + this.analsize
+                                    + '"        height = "'
+                                    + this.analsize
+                                    + '"        style="border: solid 2px #ff0000;"> \
+                        Your Browser does not support HTML5 - Canvas Elements - please upgrade. \
+                        </canvas> \
+                    </table> \
+                    </div> \
+                    <div class = "tools" id = "imagetoolselector" colspan="2"> \
+                        <b>Analysis Tool:</b> \
+                    </div> \
+                    <div id="statswrapper"> \
+                        <div class = "tools" id = "imagetoolsoutput1"></div> \
+                        <div class = "tools" id = "imagetoolsoutput2"></div> \
+                    </div> \
+                    <div class = "tools"  style="display: none;"><canvas id="psf_chart"></canvas></div> \
+                </div> \
+             </div> ')
+			//  <div id = "imagelog"></div>');
 	}
 
 	// AddTool: add (and initialize a new image analysis tool)
@@ -181,8 +233,9 @@ function imageanalysisobject() {
 			img = new Image();
 			img.onload = function() {
 				this.imgcan = document.getElementById('imagecanvas');
-				this.imgcan.width = img.width;
-				this.imgcan.height = img.height;
+				this.imgcan.width = this.imgcan.parentElement.clientWidth;
+				this.imgcan.height = this.imgcan.parentElement.clientHeight;
+                imgctx.scale(0.25, 0.25);
 				imgctx.drawImage(img, 0, 0);
 			}
 			img.src = previewurl;
@@ -214,7 +267,7 @@ function imageanalysisobject() {
 		this.request.open("POST", urlsplit[0], true);
 		this.request.send(urlsplit[1]);
 		// update message
-		$('#imagestat').html('Loading Image Data');
+		$('#imagestat').html('Loading Image Data - Preview Image Displayed');
 		imglogadd('Loading Image Data');
 		// **** Set tool selector text
 		// get tool names, set first tool as toolnow
@@ -345,18 +398,32 @@ function imageanalysisobject() {
 		this.imgcan.onmouseout = function(event) {
 			this.callback_object.mouseup(event);
 		}
+        this.imgcan.onwheel = function(event) {
+            this.callback_object.mousezoomhandler(event);
+        }
 		// get options from existing cookies
 		this.getOptions();
 		// Set zoom size (make sure diagonal is at least 300 pixels long)
 		this.imgzoom = 1.0;
-		diag = Math.sqrt(this.imgwidth * this.imgwidth + this.imgheight
-				* this.imgheight);
-		while (this.imgzoom * diag < 300) {
-			this.imgzoom += 1.0;
-		}
-		while (this.imgzoom * diag > 1800) {
-			this.imgzoom /= 2.0;
-		}
+
+        console.log("Image vals:" + this.imgwidth + ', ' + this.imgwidth + ', ' + this.imgheight + ', ' + this.imgheight);
+
+        // TODO: rethink how to do this with canvas scaling
+		// diag = Math.sqrt(this.imgwidth * this.imgwidth + this.imgheight
+		// 		* this.imgheight);
+		// while (this.imgzoom * this.imgheight < this.imgcan.parentElement.clientHeight) {
+		// 	this.imgzoom += 0.01;
+        //     console.log(this.imgzoom)
+		// }
+        // console.log("Client width: " + this.imgcan.parentElement.clientWidth);
+        // console.log("Client height: " + this.imgcan.parentElement.clientHeight);
+		// while (this.imgzoom * this.imgheight > this.imgcan.parentElement.clientHeight) {
+		// 	this.imgzoom -= 0.01;
+        //     console.log(this.imgzoom)
+		// }
+
+        console.log("Final zoom: " + this.imgzoom);
+        
 		// Set zoom selection dropdown
 		zoomsel = $('#zoomselect')[0];
 		zoomsel.disabled = false;
@@ -425,6 +492,12 @@ function imageanalysisobject() {
 			this.toollist[i].update();
 		}
 		imglogadd('Done Update Tools - Drawing');
+
+        // Seth's panning stuff
+        this.pan = { x: 0, y: 0 };
+        this.panStart = { x: 0, y: 0};
+        this.bitimg = null;
+
 		// **** Display and message
 		// Display Image
 		this.imagedraw();
@@ -434,7 +507,8 @@ function imageanalysisobject() {
 	}
 
 	// ImageDraw: Draw the image using current scale and zoom settings
-	this.imagedraw = function() {
+	this.imagedraw = async function() {
+        console.log("imagedraw")
 		// **** Get image geometry constraints
 		// get display size (limit display size to 5000 x 5000)
 		var dispwidth = Math.round(this.imgwidth * this.imgzoom);
@@ -445,9 +519,11 @@ function imageanalysisobject() {
 		if (dispheight > 5000) {
 			dispheight = 5000;
 		}
+        console.log("Thinks display width should be: " + dispwidth);
+
 		// set imagediv height
 		if (dispheight > 600) {
-			document.getElementById('imagediv').style.height = '600px';
+			// document.getElementById('imagediv').style.height = '600px';
 		} else {
 			document.getElementById('imagediv').style.height = 'auto';
 		}
@@ -466,32 +542,39 @@ function imageanalysisobject() {
 		var imgdiff = 1.0;
 
         // TODO: Double check this doesn't always run
-		if (this.rescale > 0) {
-            console.log('Running rescale loop');
-			imglogadd('Start Rescale Loop ' + imgmin + ' ' + imgmax);
-			this.rescale = 0;
-			if (this.imgscale == 'Log') {
-				imgdiff = Math.log10(imgmax / imgmin);
-				imglogadd(' - Logging')
-			} else {
-				imgdiff = imgmax - imgmin;
-			}
-			for (imgx = 0; imgx < imgwidth; imgx += 1) {
-				for (imgy = 0; imgy < imgheight; imgy += 1) {
-					i = imgy * imgwidth + imgx;
-					if (this.imgscale == 'Log') {
-						(this.imgscaled)[i] = Math.round( Math.log10( imgraw[i] / imgmin)
-								* 255.0 / imgdiff );
-					} else {
-						this.imgscaled[i] = Math.round(255.0 * (imgraw[i] - imgmin)
-								/ imgdiff);
-					}
-				}
-			}
-		}
+		// if (this.rescale > 0) {
+        //     console.log('Running rescale loop');
+		// 	imglogadd('Start Rescale Loop ' + imgmin + ' ' + imgmax);
+		// 	this.rescale = 0;
+		// 	if (this.imgscale == 'Log') {
+		// 		imgdiff = Math.log10(imgmax / imgmin);
+		// 		imglogadd(' - Logging')
+		// 	} else {
+		// 		imgdiff = imgmax - imgmin;
+		// 	}
+		// 	for (imgx = 0; imgx < imgwidth; imgx += 1) {
+		// 		for (imgy = 0; imgy < imgheight; imgy += 1) {
+		// 			i = imgy * imgwidth + imgx;
+		// 			if (this.imgscale == 'Log') {
+		// 				(this.imgscaled)[i] = Math.round( Math.log10( imgraw[i] / imgmin)
+		// 						* 255.0 / imgdiff );
+		// 			} else {
+		// 				this.imgscaled[i] = Math.round(255.0 * (imgraw[i] - imgmin)
+		// 						/ imgdiff);
+		// 			}
+		// 		}
+		// 	}
+        //     // console.log("rescale bitimg update");
+        //     // this.bitimg = await createImageBitmap(canimg, { imageOrientation: 'flipY' });
+        //     // console.log(this.bitimg);
+		// }
+
+        // Clear canvas TODO: need something like this
+        // ctx.clearRect(0, 0, this.imgcan.width, this.imgcan.height);
+
 		// fill canvas image
 		imglogadd('Start Drawing Loop');
-		var imgzoom = this.imgzoom;
+		var imgzoom = 1;
 		var carr = this.getRGB(0);
 		for (var y = 0; y < dispheight; y += 1) {
 			for (var x = 0; x < dispwidth; x += 1) {
@@ -507,24 +590,59 @@ function imageanalysisobject() {
 		}
 		imglogadd('Stop Drawing Loop');
 
+        if (this.bitimg === null) {
+            console.log("attempting to create bitmap")
+            this.bitimg = await createImageBitmap(canimg, { imageOrientation: 'flipY' });
+        }
+
         // TODO: attempting some things from Ian
         // let fitsImgData = new ImageData(canimg.data, dispwidth, dispheight);
+        
+        // Get image div for reference
+        let imagediv = document.getElementById('imagediv');
 
 		// set canvas size
-		this.imgcan.width = dispwidth;
-		this.imgcan.height = dispheight;
+        // Seth say's don't change this! We want it fixed now to pan
+		this.imgcan.width = imagediv.clientWidth;
+		this.imgcan.height = imagediv.clientHeight;
+
+        // if (dispwidth > imagediv.clientWidth) {
+        //     this.imgcan.width = imagediv.clientWidth;
+        //     this.imgcan.height = imagediv.clientWidth; // Try to keep square
+        // }
+
+        // if (dispheight > imagediv.clientHeight) {
+        //     let rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        //     this.imgcan.height = imagediv.clientHeight - 2*rem;
+        // }
+        
+        
+        // Seth's panning
+        // ctx.translate(this.pan.x, this.pan.y);
+        // console.log(this.imgcan.width, this.imgcan.height);
+        // console.log(this.pan);
+        ctx.clearRect(0, 0, this.imgcan.width, this.imgcan.height);
+
+        // Why not work?
+        ctx.save();
+        ctx.scale(this.imgzoom, this.imgzoom);
+        ctx.translate(this.pan.x, this.pan.y);
+
 
 		// draw image
-		ctx.putImageData(canimg, 0, 0);
-        // let img = await createImageBitmap(fitsImgData, { imageOrientation: 'flipY' });
-        // ctx.drawImage(img, 0, 0);
-
+		// ctx.putImageData(canimg, 0, 0);
+        
         // TODO: try and use drawImage instead with an ImageBitmap object
+        // Kind of works but is quite laggy
+        ctx.drawImage(this.bitimg, 0, 0);
 
 		// **** Draw the analysis tools
 		for (i = 0; i < this.toollist.length; i += 1) {
 			this.toollist[i].draw();
 		}
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.restore();
 	}
 
 	// Mousemove: Event handler to respond to mouse events
@@ -660,6 +778,18 @@ function imageanalysisobject() {
 			this.toolmove.move(imgx,imgy);
 			this.imagedraw();
 		}
+
+        // Seth's panning stuff
+        if (this.panning) {
+            this.pan = {
+                x: this.pan.x + imgx - this.panStart.x,
+                y: this.pan.y + imgy - this.panStart.y
+            };
+            this.panStart.x = imgx;
+            this.panStart.y = imgy;
+            this.imagedraw();
+            console.log(this.pan);
+        }
 	}
 	
 	// Mousedown: Event handler to press mouse button
@@ -676,6 +806,16 @@ function imageanalysisobject() {
 				this.toolmove = this.toollist[i];
 			}
 		}
+
+        // If we still have nothing to move
+        if (this.toolmove === null) {
+            console.log('mousedown pan starting');
+            this.panning = true;
+            this.panStart = {
+                x: imgx, 
+                y: imgy
+            }
+        }
 	}
 	
 	// Mouseup: Event handler to release mouse button
@@ -687,7 +827,24 @@ function imageanalysisobject() {
 			this.toolmove = null;
 			this.imagedraw();
 		}
+        this.panning = false;
 	}
+
+    this.mousezoomhandler = function(event) {
+        // if (imageLoaded) { // TODO: need something like this
+        const zoomRate = 1.0025 // Set here for now
+        let zoomFactor = Math.pow(zoomRate, -event.deltaY);
+        this.imgzoom *= zoomFactor;
+        // pan = {
+        //     x: e.offsetX - (e.offsetX - pan.x) * zoomFactor,
+        //     y: e.offsetY - (e.offsetY - pan.y) * zoomFactor
+        // };
+        // redraw(); Also need something more like this
+        // Try for now:
+        this.imagedraw();
+
+        event.preventDefault();
+    }
 
 	// Zoomhandler: Responds to zoom selection events
 	this.zoomhandler = function() {
@@ -763,6 +920,8 @@ function imageanalysisobject() {
 		imglogadd('New Tool: '+toolname+' found='+found)
 		// Deactivate old tool / Activate new tool
 		if(found>-1){
+            this.toolnow.disable();
+            // console.log(this.toolnow);
 			this.toolnow.active = false;
 			this.toolnow = this.toollist[found];
 			this.toolnow.active = true;
@@ -1268,6 +1427,10 @@ function imagetoolstatsobject() {
 		}
 		
 	}
+
+    this.disable = function() {
+        // pass
+    }
 };
 
 /**
@@ -1676,6 +1839,10 @@ function imagetoolpsfobject() {
 		}
 		
 	}
+
+    this.disable = function() {
+        // pass
+    }
 };
 
 /**
@@ -1891,47 +2058,76 @@ function imagetoollineobject() {
 
         if (!this.is_chart_init) {
             this.chart = new Chart(chart_ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
-                // labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                labels: Array.from(Array(this.line_len).keys()),
                 datasets: [{
-                    label: 'Counts',
+                    label: 'Raw Counts',
                     data: psf_i,
-                    borderWidth: 1
+                    borderWidth: 1,
+                    backgroundColor: this.color,
+                    borderColor: this.color,
                 }]
                 },
                 options: {
                 scales: {
                     y: {
-                    beginAtZero: true
+                        beginAtZero: false
                     }
                 },
 				animation: false,
+                elements: {
+                    point: {
+                        pointStyle: false
+                    }
+                },
+                plugins: {
+                    decimation: {
+                        enabled: true
+                    }
+                }
                 }
             });
             this.is_chart_init = true;
+            chart_ctx.parentElement.style = "display: block;";
         } else {
+            chart_ctx.parentElement.style = "display: block;";
             this.chart.data = {
                 labels: Array.from(Array(this.line_len).keys()),
                 datasets: [{
-                    label: 'Counts',
+                    label: 'Raw Counts',
                     data: psf_i,
-                    borderWidth: 1
+                    borderWidth: 1,
+                    backgroundColor: this.color,
+                    borderColor: this.color,
                 }]
             }
             this.chart.update();
         }
 
+        // Prep the download information
+        let col1_nums = Array.from(Array(this.line_len).keys());
+        let col2_data = psf_i;
+        let csv_data = col1_nums.map(function(e, i) {
+            return [e, col2_data[i]];
+        });
+        let csv = arrayToCsv(csv_data);
 
 		//** Display Statistics */
 		$('#imagetoolsoutput1')
-		.html('<form> \
-			   <br /> \
+		.html('<div> \
 			   P0: (' + this.imganalobj.valueformat(this.datax0) +
 			  ', ' + this.imganalobj.valueformat(this.datay0) + ')' +
 			  '<br />P1: (' + this.imganalobj.valueformat(this.datax1) +
               ', ' + this.imganalobj.valueformat(this.datay1) +  ')' +
-              '<br />Length: ' + this.imganalobj.valueformat(this.line_len) +'px' );
+              '<br />Length: ' + this.imganalobj.valueformat(this.line_len) +'px' +
+              '<br /><a id="data_download">Download</a></div>' );
+        
+        // Set the download information
+        let encoded_uri = getDownloadBlobURL(csv, 'export.csv', 'text/csv;charset=utf-8;')
+        let link = document.getElementById('data_download');
+        link.setAttribute("href", encoded_uri);
+        link.setAttribute("download", "export.csv");
         
         //** Display arc length */
         $('#imagetoolsoutput2').html(points_in_radec);
@@ -1976,7 +2172,8 @@ function imagetoollineobject() {
 				   'black':'white'}[this.color];
 		$('#linecolor').css('background',this.color);
 		$('#linecolor').css('color',textcol);
-		this.imganalobj.imagedraw();
+		this.update();
+        this.imganalobj.imagedraw();
 	}
 	
 	// PICKUP: Checks if the image mouse location (x/y) is correct to pick up
@@ -2107,6 +2304,13 @@ function imagetoollineobject() {
 		}
 		
 	}
+
+    this.disable = function() {
+        // Turn off the chart
+        const chart_ctx = document.getElementById('psf_chart');
+        chart_ctx.parentElement.style = "display: none;";
+        console.log("disabling chart");
+    }
 };
 
 // **** Logadd: adds log messages to #imagelog
@@ -2116,6 +2320,35 @@ function imglogadd(message){
 		$('#imagelog').append('<br>'+time+': '+message)
 	}
 }
+
+// Below is from Seth 
+
+/**
+ * Convert a 2D array into a CSV string
+ * Taken from https://stackoverflow.com/a/68146412
+ */
+function arrayToCsv(data){
+  return data.map(row =>
+    row
+    .map(String)  // convert every value to String
+    .map(v => v.replaceAll('"', '""'))  // escape double quotes
+    .map(v => `"${v}"`)  // quote it
+    .join(',')  // comma-separated
+  ).join('\r\n');  // rows starting on new lines
+}
+
+/**
+ * Download contents as a file
+ * Source: https://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
+ */
+function getDownloadBlobURL(content, filename, contentType) {
+    // Create a blob
+    var blob = new Blob([content], { type: contentType });
+    var url = URL.createObjectURL(blob);
+  
+    return url;
+}
+
 	
 /***
  * === History ===

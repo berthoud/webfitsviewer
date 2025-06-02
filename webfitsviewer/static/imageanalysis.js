@@ -409,6 +409,7 @@ function imageanalysisobject() {
         console.log("Image vals:" + this.imgwidth + ', ' + this.imgwidth + ', ' + this.imgheight + ', ' + this.imgheight);
 
         // TODO: rethink how to do this with canvas scaling
+        // This code 
 		// diag = Math.sqrt(this.imgwidth * this.imgwidth + this.imgheight
 		// 		* this.imgheight);
 		// while (this.imgzoom * this.imgheight < this.imgcan.parentElement.clientHeight) {
@@ -541,33 +542,33 @@ function imageanalysisobject() {
 		var imgraw = this.imgraw;
 		var imgdiff = 1.0;
 
-        // TODO: Double check this doesn't always run
-		// if (this.rescale > 0) {
-        //     console.log('Running rescale loop');
-		// 	imglogadd('Start Rescale Loop ' + imgmin + ' ' + imgmax);
-		// 	this.rescale = 0;
-		// 	if (this.imgscale == 'Log') {
-		// 		imgdiff = Math.log10(imgmax / imgmin);
-		// 		imglogadd(' - Logging')
-		// 	} else {
-		// 		imgdiff = imgmax - imgmin;
-		// 	}
-		// 	for (imgx = 0; imgx < imgwidth; imgx += 1) {
-		// 		for (imgy = 0; imgy < imgheight; imgy += 1) {
-		// 			i = imgy * imgwidth + imgx;
-		// 			if (this.imgscale == 'Log') {
-		// 				(this.imgscaled)[i] = Math.round( Math.log10( imgraw[i] / imgmin)
-		// 						* 255.0 / imgdiff );
-		// 			} else {
-		// 				this.imgscaled[i] = Math.round(255.0 * (imgraw[i] - imgmin)
-		// 						/ imgdiff);
-		// 			}
-		// 		}
-		// 	}
-        //     // console.log("rescale bitimg update");
-        //     // this.bitimg = await createImageBitmap(canimg, { imageOrientation: 'flipY' });
-        //     // console.log(this.bitimg);
-		// }
+        // TODO: Double check this doesn't always run, and also double check when
+        // this section actually does run (i.e. is it reliable)
+		if (this.rescale > 0) {
+            console.log('Running rescale loop');
+			imglogadd('Start Rescale Loop ' + imgmin + ' ' + imgmax);
+			this.rescale = 0;
+			if (this.imgscale == 'Log') {
+				imgdiff = Math.log10(imgmax / imgmin);
+				imglogadd(' - Logging')
+			} else {
+				imgdiff = imgmax - imgmin;
+			}
+			for (imgx = 0; imgx < imgwidth; imgx += 1) {
+				for (imgy = 0; imgy < imgheight; imgy += 1) {
+					i = imgy * imgwidth + imgx;
+					if (this.imgscale == 'Log') {
+						(this.imgscaled)[i] = Math.round( Math.log10( imgraw[i] / imgmin)
+								* 255.0 / imgdiff );
+					} else {
+						this.imgscaled[i] = Math.round(255.0 * (imgraw[i] - imgmin)
+								/ imgdiff);
+					}
+				}
+			}
+            // Try and set bitmap to null so that it gets recalculated below
+            this.bitimg = null;
+		}
 
         // Clear canvas TODO: need something like this
         // ctx.clearRect(0, 0, this.imgcan.width, this.imgcan.height);
@@ -628,12 +629,12 @@ function imageanalysisobject() {
         ctx.scale(this.imgzoom, this.imgzoom);
         ctx.translate(this.pan.x, this.pan.y);
 
-
+        // Marc's original code
 		// draw image
 		// ctx.putImageData(canimg, 0, 0);
         
-        // TODO: try and use drawImage instead with an ImageBitmap object
-        // Kind of works but is quite laggy
+        // TODO: Currently trying to use drawImage instead with an ImageBitmap object
+        // Not as laggy as before, could probably still be improved
         ctx.drawImage(this.bitimg, 0, 0);
 
 		// **** Draw the analysis tools
@@ -782,8 +783,8 @@ function imageanalysisobject() {
         // Seth's panning stuff
         if (this.panning) {
             this.pan = {
-                x: this.pan.x + imgx - this.panStart.x,
-                y: this.pan.y + imgy - this.panStart.y
+                x: this.pan.x + (imgx - this.panStart.x) * 1/this.imgzoom,
+                y: this.pan.y + (imgy - this.panStart.y) * 1/this.imgzoom
             };
             this.panStart.x = imgx;
             this.panStart.y = imgy;
@@ -831,15 +832,19 @@ function imageanalysisobject() {
 	}
 
     this.mousezoomhandler = function(event) {
-        // if (imageLoaded) { // TODO: need something like this
+        // if (imageLoaded) { 
+        // TODO: really need something like this to stop zoom before load
+        
         const zoomRate = 1.0025 // Set here for now
         let zoomFactor = Math.pow(zoomRate, -event.deltaY);
         this.imgzoom *= zoomFactor;
+        
+        // Needs fixing to allow for zoom to be centered on the mouse
         // pan = {
         //     x: e.offsetX - (e.offsetX - pan.x) * zoomFactor,
         //     y: e.offsetY - (e.offsetY - pan.y) * zoomFactor
         // };
-        // redraw(); Also need something more like this
+
         // Try for now:
         this.imagedraw();
 
@@ -1983,9 +1988,6 @@ function imagetoollineobject() {
         let x1 = this.datax1;
         let y1 = this.datay1;
 
-        console.log(x0, y0, x1, y1);
-        // TODO: Find out which way the coordinate system goes once and for all...
-
         // Get a list of all the data on our line (rounds to nearest)
         // x0, y0 = psf_lines[img][0]
         // x1, y1 = psf_lines[img][1]
@@ -2029,6 +2031,8 @@ function imagetoollineobject() {
         console.log(x1, y1);
         console.log(this.line_len);
 
+        // TODO: Decide whether this should double count pixels or not (which
+        // it currently does)
         let psf_i = [];
         let scaled_psf_i = [];
         for (let i = 0; i <= this.line_len; i++) {
@@ -2038,7 +2042,7 @@ function imagetoollineobject() {
             let yoff = Math.round(cy) * this.imganalobj.imgwidth;
 			let data_index = yoff + Math.round(cx);
 
-            // console.log(cx, cy, data_index, this.imganalobj.imgraw[data_index]);
+            // Add the scaled data to the graph points
             scaled_psf_i.push(this.imganalobj.imgscaled[data_index])
 
             if (isNaN(this.imganalobj.imgraw[data_index])) {
@@ -2048,7 +2052,6 @@ function imagetoollineobject() {
             }
         }
 
-        // console.table(line_len, step_x, step_y);
         console.log('PSF Data:');
         console.log(psf_i);
         let psf_max = Math.max(...psf_i);
@@ -2105,6 +2108,7 @@ function imagetoollineobject() {
             this.chart.update();
         }
 
+        // TODO: Add RA/DEC information to CSV output
         // Prep the download information
         let col1_nums = Array.from(Array(this.line_len).keys());
         let col2_data = psf_i;

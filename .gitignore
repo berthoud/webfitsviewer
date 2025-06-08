@@ -106,3 +106,4 @@ venv.bak/
 # OS / IDE Dependent
 .DS_Store
 .project
+.pydevproject

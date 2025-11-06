@@ -509,7 +509,7 @@ function imageanalysisobject() {
 
 	// ImageDraw: Draw the image using current scale and zoom settings
 	this.imagedraw = async function() {
-        console.log("imagedraw")
+        // console.log("imagedraw")
 		// **** Get image geometry constraints
 		// get display size (limit display size to 5000 x 5000)
 		var dispwidth = Math.round(this.imgwidth * this.imgzoom);
@@ -520,7 +520,7 @@ function imageanalysisobject() {
 		if (dispheight > 5000) {
 			dispheight = 5000;
 		}
-        console.log("Thinks display width should be: " + dispwidth);
+        // console.log("Thinks display width should be: " + dispwidth);
 
 		// set imagediv height
 		if (dispheight > 600) {
@@ -626,8 +626,9 @@ function imageanalysisobject() {
 
         // Why not work?
         ctx.save();
-        ctx.scale(this.imgzoom, this.imgzoom);
         ctx.translate(this.pan.x, this.pan.y);
+        ctx.scale(this.imgzoom, this.imgzoom);
+        
 
         // Marc's original code
 		// draw image
@@ -658,8 +659,12 @@ function imageanalysisobject() {
 		datay = this.imgheight - 1 - Math.floor(imgy / this.imgzoom);
 		i = datay * this.imgwidth + datax;
 		val = this.imgraw[i];
+
+        // This seems to break hard when there are undefined values?
+        // Edited valueformat to return 0 for undefined values
 		val = this.valueformat(val);
-		// Message: X/Y row/column
+		
+        // Message: X/Y row/column
 		msg = 'Mouse&nbsp;X&nbsp;/&nbsp;Y:<br>&nbsp;&nbsp;';
 		msg += datax + ' / ' + datay;
 		// Message: Coordinates
@@ -783,13 +788,14 @@ function imageanalysisobject() {
         // Seth's panning stuff
         if (this.panning) {
             this.pan = {
-                x: this.pan.x + (imgx - this.panStart.x) * 1/this.imgzoom,
-                y: this.pan.y + (imgy - this.panStart.y) * 1/this.imgzoom
+                x: this.pan.x + (event.offsetX - this.panStart.x),
+                y: this.pan.y + (event.offsetY - this.panStart.y)
             };
-            this.panStart.x = imgx;
-            this.panStart.y = imgy;
+
+            this.panStart.x = event.offsetX;
+            this.panStart.y = event.offsetY;
             this.imagedraw();
-            console.log(this.pan);
+            // console.log(this.pan);
         }
 	}
 	
@@ -813,8 +819,8 @@ function imageanalysisobject() {
             console.log('mousedown pan starting');
             this.panning = true;
             this.panStart = {
-                x: imgx, 
-                y: imgy
+                x: event.offsetX, 
+                y: event.offsetY
             }
         }
 	}
@@ -831,24 +837,26 @@ function imageanalysisobject() {
         this.panning = false;
 	}
 
-    this.mousezoomhandler = function(event) {
+    this.mousezoomhandler = function(e) {
         // if (imageLoaded) { 
         // TODO: really need something like this to stop zoom before load
         
-        const zoomRate = 1.0025 // Set here for now
-        let zoomFactor = Math.pow(zoomRate, -event.deltaY);
-        this.imgzoom *= zoomFactor;
-        
-        // Needs fixing to allow for zoom to be centered on the mouse
-        // pan = {
-        //     x: e.offsetX - (e.offsetX - pan.x) * zoomFactor,
-        //     y: e.offsetY - (e.offsetY - pan.y) * zoomFactor
-        // };
+        e.preventDefault();
 
-        // Try for now:
+        const zoomRate = 1.0025; // scroll sensitivity
+        const zoomFactor = Math.pow(zoomRate, -e.deltaY);
+
+        const prevZoom = this.imgzoom;
+        const newZoom = prevZoom * zoomFactor;
+
+        const mouseX = e.offsetX;
+        const mouseY = e.offsetY;
+
+        this.pan.x = (newZoom*(this.pan.x - mouseX) / prevZoom) + mouseX;
+        this.pan.y = (newZoom*(this.pan.y - mouseY) / prevZoom) + mouseY;
+
+        this.imgzoom = newZoom;
         this.imagedraw();
-
-        event.preventDefault();
     }
 
 	// Zoomhandler: Responds to zoom selection events
@@ -1146,6 +1154,9 @@ function imageanalysisobject() {
 
 	// ValueFormat: format a value to a string
 	this.valueformat = function(value) {
+        if (value == undefined) {
+            return 0;
+        }
 		if (Math.abs(value) > 1e5 || Math.abs(value) < 1e-2
 				&& Math.abs(value) > 0.0) {
 			return value.toExponential(4);
@@ -1208,6 +1219,7 @@ function imagetoolstatsobject() {
 
 	// DRAW: Draws the box with the current color at the current location.
 	this.draw = function() {
+        return // Stop this for a moment
 		if (this.shown & this.active) {
 			// Get the canvas
 			ctx = this.imganalobj.imgcan.getContext('2d');

@@ -512,27 +512,27 @@ function imageanalysisobject() {
         // console.log("imagedraw")
 		// **** Get image geometry constraints
 		// get display size (limit display size to 5000 x 5000)
-		var dispwidth = Math.round(this.imgwidth * this.imgzoom);
-		if (dispwidth > 5000) {
-			dispwidth = 5000;
-		}
-		var dispheight = Math.round(this.imgheight * this.imgzoom);
-		if (dispheight > 5000) {
-			dispheight = 5000;
-		}
+		// var dispwidth = Math.round(this.imgwidth * this.imgzoom);
+		// if (dispwidth > 5000) {
+		// 	dispwidth = 5000;
+		// }
+		// var dispheight = Math.round(this.imgheight * this.imgzoom);
+		// if (dispheight > 5000) {
+		// 	dispheight = 5000;
+		// }
         // console.log("Thinks display width should be: " + dispwidth);
 
 		// set imagediv height
-		if (dispheight > 600) {
-			// document.getElementById('imagediv').style.height = '600px';
-		} else {
-			document.getElementById('imagediv').style.height = 'auto';
-		}
+		// if (dispheight > 600) {
+		// 	// document.getElementById('imagediv').style.height = '600px';
+		// } else {
+		// 	document.getElementById('imagediv').style.height = 'auto';
+		// }
 		// **** Draw the image
 		// get canvas context
 		ctx = this.imgcan.getContext('2d');
 		// make canvas image
-		var canimg = ctx.createImageData(dispwidth, dispheight);
+		var canimg = ctx.createImageData(this.imgwidth, this.imgheight);
 		// recalculate imagescaled values if necessary
 		var imgx = 0, imgy = 0, i = 0, j = 0, k = 0;
 		var imgwidth = this.imgwidth;
@@ -574,27 +574,35 @@ function imageanalysisobject() {
         // ctx.clearRect(0, 0, this.imgcan.width, this.imgcan.height);
 
 		// fill canvas image
-		imglogadd('Start Drawing Loop');
-		var imgzoom = 1;
-		var carr = this.getRGB(0);
-		for (var y = 0; y < dispheight; y += 1) {
-			for (var x = 0; x < dispwidth; x += 1) {
-				imgx = Math.floor(x / imgzoom);
-				imgy = Math.floor(y / imgzoom);
-				i = imgy * imgwidth + imgx; // index of raw image pixel
-				j = (dispheight - 1 - y) * dispwidth + x;
-				carr = this.getRGB(this.imgscaled[i]);
-				for (k = 0; k < 4; k++) {
-					(canimg.data)[4 * j + k] = carr[k];
-				}
-			}
-		}
-		imglogadd('Stop Drawing Loop');
 
         if (this.bitimg === null) {
             console.log("attempting to create bitmap")
+
+            imglogadd('Start Drawing Loop');
+            console.log('Running loop')
+            var imgzoom = 1;
+            var carr = this.getRGB(0);
+            console.log(imgwidth, imgheight)
+            for (var y = 0; y < imgheight; y += 1) {
+                for (var x = 0; x < imgwidth; x += 1) {
+                    // imgx = Math.floor(x / imgzoom);
+                    // imgy = Math.floor(y / imgzoom);
+                    // i = imgy * imgwidth + imgx; // index of raw image pixel
+                    // j = (dispheight - 1 - y) * dispwidth + x;
+                    i = y*imgwidth+x;
+                    // j = (imgheight - 1 - y) * imgwidth + x;
+                    carr = this.getRGB(this.imgscaled[i]);
+                    for (k = 0; k < 4; k++) {
+                        (canimg.data)[4 * i + k] = carr[k];
+                    }
+                }
+            }
+            imglogadd('Stop Drawing Loop');
+
             this.bitimg = await createImageBitmap(canimg, { imageOrientation: 'flipY' });
         }
+
+        // console.log("bitimg" + this.bitimg.width + ", " + this.bitimg.height)
 
         // TODO: attempting some things from Ian
         // let fitsImgData = new ImageData(canimg.data, dispwidth, dispheight);
@@ -606,36 +614,24 @@ function imageanalysisobject() {
         // Seth say's don't change this! We want it fixed now to pan
 		this.imgcan.width = imagediv.clientWidth;
 		this.imgcan.height = imagediv.clientHeight;
-
-        // if (dispwidth > imagediv.clientWidth) {
-        //     this.imgcan.width = imagediv.clientWidth;
-        //     this.imgcan.height = imagediv.clientWidth; // Try to keep square
-        // }
-
-        // if (dispheight > imagediv.clientHeight) {
-        //     let rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-        //     this.imgcan.height = imagediv.clientHeight - 2*rem;
-        // }
-        
         
         // Seth's panning
-        // ctx.translate(this.pan.x, this.pan.y);
-        // console.log(this.imgcan.width, this.imgcan.height);
-        // console.log(this.pan);
         ctx.clearRect(0, 0, this.imgcan.width, this.imgcan.height);
 
-        // Why not work?
         ctx.save();
         ctx.translate(this.pan.x, this.pan.y);
         ctx.scale(this.imgzoom, this.imgzoom);
         
-
-        // Marc's original code
-		// draw image
-		// ctx.putImageData(canimg, 0, 0);
-        
         // TODO: Currently trying to use drawImage instead with an ImageBitmap object
         // Not as laggy as before, could probably still be improved
+
+        // Set zoom scaling
+        if (this.imgzoom >= 2) {
+            ctx.imageSmoothingEnabled = false;
+        } else {
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high"
+        }
         ctx.drawImage(this.bitimg, 0, 0);
 
 		// **** Draw the analysis tools
@@ -653,8 +649,11 @@ function imageanalysisobject() {
 		// Get x and y and display them
 		scrollx = $('#imagediv').scrollLeft();
 		scrolly = $('#imagediv').scrollTop();
-		imgx = event.pageX - this.imgcan.offsetLeft + scrollx;
-		imgy = event.pageY - this.imgcan.offsetTop + scrolly - 1;
+		// imgx = event.pageX - this.imgcan.offsetLeft + scrollx;
+		// imgy = event.pageY - this.imgcan.offsetTop + scrolly - 1;
+        imgx = event.offsetX - this.pan.x;
+        imgy = event.offsetY - this.pan.y;
+
 		datax = Math.floor(imgx / this.imgzoom);
 		datay = this.imgheight - 1 - Math.floor(imgy / this.imgzoom);
 		i = datay * this.imgwidth + datax;
@@ -914,6 +913,7 @@ function imageanalysisobject() {
 		optlist = colorobj.options;
 		this.updateOptions('', '', optlist[colorobj.selectedIndex].text
 				.toUpperCase());
+        this.rescale = 1;
 		this.imagedraw();
 	}
 

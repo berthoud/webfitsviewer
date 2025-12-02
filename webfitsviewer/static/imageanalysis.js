@@ -652,6 +652,8 @@ function imageanalysisobject() {
 		scrolly = $('#imagediv').scrollTop();
 		// imgx = event.pageX - this.imgcan.offsetLeft + scrollx;
 		// imgy = event.pageY - this.imgcan.offsetTop + scrolly - 1;
+		//imgx = ( event.offsetX - this.pan.x ) / this.imgzoom;
+		//imgy = ( event.offsetY - this.pan.y ) / this.imgzoom;
         imgx = event.offsetX - this.pan.x;
         imgy = event.offsetY - this.pan.y;
 
@@ -781,7 +783,7 @@ function imageanalysisobject() {
 		ctx.putImageData(canimg, 0, 0);
 		// Move tool if it's being moved
 		if( this.toolmove != null){
-			this.toolmove.move(imgx,imgy);
+			this.toolmove.move(datax,datay);
 			this.imagedraw();
 		}
 

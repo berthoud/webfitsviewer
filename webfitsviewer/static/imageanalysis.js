@@ -804,8 +804,10 @@ function imageanalysisobject() {
 		// Get mouse coordinates
 		scrollx = $('#imagediv').scrollLeft();
 		scrolly = $('#imagediv').scrollTop();
-		imgx = event.pageX - this.imgcan.offsetLeft + scrollx;
-		imgy = event.pageY - this.imgcan.offsetTop + scrolly - 1;
+		//imgx = event.pageX - this.imgcan.offsetLeft + scrollx;
+		//imgy = event.pageY - this.imgcan.offsetTop + scrolly - 1;
+		imgx = ( event.offsetX - this.pan.x ) / this.imgzoom;
+		imgy = ( event.offsetY - this.pan.y ) / this.imgzoom;
 		// Check connection to tool object
 		this.toolmove = null;
 		for( i=0; i<this.toollist.length && this.toolmove == null; i++){
@@ -1221,7 +1223,7 @@ function imagetoolstatsobject() {
 
 	// DRAW: Draws the box with the current color at the current location.
 	this.draw = function() {
-        return // Stop this for a moment
+        //return // Stop this for a moment
 		if (this.shown & this.active) {
 			// Get the canvas
 			ctx = this.imganalobj.imgcan.getContext('2d');
@@ -1354,6 +1356,7 @@ function imagetoolstatsobject() {
 	// PICKUP: Checks if the image mouse location (x/y) is correct to pick up
 	//         the box. If so true is returned and the box is set to moving.
 	this.pickup = function(mousex,mousey){
+		console.log(mousex,this.imgx0);
 		// Ignore if not shown or inactive
 		if( ! this.shown || ! this.active) {
 			return false;

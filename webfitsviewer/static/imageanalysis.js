@@ -68,6 +68,10 @@ function imageanalysisobject() {
 	this.toolmove = null; // tool object that is being moved
 	this.mousex = 0; // x/y where the mouse was last seen
 	this.mousey = 0;
+	// Seth's panning stuff
+	this.pan = { x: 0, y: 0 }; // coordinates of top left corner of image in canvas pixels
+	this.panStart = { x: 0, y: 0};
+	this.bitimg = null;
 
 	// **** Object Functions
 	// WriteTools: writes the HTML code for the image analysis tools, a table with
@@ -494,10 +498,7 @@ function imageanalysisobject() {
 		}
 		imglogadd('Done Update Tools - Drawing');
 
-        // Seth's panning stuff
-        this.pan = { x: 0, y: 0 };
-        this.panStart = { x: 0, y: 0};
-        this.bitimg = null;
+
 
 		// **** Display and message
 		// Display Image
@@ -855,6 +856,7 @@ function imageanalysisobject() {
         this.pan.y = (newZoom*(this.pan.y - mouseY) / prevZoom) + mouseY;
 
         this.imgzoom = newZoom;
+		//console.log(this.pan.x,this.pan.y);
         this.imagedraw();
     }
 

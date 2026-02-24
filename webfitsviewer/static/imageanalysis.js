@@ -72,6 +72,10 @@ function imageanalysisobject() {
 	this.pan = { x: 0, y: 0 }; // coordinates of top left corner of image in canvas pixels
 	this.panStart = { x: 0, y: 0};
 	this.bitimg = null;
+	// Seth's panning stuff
+	this.pan = { x: 0, y: 0 }; // coordinates of top left corner of image in canvas pixels
+	this.panStart = { x: 0, y: 0};
+	this.bitimg = null;
 
 	// **** Object Functions
 	// WriteTools: writes the HTML code for the image analysis tools, a table with
@@ -145,16 +149,8 @@ function imageanalysisobject() {
                     <table><tr><td class = "tools"> \
                         <div id = "imageinfo"> \
                         Mouse&nbsp;X&nbsp;/&nbsp;Y:<br>&nbsp;<br>Value:<br>&nbsp;</div> \
-                        <td class = "tools"><form> \
-                        Zoom:<br> \
-                        <select id = "zoomselect" disabled> \
-                        <option>1/10</option> \
-                        <option>1/3</option> \
-                        <option>1x</option> \
-                        <option>3x</option> \
-                        <option>10x</option> \
-                        </select><br> \
-                        Scale:<br> \
+                        <form> \
+                        Scale: \
                         <select id = "scaleselect" disabled> \
                         <option>MinMax</option> \
                         <option>99.5%</option> \
@@ -163,8 +159,8 @@ function imageanalysisobject() {
                         <option>1 StDev</option> \
                         <option>Log</option> \
                         <option>Box</option> \
-                        </select><br> \
-                        Color:<br> \
+                        </select> \
+                        Color: \
                         <select id = "colorselect" disabled> \
                         <option>Grey</option> \
                         <option>Rainbow</option> \
@@ -412,45 +408,42 @@ function imageanalysisobject() {
 
         console.log("Image vals:" + this.imgwidth + ', ' + this.imgwidth + ', ' + this.imgheight + ', ' + this.imgheight);
 
-        // TODO: rethink how to do this with canvas scaling
-        // This code 
-		// diag = Math.sqrt(this.imgwidth * this.imgwidth + this.imgheight
-		// 		* this.imgheight);
-		// while (this.imgzoom * this.imgheight < this.imgcan.parentElement.clientHeight) {
-		// 	this.imgzoom += 0.01;
-        //     console.log(this.imgzoom)
-		// }
-        // console.log("Client width: " + this.imgcan.parentElement.clientWidth);
-        // console.log("Client height: " + this.imgcan.parentElement.clientHeight);
-		// while (this.imgzoom * this.imgheight > this.imgcan.parentElement.clientHeight) {
-		// 	this.imgzoom -= 0.01;
-        //     console.log(this.imgzoom)
-		// }
+        // Set the initial zoom
+		diag = Math.sqrt(this.imgwidth * this.imgwidth + this.imgheight
+				* this.imgheight);
+		while (this.imgzoom * this.imgwidth < this.imgcan.parentElement.clientWidth - 20) {
+			this.imgzoom += 0.01;
+		}
+        while (this.imgzoom * this.imgwidth > this.imgcan.parentElement.clientWidth - 20) {
+			this.imgzoom -= 0.01;
+		}
 
         console.log("Final zoom: " + this.imgzoom);
         
+        // To be deleted...
 		// Set zoom selection dropdown
-		zoomsel = $('#zoomselect')[0];
-		zoomsel.disabled = false;
-		if (this.imgzoom != 1.0) {
-			// If zoom > 1 -> add selected "Auto" option to select
-			option = new Option('Auto', 'Auto', true, true);
-			zoomsel.add(option, null);
-		} else {
-			// If zoom == 1 -> select 1x option
-			found = -1;
-			for (i = 0; i < zoomsel.length; i++) {
-				if (zoomsel.options[i].text == '1x')
-					found = i;
-			}
-			if (found > -1)
-				zoomsel.selectedIndex = found;
-		}
-		// Set zoomselect onChange function
-		zoomsel.callback_object = this;
-		zoomsel.onchange = function() {
-			this.callback_object.zoomhandler();
-		}
+		// zoomsel = $('#zoomselect')[0];
+		// zoomsel.disabled = false;
+		// if (this.imgzoom != 1.0) {
+		// 	// If zoom > 1 -> add selected "Auto" option to select
+		// 	option = new Option('Auto', 'Auto', true, true);
+		// 	zoomsel.add(option, null);
+		// } else {
+		// 	// If zoom == 1 -> select 1x option
+		// 	found = -1;
+		// 	for (i = 0; i < zoomsel.length; i++) {
+		// 		if (zoomsel.options[i].text == '1x')
+		// 			found = i;
+		// 	}
+		// 	if (found > -1)
+		// 		zoomsel.selectedIndex = found;
+		// }
+		// // Set zoomselect onChange function
+		// zoomsel.callback_object = this;
+		// zoomsel.onchange = function() {
+		// 	this.callback_object.zoomhandler();
+		// }
+        
 		// Set scaleselect index and onchange function
 		scalesel = $('#scaleselect')[0];
 		scalesel.disabled = false;
@@ -729,7 +722,7 @@ function imageanalysisobject() {
 		    }
 		}
 		// Message: Value and print
-		msg += '<br>Value:<br>&nbsp;&nbsp;' + val;
+		msg += '<br>Value:&nbsp;&nbsp;' + val;
 		document.getElementById('imageinfo').innerHTML = msg;
 		// **** Update Mouse analysis window
 		// make image
@@ -783,7 +776,8 @@ function imageanalysisobject() {
 		ctx.putImageData(canimg, 0, 0);
 		// Move tool if it's being moved
 		if( this.toolmove != null){
-			this.toolmove.move(datax,datay);
+            swapy = this.imgheight - datay;
+			this.toolmove.move(datax,swapy);
 			this.imagedraw();
 		}
 
@@ -806,14 +800,18 @@ function imageanalysisobject() {
 		// Get mouse coordinates
 		scrollx = $('#imagediv').scrollLeft();
 		scrolly = $('#imagediv').scrollTop();
-		//imgx = event.pageX - this.imgcan.offsetLeft + scrollx;
-		//imgy = event.pageY - this.imgcan.offsetTop + scrolly - 1;
-		imgx = ( event.offsetX - this.pan.x ) / this.imgzoom;
-		imgy = ( event.offsetY - this.pan.y ) / this.imgzoom;
+		// imgx = event.pageX - this.imgcan.offsetLeft + scrollx;
+		// imgy = event.pageY - this.imgcan.offsetTop + scrolly - 1;
+        imgx = event.offsetX - this.pan.x;
+        imgy = event.offsetY - this.pan.y;
+
+        datax = Math.floor(imgx / this.imgzoom);
+		datay = Math.round(imgy / this.imgzoom);
+
 		// Check connection to tool object
 		this.toolmove = null;
 		for( i=0; i<this.toollist.length && this.toolmove == null; i++){
-			if( this.toollist[i].pickup(imgx, imgy)) {
+			if( this.toollist[i].pickup(datax, datay)) {
 				this.toolmove = this.toollist[i];
 			}
 		}
@@ -858,6 +856,8 @@ function imageanalysisobject() {
 
         this.pan.x = (newZoom*(this.pan.x - mouseX) / prevZoom) + mouseX;
         this.pan.y = (newZoom*(this.pan.y - mouseY) / prevZoom) + mouseY;
+
+        console.log(this.pan.x, this.pan.y)
 
         this.imgzoom = newZoom;
 		//console.log(this.pan.x,this.pan.y);
@@ -1217,23 +1217,28 @@ function imagetoolstatsobject() {
 		// Assign variables
 		this.imganalobj = imganalobj;
 		// Initialize box size
-		this.datax0 = Math.round(this.imganalobj.imgwidth / 10);
-		this.datax1 = this.imganalobj.imgwidth - this.datax0;
-		this.datay0 = Math.round(this.imganalobj.imgheight / 10);
-		this.datay1 = this.imganalobj.imgheight - this.datay0;
+		// this.datax0 = Math.round(this.imganalobj.imgwidth / 10);
+		// this.datax1 = this.imganalobj.imgwidth - this.datax0;
+		// this.datay0 = Math.round(this.imganalobj.imgheight / 10);
+		// this.datay1 = this.imganalobj.imgheight - this.datay0;
+
+        this.imgx0 = Math.round(this.imganalobj.imgwidth*3 / 8);
+		this.imgx1 = this.imganalobj.imgwidth - this.imgx0;
+		this.imgy0 = Math.round(this.imganalobj.imgheight*3 / 8);
+		this.imgy1 = this.imganalobj.imgheight - this.imgy0;
 	}
 
 	// DRAW: Draws the box with the current color at the current location.
 	this.draw = function() {
-        //return // Stop this for a moment
+        // return // Stop this for a moment
 		if (this.shown & this.active) {
 			// Get the canvas
 			ctx = this.imganalobj.imgcan.getContext('2d');
 			// Draw the square
 			ctx.strokeStyle = this.color;
-			ctx.lineWidth = 2;
-			ctx.strokeRect(this.imgx0, this.imgy0, this.imgx1 - this.imgx0,
-					this.imgy1 - this.imgy0);
+			ctx.lineWidth = Math.max(0.5, 3 * 1/this.imganalobj.imgzoom);
+            ctx.strokeRect(this.imgx0, this.imgy0, this.imgx1 - this.imgx0,
+                this.imgy1 - this.imgy0);
 		}
 	}
 
@@ -1246,36 +1251,137 @@ function imagetoolstatsobject() {
 		}
 		// Get raw and sorted data for statistics
 		imglogadd('Analstats: Going');
-		if (this.shown) { // If box is shown -> get contents
+		this.calculatestats().then( (results) => {
+
+            // Unpack results
+            imgmed = results[0];
+            imgavg = results[1];
+            imgstd = results[2];
+            sum = results[3];
+            imgn = results[4];
+
+            imglogadd('Analstats: Done');
+            // Display statistics
+            $('#imagetoolsoutput1')
+                    .html('<form> \
+                        <input type="checkbox" id="statsbox">\
+                        <span id="statscolor">&nbsp;Box&nbsp;</span><br />Min: '
+                        + this.imgmin + '<br />Max: ' + this.imgmax + 
+                        '<br />Npix: ' + imgn);
+            $('#imagetoolsoutput2').html(
+                    'Median: ' + imgmed + '<br />Average: ' + imgavg
+                            + '<br />StdDev: ' + imgstd + '<br />Sum: '
+                            + this.imganalobj.valueformat(sum) );
+            // Set [./]box callback functions
+            statsbox = $('#statsbox')[0];
+            statsbox.callback_object = this;
+            statsbox.onchange = function() {
+                this.callback_object.checkhandler();
+            }
+            statsbox.checked = this.shown;
+            if(this.shown){
+                textcol = {'red':'black','lime':'black','blue':'white',
+                        'black':'white'}[this.color];
+                $('#statscolor').css('background',this.color);
+                $('#statscolor').css('color',textcol);
+                statscolor = $('#statscolor')[0]
+                statscolor.callback_object = this;
+                statscolor.onclick = function() {
+                    this.callback_object.boxcolor();
+                }
+            }
+            // If ImageAnalysisObject.imgscale=='Box' -> call updateOptions
+            if(this.imganalobj.imgscale=='Box'){
+                this.imganalobj.updateOptions('','Box','');
+            }
+        })
+
+
+		// Display statistics
+		// $('#imagetoolsoutput1')
+		// 		.html('<form> \
+		// 			   <input type="checkbox" id="statsbox">\
+		// 			   <span id="statscolor">&nbsp;Box&nbsp;</span><br />Min: '
+		// 			  + this.imgmin + '<br />Max: ' + this.imgmax + 
+		// 			  '<br />Npix: ' + imgn);
+		// $('#imagetoolsoutput2').html(
+		// 		'Median: ' + imgmed + '<br />Average: ' + imgavg
+		// 				+ '<br />StdDev: ' + imgstd + '<br />Sum: '
+		// 				+ this.imganalobj.valueformat(sum) );
+		// // Set [./]box callback functions
+		// statsbox = $('#statsbox')[0];
+		// statsbox.callback_object = this;
+		// statsbox.onchange = function() {
+		// 	this.callback_object.checkhandler();
+		// }
+		// statsbox.checked = this.shown;
+		// if(this.shown){
+		// 	textcol = {'red':'black','lime':'black','blue':'white',
+		// 			   'black':'white'}[this.color];
+		// 	$('#statscolor').css('background',this.color);
+		// 	$('#statscolor').css('color',textcol);
+		// 	statscolor = $('#statscolor')[0]
+		// 	statscolor.callback_object = this;
+		// 	statscolor.onclick = function() {
+		// 		this.callback_object.boxcolor();
+		// 	}
+		// }
+		// // If ImageAnalysisObject.imgscale=='Box' -> call updateOptions
+		// if(this.imganalobj.imgscale=='Box'){
+		// 	this.imganalobj.updateOptions('','Box','');
+		// }
+	}
+
+    this.calculatestats = async function() {
+        boxdata = new Array()
+        if (this.shown) { // If box is shown -> get contents
 			// Calculate box shape from imganalobj
 			datady = this.imganalobj.imgheight;
 			zoom = this.imganalobj.imgzoom;
-			this.imgx0 = this.datax0 * zoom;
-			this.imgx1 = this.datax1 * zoom;
-			this.imgy0 = (datady-this.datay1) * zoom;
-			this.imgy1 = (datady-this.datay0) * zoom;
-			// Get data and sort
-			var boxdata = new Array();
-			for (yi = this.datay0; yi < this.datay1; yi += 1) {
+			// this.imgx0 = this.datax0;
+			// this.imgx1 = this.datax1;
+			// this.imgy0 = (datady-this.datay1);
+			// this.imgy1 = (datady-this.datay0);
+            
+            // Get data and sort
+			// var boxdata = new Array();
+			// for (yi = this.datay0; yi < this.datay1; yi += 1) {
+			// 	yoff = yi * this.imganalobj.imgwidth;
+			// 	x0 = yoff + this.datax0;
+			// 	x1 = yoff + this.datax1;
+			// 	adddata = this.imganalobj.imgraw.slice(x0, x1);
+			// 	boxdata.push.apply(boxdata,adddata); // Append to array
+			// }
+
+            for (yi = this.imgy0; yi < this.imgy1; yi += 1) {
 				yoff = yi * this.imganalobj.imgwidth;
-				x0 = yoff + this.datax0;
-				x1 = yoff + this.datax1;
+				x0 = yoff + this.imgx0;
+				x1 = yoff + this.imgx1;
 				adddata = this.imganalobj.imgraw.slice(x0, x1);
 				boxdata.push.apply(boxdata,adddata); // Append to array
 			}
+
 			boxdata=boxdata.filter(function(x) { return !isNaN(x);});
 			imglogadd('Analstats: Got data');
 			boxdata.sort(function callback(a, b) {
 				return a - b;
 			});
+
+            console.log("Calculated box data")
+
 		} else {
 			// Get sorted data from imganalobj
 			var npix = this.imganalobj.imgwidth * this.imganalobj.imgheight - this.imganalobj.nnans;
-			var boxdata = this.imganalobj.imgrawsort.slice(0,npix);
+			boxdata = this.imganalobj.imgrawsort.slice(0,npix);
 		}
 		imglogadd('Analstats: Got Sorted data');
+
+        // DATA: This needs to be in the separate thread
 		// Calculate statistics
 		imgn = boxdata.length;
+
+        console.log("Found npix: " + boxdata.length)
+
 		this.imgmin = this.imganalobj.valueformat(boxdata[0]);
 		this.imgmax = this.imganalobj.valueformat(boxdata[imgn - 1]);
 		imgmed = this.imganalobj.valueformat(boxdata[Math.round(imgn / 2)]);
@@ -1296,40 +1402,9 @@ function imagetoolstatsobject() {
 		imgavg = this.imganalobj.valueformat(imgavg);
 		imgstd = this.imganalobj.valueformat(imgstd);
 		imglogadd('Analstats: Got stats');
-		// Display statistics
-		$('#imagetoolsoutput1')
-				.html('<form> \
-					   <input type="checkbox" id="statsbox">\
-					   <span id="statscolor">&nbsp;Box&nbsp;</span><br />Min: '
-					  + this.imgmin + '<br />Max: ' + this.imgmax + 
-					  '<br />Npix: ' + imgn);
-		$('#imagetoolsoutput2').html(
-				'Median: ' + imgmed + '<br />Average: ' + imgavg
-						+ '<br />StdDev: ' + imgstd + '<br />Sum: '
-						+ this.imganalobj.valueformat(sum) );
-		// Set [./]box callback functions
-		statsbox = $('#statsbox')[0];
-		statsbox.callback_object = this;
-		statsbox.onchange = function() {
-			this.callback_object.checkhandler();
-		}
-		statsbox.checked = this.shown;
-		if(this.shown){
-			textcol = {'red':'black','lime':'black','blue':'white',
-					   'black':'white'}[this.color];
-			$('#statscolor').css('background',this.color);
-			$('#statscolor').css('color',textcol);
-			statscolor = $('#statscolor')[0]
-			statscolor.callback_object = this;
-			statscolor.onclick = function() {
-				this.callback_object.boxcolor();
-			}
-		}
-		// If ImageAnalysisObject.imgscale=='Box' -> call updateOptions
-		if(this.imganalobj.imgscale=='Box'){
-			this.imganalobj.updateOptions('','Box','');
-		}
-	}
+
+        return [imgmed, imgavg, imgstd, sum, imgn];
+    }
 
 	// CHECKHANDLER: Handles check events from the checkbox. Toogles the shown
 	// flag, updates the widget and redraws the imageanalysisobject
@@ -1358,7 +1433,7 @@ function imagetoolstatsobject() {
 	// PICKUP: Checks if the image mouse location (x/y) is correct to pick up
 	//         the box. If so true is returned and the box is set to moving.
 	this.pickup = function(mousex,mousey){
-		console.log(mousex,this.imgx0);
+        zoom = this.imganalobj.imgzoom;
 		// Ignore if not shown or inactive
 		if( ! this.shown || ! this.active) {
 			return false;
@@ -1367,8 +1442,28 @@ function imagetoolstatsobject() {
 			this.dropoff();
 			return false;
 		// Check if mouse is inside the box
-		} else if( mousex > this.imgx0-3 && mousex < this.imgx1+3 &&
-		           mousey > this.imgy0-3 && mousey < this.imgy1+3 ){
+		// } else if( mousex > this.imgx0-3 && mousex < this.imgx1+3 &&
+		//            mousey > this.imgy0-3 && mousey < this.imgy1+3 ){
+		// 	// Initialize move
+		// 	this.pickupx0 = this.imgx0;
+		// 	this.pickupx1 = this.imgx1;
+		// 	this.pickupy0 = this.imgy0;
+		// 	this.pickupy1 = this.imgy1;
+		// 	this.mousex0 = mousex;
+		// 	this.mousey0 = mousey;
+		// 	// Check movement of edges
+		// 	if( mousex < this.imgx0+3) { this.moving = this.moving + 1; }
+		// 	if( mousex > this.imgx1-3) { this.moving = this.moving + 2; }
+		// 	if( mousey < this.imgy0+3) { this.moving = this.moving + 4; }
+		// 	if( mousey > this.imgy1-3) { this.moving = this.moving + 8; }
+		// 	// Check movement of full box
+		// 	if( !this.moving ){
+		// 		this.moving = 15;
+		// 	}
+		// 	// Return
+		// 	return true;
+		} else if( mousex > this.imgx0-3/zoom && mousex < this.imgx1+3/zoom &&
+		           mousey > this.imgy0-3/zoom && mousey < this.imgy1+3 ){
 			// Initialize move
 			this.pickupx0 = this.imgx0;
 			this.pickupx1 = this.imgx1;
@@ -1377,10 +1472,10 @@ function imagetoolstatsobject() {
 			this.mousex0 = mousex;
 			this.mousey0 = mousey;
 			// Check movement of edges
-			if( mousex < this.imgx0+3) { this.moving = this.moving + 1; }
-			if( mousex > this.imgx1-3) { this.moving = this.moving + 2; }
-			if( mousey < this.imgy0+3) { this.moving = this.moving + 4; }
-			if( mousey > this.imgy1-3) { this.moving = this.moving + 8; }
+			if( mousex < this.imgx0+3/zoom) { this.moving = this.moving + 1; }
+			if( mousex > this.imgx1-3/zoom) { this.moving = this.moving + 2; }
+			if( mousey < this.imgy0+3/zoom) { this.moving = this.moving + 4; }
+			if( mousey > this.imgy1-3/zoom) { this.moving = this.moving + 8; }
 			// Check movement of full box
 			if( !this.moving ){
 				this.moving = 15;
@@ -1397,8 +1492,8 @@ function imagetoolstatsobject() {
 	this.move = function(mousex,mousey){
 		// calculate maximal valid indices
 		zoom = this.imganalobj.imgzoom;
-		imgdx = Math.round(this.imganalobj.imgwidth * zoom) - 1;
-		imgdy = Math.round(this.imganalobj.imgheight * zoom) - 1;
+		imgdx = Math.round(this.imganalobj.imgwidth) - 1;
+		imgdy = Math.round(this.imganalobj.imgheight) - 1;
 		// calculate offsets
 		mousedx = mousex-this.mousex0;
 		mousedy = mousey-this.mousey0;
@@ -1440,10 +1535,10 @@ function imagetoolstatsobject() {
 			// Calculate new data coordinates
 			datady = this.imganalobj.imgheight;
 			zoom = this.imganalobj.imgzoom;
-			this.datax0 = Math.round(this.imgx0/zoom);
-			this.datax1 = Math.round(this.imgx1/zoom);
-			this.datay0 = datady - Math.round(this.imgy1/zoom);
-			this.datay1 = datady - Math.round(this.imgy0/zoom);
+			this.datax0 = Math.round(this.imgx0);
+			this.datax1 = Math.round(this.imgx1);
+			this.datay0 = datady - Math.round(this.imgy1);
+			this.datay1 = datady - Math.round(this.imgy0);
 			// Clear moving
 			this.moving = 0;
 			// Update
@@ -1502,22 +1597,85 @@ function imagetoolpsfobject() {
 		// Assign variables
 		this.imganalobj = imganalobj;
 		// Initialize box size
-		this.datax0 = Math.round(this.imganalobj.imgwidth / 10);
-		this.datax1 = this.imganalobj.imgwidth - this.datax0;
-		this.datay0 = Math.round(this.imganalobj.imgheight / 10);
-		this.datay1 = this.imganalobj.imgheight - this.datay0;
+		// this.datax0 = Math.round(this.imganalobj.imgwidth*3 / 8);
+		// this.datax1 = this.imganalobj.imgwidth - this.datax0;
+		// this.datay0 = Math.round(this.imganalobj.imgheight*3 / 8);
+		// this.datay1 = this.imganalobj.imgheight - this.datay0;
+		// // Check if it's too large
+		// if( this.datax1-this.datax0 > this.boxmaxsize ){
+		// 	xmed = Math.round(this.imganalobj.imgwidth / 2);
+		// 	this.datax0 = xmed - this.boxmaxsize / 2;
+		// 	this.datax1 = xmed + this.boxmaxsize / 2;
+		// }
+		// if( this.datay1-this.datay0 > this.boxmaxsize ){
+		// 	ymed = Math.round(this.imganalobj.imgheight / 2);
+		// 	this.datay0 = ymed - this.boxmaxsize / 2;
+		// 	this.datay1 = ymed + this.boxmaxsize / 2;
+		// }
+
+        // Initialize box size
+        this.imgx0 = Math.round(this.imganalobj.imgwidth/10);
+		this.imgx1 = this.imganalobj.imgwidth - this.imgx0;
+		this.imgy0 = Math.round(this.imganalobj.imgheight/10);
+		this.imgy1 = this.imganalobj.imgheight - this.imgy0;
 		// Check if it's too large
-		if( this.datax1-this.datax0 > this.boxmaxsize ){
+		if( this.imgx1-this.imgx0 > this.boxmaxsize ){
+            console.log("too large")
 			xmed = Math.round(this.imganalobj.imgwidth / 2);
-			this.datax0 = xmed - this.boxmaxsize / 2;
-			this.datax1 = xmed + this.boxmaxsize / 2;
+			this.imgx0 = xmed - this.boxmaxsize / 2;
+			this.imgx1 = xmed + this.boxmaxsize / 2;
 		}
-		if( this.datay1-this.datay0 > this.boxmaxsize ){
+		if( this.imgy1-this.imgy0 > this.boxmaxsize ){
 			ymed = Math.round(this.imganalobj.imgheight / 2);
-			this.datay0 = ymed - this.boxmaxsize / 2;
-			this.datay1 = ymed + this.boxmaxsize / 2;
+			this.imgy0 = ymed - this.boxmaxsize / 2;
+			this.imgy1 = ymed + this.boxmaxsize / 2;
 		}
 	}
+
+    this.coordstoradec = function(coordx, coordy) {
+        let msg = "";
+
+        // Get the RA
+        let hr = Math.floor(coordx/15);
+        let mn = Math.floor(4*coordx-60*hr);
+        let sc = 240*coordx-3600*hr-60*mn;
+        if(mn<10.0){
+            mn = '0'+mn.toFixed(0);
+        } else {
+            mn = mn.toFixed(0);
+        }
+        if(sc<10.0){
+            sc = '0'+sc.toFixed(2);
+        } else {
+            sc = sc.toFixed(2);
+        }
+        msg += this.imganalobj.coordlblx + ' ' + hr.toFixed(0) + 'h' + mn + 'm' + sc + 's';
+        
+        let sn = '';
+        // Get the DEC
+        if(coordy<0){
+            sn='-';
+            coordy = -coordy;
+        } else {
+            sn='';
+        }
+        let dg = Math.floor(coordy);
+        mn = Math.floor(60*coordy-60*dg);
+        sc = 3600*coordy-3600*dg-60*mn;
+        if(mn<10.0){
+            mn = '0'+mn.toFixed(0);
+        } else {
+            mn = mn.toFixed(0);
+        }
+        if(sc<10.0){
+            sc = '0'+sc.toFixed(1);
+        } else {
+            sc = sc.toFixed(1);
+        }
+        msg += ' / ' + this.imganalobj.coordlbly + ' ' + sn + dg.toFixed(0) + '&deg;' + mn + '\'' + sc + '"';
+
+        return msg;
+    }
 
 	// DRAW: Draws the box with the current color at the current location.
 	this.draw = function() {
@@ -1530,11 +1688,11 @@ function imagetoolpsfobject() {
 			ctx.strokeRect(this.imgx0, this.imgy0, this.imgx1 - this.imgx0,
 					this.imgy1 - this.imgy0);
 			// Get Zoom
-			zoom = this.imganalobj.imgzoom;
-			centerx = (this.centerx + 0.5) * zoom;
-			centery = ( this.imganalobj.imgheight - this.centery - 0.5 ) * zoom;
-			sig1 = this.sig1 * zoom;
-			sig2 = this.sig2 * zoom;
+			// zoom = this.imganalobj.imgzoom;
+			centerx = (this.centerx + 0.5);
+			centery = ( this.imganalobj.imgheight - this.centery - 0.5 );
+			sig1 = this.sig1;
+			sig2 = this.sig2;
 			ctx.beginPath();
 			ctx.ellipse(centerx,centery,sig1,sig2,-this.theta,0.0,2*Math.PI);
 			ctx.stroke();
@@ -1550,16 +1708,25 @@ function imagetoolpsfobject() {
 		}
 		imglogadd('AnalPsf: Going');
 		//** Get the data into boxdata and sorted to boxsort (latter w/o Nans)
-		// Calculate box shape from imganalobj
-		nx = this.datax1 - this.datax0;
-		ny = this.datay1 - this.datay0;
+		
+        // Calculate box shape from imganalobj
+		// nx = this.datax1 - this.datax0;
+		// ny = this.datay1 - this.datay0;
+        nx = this.imgx1 - this.imgx0;
+		ny = this.imgy1 - this.imgy0;
 		datady = this.imganalobj.imgheight;
-		zoom = this.imganalobj.imgzoom;
-		this.imgx0 = this.datax0 * zoom;
-		this.imgx1 = this.datax1 * zoom;
-		this.imgy0 = (datady-this.datay1) * zoom; // HERE: y0 = ..y1
-		this.imgy1 = (datady-this.datay0) * zoom; //       y1 = ..y0 to keep y0<y1
-		// Get data -> boxdata
+
+        // this.imgx0 = this.datax0;
+		// this.imgx1 = this.datax1;
+		// this.imgy0 = (datady-this.datay1); // HERE: y0 = ..y1
+		// this.imgy1 = (datady-this.datay0); //       y1 = ..y0 to keep y0<y1
+		
+        this.datax0 = this.imgx0;
+		this.datax1 = this.imgx1;
+		this.datay0 = (datady-this.imgy1); // HERE: y0 = ..y1
+		this.datay1 = (datady-this.imgy0);
+
+        // Get data -> boxdata
 		var boxdata = new Array();
 		for (yi = this.datay0; yi < this.datay1; yi += 1) {
 			yoff = yi * this.imganalobj.imgwidth;
@@ -1568,7 +1735,8 @@ function imagetoolpsfobject() {
 			adddata = this.imganalobj.imgraw.slice(x0, x1);
 			boxdata.push.apply(boxdata,adddata); // Append to array
 		}
-		// Remove Nan's and sort
+		
+        // Remove Nan's and sort
 		boxsort=boxdata.filter(function(x) { return !isNaN(x);});
 		boxsort.sort(function callback(a, b) {
 			return a - b;
@@ -1655,12 +1823,26 @@ function imagetoolpsfobject() {
 		this.off = off;
 		this.centerx = centerx + this.datax0;
 		this.centery = centery + this.datay0;
+        center_in_radec = "";
+
+        if (this.imganalobj.coords) {
+            console.log(this.imganalobj.coordx0, this.imganalobj.coordy0)
+
+            let p0x = this.imganalobj.coordx0 + this.centerx * this.imganalobj.coordcolx + this.centery * this.imganalobj.coordrowx;
+            let p0y = this.imganalobj.coordy0 + this.centerx * this.imganalobj.coordcoly + this.centery * this.imganalobj.coordrowy;
+
+            if(this.imganalobj.coordlblx.toUpperCase().includes('RA') && this.imganalobj.coordlbly.toUpperCase().includes('DEC')){
+                    center_in_radec = "Center: " + this.coordstoradec(p0x, p0y) + "<br />";
+            }
+        }
+
 		//** Display Statistics
 		$('#imagetoolsoutput1')
 		.html('<form> \
 			   <span id="psfcolor">&nbsp;Color&nbsp;</span><br /> \
 			   CenterX: ' + this.imganalobj.valueformat(this.centerx) +
-			  '<br />CenterY: ' + this.imganalobj.valueformat(this.centery) + 
+			  '<br />CenterY: ' + this.imganalobj.valueformat(this.centery) +
+              '<br />' + center_in_radec + 
 			  '<br />Off: ' + this.imganalobj.valueformat(off) );
 		$('#imagetoolsoutput2').html(
 				'Ampl: ' + this.imganalobj.valueformat(this.ampl) +
@@ -1801,8 +1983,8 @@ function imagetoolpsfobject() {
 	this.move = function(mousex,mousey){
 		// calculate maximal valid indices
 		zoom = this.imganalobj.imgzoom;
-		imgdx = Math.round(this.imganalobj.imgwidth * zoom) - 1;
-		imgdy = Math.round(this.imganalobj.imgheight * zoom) - 1;
+		imgdx = Math.round(this.imganalobj.imgwidth) - 1;
+		imgdy = Math.round(this.imganalobj.imgheight) - 1;
 		// calculate offsets
 		mousedx = mousex-this.mousex0;
 		mousedy = mousey-this.mousey0;
@@ -1817,30 +1999,30 @@ function imagetoolpsfobject() {
 			if( this.imgx0 < 0 ) { this.imgx0 = 0; }
 			if( this.imgx1 < 5 ) { this.imgx1 = 5; }
 			if( this.imgx1 < this.imgx0+5) { this.imgx1 = this.imgx0+5; }
-			if( this.imgx1 > this.imgx0+this.boxmaxsize*zoom ) { 
-				this.imgx1 = this.imgx0+this.boxmaxsize*zoom; }
+			if( this.imgx1 > this.imgx0+this.boxmaxsize ) { 
+				this.imgx1 = this.imgx0+this.boxmaxsize; }
 		} else {
 			// Check right
 			if( this.imgx1 > imgdx ) { this.imgx1 = imgdx; }
 			if( this.imgx0 > imgdx-5) { this.imgx0 = imgdx-5; }
 			if( this.imgx0 > this.imgx1-5) { this.imgx0 = this.imgx1-5; }
-			if( this.imgx0 < this.imgx1-this.boxmaxsize*zoom ) {
-				this.imgx0 = this.imgx1-this.boxmaxsize*zoom; }
+			if( this.imgx0 < this.imgx1-this.boxmaxsize ) {
+				this.imgx0 = this.imgx1-this.boxmaxsize; }
 		}
 		if( mousedy < 0){
 			// Check top
 			if( this.imgy0 < 0 ) { this.imgy0 = 0; }
 			if( this.imgy1 < 5 ) { this.imgy1 = 5; }
 			if( this.imgy1 < this.imgy0+5) { this.imgy1 = this.imgy0+5; }
-			if( this.imgy1 > this.imgy0+this.boxmaxsize*zoom ) { 
-				this.imgy1 = this.imgy0+this.boxmaxsize*zoom; }
+			if( this.imgy1 > this.imgy0+this.boxmaxsize ) { 
+				this.imgy1 = this.imgy0+this.boxmaxsize; }
 		} else {
 			// Check bottom
 			if( this.imgy1 > imgdy ) { this.imgy1 = imgdy; }
 			if( this.imgy0 > imgdy-5) { this.imgy0 = imgdy-5; }
 			if( this.imgy0 > this.imgy1-5) { this.imgy0 = this.imgy1-5; }			
-			if( this.imgy0 < this.imgy1-this.boxmaxsize*zoom ) { 
-				this.imgy0 = this.imgy1-this.boxmaxsize*zoom; }
+			if( this.imgy0 < this.imgy1-this.boxmaxsize ) { 
+				this.imgy0 = this.imgy1-this.boxmaxsize; }
 		}
 	}
 	
@@ -1851,11 +2033,11 @@ function imagetoolpsfobject() {
 		if( this.moving ){
 			// Calculate new data coordinates
 			datady = this.imganalobj.imgheight;
-			zoom = this.imganalobj.imgzoom;
-			this.datax0 = Math.round(this.imgx0/zoom);
-			this.datax1 = Math.round(this.imgx1/zoom);
-			this.datay0 = datady - Math.round(this.imgy1/zoom);
-			this.datay1 = datady - Math.round(this.imgy0/zoom);
+			// zoom = this.imganalobj.imgzoom;
+			this.datax0 = Math.round(this.imgx0);
+			this.datax1 = Math.round(this.imgx1);
+			this.datay0 = datady - Math.round(this.imgy1);
+			this.datay1 = datady - Math.round(this.imgy0);
 			// Clear moving
 			this.moving = 0;
 			// Update
@@ -1881,7 +2063,7 @@ function imagetoollineobject() {
 	this.name = ''; // name that the tool has for the user
 	this.active = false; // Flag indicating if the tool is used
 	this.shown = true; // Flag indicating if the box is shown
-	this.color = 'lime'; // Color of the frame
+	this.color = 'red'; // Color of the frame
 	// this.boxmaxsize = 50; // Maximal size of the box in data units
 	this.datax0 = 0;  // DATA coordinates: coordinates of the box in the
 	this.datax1 = 10; // unscaled data frame. Coordinates
@@ -1930,13 +2112,17 @@ function imagetoollineobject() {
 			ctx = this.imganalobj.imgcan.getContext('2d');
 			// Draw the square
 			ctx.strokeStyle = this.color;
-			ctx.lineWidth = 2;
+            // Try and keep the linewidth somewhat consistent when zooming
+			ctx.lineWidth = Math.max(0.5, 2 * 1/this.imganalobj.imgzoom);
             ctx.beginPath();
             ctx.moveTo(this.imgx0, this.imgy0);
             ctx.lineTo(this.imgx1, this.imgy1);
             ctx.stroke();
-			ctx.strokeRect(this.imgx0-1, this.imgy0-1, 3,3);		
-			ctx.strokeRect(this.imgx1-1, this.imgy1-1, 3,3);		
+            ctx.fillStyle = this.color;
+            
+            boxsize = Math.max(1, 6 * 1/this.imganalobj.imgzoom);
+            ctx.fillRect(this.imgx0-boxsize/2, this.imgy0-boxsize/2, boxsize,boxsize);		
+            ctx.fillRect(this.imgx1-boxsize/2, this.imgy1-boxsize/2, boxsize,boxsize);	
 		}
 	}
 
@@ -1995,10 +2181,10 @@ function imagetoollineobject() {
 		imglogadd('AnalLine: Going');
         datady = this.imganalobj.imgheight;
 		zoom = this.imganalobj.imgzoom;
-		this.imgx0 = this.datax0 * zoom;
-		this.imgx1 = this.datax1 * zoom;
-		this.imgy0 = (datady-this.datay0) * zoom;
-		this.imgy1 = (datady-this.datay1) * zoom;
+		this.imgx0 = this.datax0;
+		this.imgx1 = this.datax1;
+		this.imgy0 = (datady-this.datay0);
+		this.imgy1 = (datady-this.datay1);
 
         console.log("DATAY: " + this.datay0 + ", " + this.datay1);
 
@@ -2046,9 +2232,9 @@ function imagetoollineobject() {
         let step_x = (x1-x0) / this.line_len;
         let step_y = (y1-y0) / this.line_len;
 
-        console.log(x0, y0);
-        console.log(x1, y1);
-        console.log(this.line_len);
+        // console.log(x0, y0);
+        // console.log(x1, y1);
+        // console.log(this.line_len);
 
         // TODO: Decide whether this should double count pixels or not (which
         // it currently does)
@@ -2071,10 +2257,10 @@ function imagetoollineobject() {
             }
         }
 
-        console.log('PSF Data:');
-        console.log(psf_i);
-        let psf_max = Math.max(...psf_i);
-        console.log(psf_max);
+        // console.log('PSF Data:');
+        // console.log(psf_i);
+        // let psf_max = Math.max(...psf_i);
+        // console.log(psf_max);
 
         const chart_ctx = document.getElementById('psf_chart');
 
@@ -2086,7 +2272,7 @@ function imagetoollineobject() {
                 datasets: [{
                     label: 'Raw Counts',
                     data: psf_i,
-                    borderWidth: 1,
+                    borderWidth: 2,
                     backgroundColor: this.color,
                     borderColor: this.color,
                 }]
@@ -2119,7 +2305,7 @@ function imagetoollineobject() {
                 datasets: [{
                     label: 'Raw Counts',
                     data: psf_i,
-                    borderWidth: 1,
+                    borderWidth: 2,
                     backgroundColor: this.color,
                     borderColor: this.color,
                 }]
@@ -2202,6 +2388,9 @@ function imagetoollineobject() {
 	// PICKUP: Checks if the image mouse location (x/y) is correct to pick up
 	//         the box. If so true is returned and the box is set to moving.
 	this.pickup = function(mousex,mousey){
+        console.log("Line pickup at:");
+        console.log(mousex, mousey)
+        console.log(this.imgx0, this.imgy0, this.imgx1, this.imgy1);
 		// Ignore if not shown or inactive
 		if( ! this.shown || ! this.active) {
 			return false;
@@ -2254,17 +2443,19 @@ function imagetoollineobject() {
 	this.move = function(mousex,mousey){
 		// calculate maximal valid indices
 		zoom = this.imganalobj.imgzoom;
-		imgdx = Math.round(this.imganalobj.imgwidth * zoom) - 1;
-		imgdy = Math.round(this.imganalobj.imgheight * zoom) - 1;
-		// calculate offsets
+
+        // Set the limits
+		imgdx = Math.round(this.imganalobj.imgwidth) - 1;
+		imgdy = Math.round(this.imganalobj.imgheight) - 1;
+		
+        // Calculate mouse offsets
 		mousedx = mousex-this.mousex0;
 		mousedy = mousey-this.mousey0;
+
+        // Debug
         console.log("Moving: " + this.moving);
-		// calculate new coordinates
-		// if(this.moving & 1) { this.imgx0 = this.pickupx0+mousedx; }
-		// if(this.moving & 2) { this.imgx1 = this.pickupx1+mousedx; }
-		// if(this.moving & 4) { this.imgy0 = this.pickupy0+mousedy; }
-		// if(this.moving & 8) { this.imgy1 = this.pickupy1+mousedy; }
+        console.log(this.pickupx0, this.pickupy0, this.pickupx1, this.pickupy1);
+
         if (this.moving & 1) {
             this.imgx0 = this.pickupx0+mousedx;
             this.imgy0 = this.pickupy0+mousedy;
@@ -2278,32 +2469,20 @@ function imagetoollineobject() {
 		if( mousedx < 0 ){
 			// Check left
 			if( this.imgx0 < 0 ) { this.imgx0 = 0; }
-			if( this.imgx1 < 5 ) { this.imgx1 = 5; }
-			// if( this.imgx1 < this.imgx0+5) { this.imgx1 = this.imgx0+5; }
-			// if( this.imgx1 > this.imgx0+this.boxmaxsize*zoom ) { 
-			// 	this.imgx1 = this.imgx0+this.boxmaxsize*zoom; }
+			if( this.imgx1 < 0 ) { this.imgx1 = 0; }
 		} else {
 			// Check right
 			if( this.imgx1 > imgdx ) { this.imgx1 = imgdx; }
-			if( this.imgx0 > imgdx-5) { this.imgx0 = imgdx-5; }
-			// if( this.imgx0 > this.imgx1-5) { this.imgx0 = this.imgx1-5; }
-			// if( this.imgx0 < this.imgx1-this.boxmaxsize*zoom ) {
-			// 	this.imgx0 = this.imgx1-this.boxmaxsize*zoom; }
+			if( this.imgx0 > imgdx) { this.imgx0 = imgdx; }
 		}
 		if( mousedy < 0){
 			// Check top
 			if( this.imgy0 < 0 ) { this.imgy0 = 0; }
-			if( this.imgy1 < 5 ) { this.imgy1 = 5; }
-			// if( this.imgy1 < this.imgy0+5) { this.imgy1 = this.imgy0+5; }
-			// if( this.imgy1 > this.imgy0+this.boxmaxsize*zoom ) { 
-			// 	this.imgy1 = this.imgy0+this.boxmaxsize*zoom; }
+			if( this.imgy1 < 0 ) { this.imgy1 = 0; }
 		} else {
 			// Check bottom
 			if( this.imgy1 > imgdy ) { this.imgy1 = imgdy; }
-			if( this.imgy0 > imgdy-5) { this.imgy0 = imgdy-5; }
-			// if( this.imgy0 > this.imgy1-5) { this.imgy0 = this.imgy1-5; }			
-			// if( this.imgy0 < this.imgy1-this.boxmaxsize*zoom ) { 
-			// 	this.imgy0 = this.imgy1-this.boxmaxsize*zoom; }
+			if( this.imgy0 > imgdy) { this.imgy0 = imgdy; }
 		}
 	}
 	
@@ -2315,13 +2494,15 @@ function imagetoollineobject() {
 			// Calculate new data coordinates
 			datady = this.imganalobj.imgheight;
 			zoom = this.imganalobj.imgzoom;
-			this.datax0 = Math.round(this.imgx0/zoom);
-			this.datax1 = Math.round(this.imgx1/zoom);
-			this.datay0 = this.imganalobj.imgheight - Math.round(this.imgy0/zoom);
-			this.datay1 = this.imganalobj.imgheight - Math.round(this.imgy1/zoom);
+			this.datax0 = Math.round(this.imgx0);
+			this.datax1 = Math.round(this.imgx1);
+			this.datay0 = this.imganalobj.imgheight - Math.round(this.imgy0);
+			this.datay1 = this.imganalobj.imgheight - Math.round(this.imgy1);
 			// Clear moving
 			this.moving = 0;
             console.log("Set moving to 0");
+            console.log(this.imgx0)
+            console.log(this.datax0, this.datay0, this.datax1, this.datay1);
 			// Update
 			this.update();
 		}

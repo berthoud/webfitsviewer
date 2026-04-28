@@ -401,6 +401,9 @@ function imageanalysisobject() {
         this.imgcan.onwheel = function(event) {
             this.callback_object.mousezoomhandler(event);
         }
+        this.imgcan.ondblclick = function(event) {
+            this.callback_object.doubleclick(event)
+        }
 		// get options from existing cookies
 		this.getOptions();
 		// Set zoom size (make sure diagonal is at least 300 pixels long)
@@ -818,7 +821,7 @@ function imageanalysisobject() {
 
         // If we still have nothing to move
         if (this.toolmove === null) {
-            console.log('mousedown pan starting');
+            // console.log('mousedown pan starting');
             this.panning = true;
             this.panStart = {
                 x: event.offsetX, 
@@ -857,11 +860,19 @@ function imageanalysisobject() {
         this.pan.x = (newZoom*(this.pan.x - mouseX) / prevZoom) + mouseX;
         this.pan.y = (newZoom*(this.pan.y - mouseY) / prevZoom) + mouseY;
 
-        console.log(this.pan.x, this.pan.y)
+        // console.log(this.pan.x, this.pan.y)
 
         this.imgzoom = newZoom;
 		//console.log(this.pan.x,this.pan.y);
         this.imagedraw();
+    }
+
+    this.doubleclick = function(event) {
+        imgx = event.offsetX - this.pan.x;
+        imgy = event.offsetY - this.pan.y;
+
+        this.toolnow.doubleclick(imgx, imgy);
+        this.toolnow.update();
     }
 
 	// Zoomhandler: Responds to zoom selection events
@@ -1279,14 +1290,25 @@ function imagetoolstatsobject() {
                 this.callback_object.checkhandler();
             }
             statsbox.checked = this.shown;
+            // if(this.shown){
+            //     textcol = {'red':'black','lime':'black','blue':'white',
+            //             'black':'white'}[this.color];
+            //     $('#statscolor').css('background',this.color);
+            //     $('#statscolor').css('color',textcol);
+            //     statscolor = $('#statscolor')[0]
+            //     statscolor.callback_object = this;
+            //     statscolor.onclick = function() {
+            //         this.callback_object.boxcolor();
+            //     }
+            // }
             if(this.shown){
                 textcol = {'red':'black','lime':'black','blue':'white',
                         'black':'white'}[this.color];
-                $('#statscolor').css('background',this.color);
-                $('#statscolor').css('color',textcol);
-                statscolor = $('#statscolor')[0]
-                statscolor.callback_object = this;
-                statscolor.onclick = function() {
+                $('#linecolor').css('background',this.color);
+                $('#linecolor').css('color',textcol);
+                linecolor = $('#linecolor')[0]
+                linecolor.callback_object = this;
+                linecolor.onclick = function() {
                     this.callback_object.boxcolor();
                 }
             }
@@ -1425,9 +1447,10 @@ function imagetoolstatsobject() {
 		// Update the text color
 		textcol = {'red':'black','lime':'black','blue':'white',
 				   'black':'white'}[this.color];
-		$('#statscolor').css('background',this.color);
-		$('#statscolor').css('color',textcol);
-		this.imganalobj.imagedraw();
+		$('#linecolor').css('background',this.color);
+		$('#linecolor').css('color',textcol);
+		this.update();
+        this.imganalobj.imagedraw();
 	}
 	
 	// PICKUP: Checks if the image mouse location (x/y) is correct to pick up
@@ -1684,7 +1707,7 @@ function imagetoolpsfobject() {
 			ctx = this.imganalobj.imgcan.getContext('2d');
 			// Draw the square
 			ctx.strokeStyle = this.color;
-			ctx.lineWidth = 2;
+			ctx.lineWidth = Math.max(0.5, 3 * 1/this.imganalobj.imgzoom);
 			ctx.strokeRect(this.imgx0, this.imgy0, this.imgx1 - this.imgx0,
 					this.imgy1 - this.imgy0);
 			// Get Zoom
@@ -1839,7 +1862,6 @@ function imagetoolpsfobject() {
 		//** Display Statistics
 		$('#imagetoolsoutput1')
 		.html('<form> \
-			   <span id="psfcolor">&nbsp;Color&nbsp;</span><br /> \
 			   CenterX: ' + this.imganalobj.valueformat(this.centerx) +
 			  '<br />CenterY: ' + this.imganalobj.valueformat(this.centery) +
               '<br />' + center_in_radec + 
@@ -1851,14 +1873,25 @@ function imagetoolpsfobject() {
 				'<br />Angle: ' + this.imganalobj.valueformat(180*this.theta/Math.PI) +
 				'&deg;');
 		// Set PSFcolor
-		if(this.shown){
+		// if(this.shown){
+		// 	textcol = {'red':'black','lime':'black','blue':'white',
+		// 			   'black':'white'}[this.color];
+		// 	$('#psfcolor').css('background',this.color);
+		// 	$('#psfcolor').css('color',textcol);
+		// 	psfcolor = $('#psfcolor')[0]
+		// 	psfcolor.callback_object = this;
+		// 	psfcolor.onclick = function() {
+		// 		this.callback_object.boxcolor();
+		// 	}
+		// }
+        if(this.shown){
 			textcol = {'red':'black','lime':'black','blue':'white',
 					   'black':'white'}[this.color];
-			$('#psfcolor').css('background',this.color);
-			$('#psfcolor').css('color',textcol);
-			psfcolor = $('#psfcolor')[0]
-			psfcolor.callback_object = this;
-			psfcolor.onclick = function() {
+			$('#linecolor').css('background',this.color);
+			$('#linecolor').css('color',textcol);
+			linecolor = $('#linecolor')[0]
+			linecolor.callback_object = this;
+			linecolor.onclick = function() {
 				this.callback_object.boxcolor();
 			}
 		}
@@ -1937,9 +1970,10 @@ function imagetoolpsfobject() {
 		// Update the text color
 		textcol = {'red':'black','lime':'black','blue':'white',
 				   'black':'white'}[this.color];
-		$('#psfcolor').css('background',this.color);
-		$('#psfcolor').css('color',textcol);
-		this.imganalobj.imagedraw();
+		$('#linecolor').css('background',this.color);
+		$('#linecolor').css('color',textcol);
+		this.update();
+        this.imganalobj.imagedraw();
 	}
 	
 	// PICKUP: Checks if the image mouse location (x/y) is correct to pick up
@@ -2087,6 +2121,7 @@ function imagetoollineobject() {
 	this.pickupy1 = 10;
 	this.imgmin = 0;  // Holds min/max of the pixels in the box
 	this.imgmax = 1;
+    this.notyetactivated = true;
 
 	// **** Object Functions
 
@@ -2096,18 +2131,43 @@ function imagetoollineobject() {
 		this.imganalobj = imganalobj;
 
 		// Initialize line size
-        console.log("Init for lineobject");
+        // console.log("Init for lineobject");
 		this.datax0 = Math.round(this.imganalobj.imgwidth / 5);
 		this.datax1 = this.imganalobj.imgwidth - this.datax0;
 		this.datay0 = Math.round(this.imganalobj.imgheight / 5);
 		this.datay1 = this.imganalobj.imgheight - this.datay0;
-        console.log(this.datax0);
+
+        // console.log(this.imganalobj)
+        // console.log(this.datax0);
         this.draw();
 	}
 
 	// DRAW: Draws the box with the current color at the current location.
 	this.draw = function() {
 		if (this.shown & this.active) {
+            if (this.notyetactivated) {
+                this.notyetactivated = false;
+                // console.log(this.imganalobj)
+                // console.log(this.imganalobj.imgwidth*this.imganalobj.imgzoom, this.imganalobj.imgcan.width, this.imganalobj.imgheight*this.imganalobj.imgzoom, this.imganalobj.imgcan.height)
+                // console.log(this.imganalobj.pan)
+                // If the image takes up less than the whole canvas, initialize the line across the image with some margin
+                if (this.imganalobj.imgwidth*this.imganalobj.imgzoom < this.imganalobj.imgcan.width || this.imganalobj.imgheight*this.imganalobj.imgzoom < this.imganalobj.imgcan.height) {
+                    this.imgx0 = Math.round(this.imganalobj.imgwidth / 5);
+                    this.imgx1 = this.imganalobj.imgwidth - this.imgx0;
+                    this.imgy0 = Math.round(this.imganalobj.imgheight / 5);
+                    this.imgy1 = this.imganalobj.imgheight - this.imgy0;
+                } else {
+                    // Otherwise, initialize the line in the middle of the actual viewport
+                    // console.log('init 2')
+
+                    this.imgx0 = Math.round(-this.imganalobj.pan.x/this.imganalobj.imgzoom) + Math.round(this.imganalobj.imgcan.width/this.imganalobj.imgzoom/5);
+                    this.imgx1 = this.imgx0 + this.imganalobj.imgcan.width/this.imganalobj.imgzoom - 2*Math.round(this.imganalobj.imgcan.width/this.imganalobj.imgzoom/5);
+
+                    this.imgy0 = Math.round(-this.imganalobj.pan.y/this.imganalobj.imgzoom + this.imganalobj.imgcan.height/this.imganalobj.imgzoom/2);
+                    this.imgy1 = this.imgy0;
+                }
+            }
+
 			// Get the canvas
 			ctx = this.imganalobj.imgcan.getContext('2d');
 			// Draw the square
@@ -2123,7 +2183,11 @@ function imagetoollineobject() {
             boxsize = Math.max(1, 6 * 1/this.imganalobj.imgzoom);
             ctx.fillRect(this.imgx0-boxsize/2, this.imgy0-boxsize/2, boxsize,boxsize);		
             ctx.fillRect(this.imgx1-boxsize/2, this.imgy1-boxsize/2, boxsize,boxsize);	
-		}
+		} else {
+            if (!this.notyetactivated) {
+                this.notyetactivated = true;
+            }  
+        }
 	}
 
     this.coordstoradec = function(coordx, coordy) {
@@ -2181,12 +2245,12 @@ function imagetoollineobject() {
 		imglogadd('AnalLine: Going');
         datady = this.imganalobj.imgheight;
 		zoom = this.imganalobj.imgzoom;
-		this.imgx0 = this.datax0;
-		this.imgx1 = this.datax1;
-		this.imgy0 = (datady-this.datay0);
-		this.imgy1 = (datady-this.datay1);
+		this.datax0 = this.imgx0;
+		this.datax1 = this.imgx1;
+		this.datay0 = (datady-this.imgy0);
+		this.datay1 = (datady-this.imgy1);
 
-        console.log("DATAY: " + this.datay0 + ", " + this.datay1);
+        // console.log("DATAY: " + this.datay0 + ", " + this.datay1);
 
         let x0 = this.datax0;
         let y0 = this.datay0;
@@ -2204,7 +2268,7 @@ function imagetoollineobject() {
         
         // End points and length in arc seconds
         if (this.imganalobj.coords) {
-            console.log(this.imganalobj.coordx0, this.imganalobj.coordy0)
+            // console.log(this.imganalobj.coordx0, this.imganalobj.coordy0)
 
             let p0x = this.imganalobj.coordx0 + x0 * this.imganalobj.coordcolx + y0 * this.imganalobj.coordrowx;
             let p0y = this.imganalobj.coordy0 + x0 * this.imganalobj.coordcoly + y0 * this.imganalobj.coordrowy;
@@ -2226,7 +2290,7 @@ function imagetoollineobject() {
             }
         }
 
-        console.log(points_in_radec);
+        // console.log(points_in_radec);
 
         this.line_len = Math.round(Math.sqrt((x1-x0)**2 + (y1-y0)**2));
         let step_x = (x1-x0) / this.line_len;
@@ -2333,6 +2397,7 @@ function imagetoollineobject() {
               '<br /><a id="data_download">Download</a></div>' );
         
         // Set the download information
+        // Give this a filename that includes the image name and the coordinates of the line
         let encoded_uri = getDownloadBlobURL(csv, 'export.csv', 'text/csv;charset=utf-8;')
         let link = document.getElementById('data_download');
         link.setAttribute("href", encoded_uri);
@@ -2388,9 +2453,9 @@ function imagetoollineobject() {
 	// PICKUP: Checks if the image mouse location (x/y) is correct to pick up
 	//         the box. If so true is returned and the box is set to moving.
 	this.pickup = function(mousex,mousey){
-        console.log("Line pickup at:");
-        console.log(mousex, mousey)
-        console.log(this.imgx0, this.imgy0, this.imgx1, this.imgy1);
+        // console.log("Line pickup at:");
+        // console.log(mousex, mousey)
+        // console.log(this.imgx0, this.imgy0, this.imgx1, this.imgy1);
 		// Ignore if not shown or inactive
 		if( ! this.shown || ! this.active) {
 			return false;
@@ -2453,8 +2518,8 @@ function imagetoollineobject() {
 		mousedy = mousey-this.mousey0;
 
         // Debug
-        console.log("Moving: " + this.moving);
-        console.log(this.pickupx0, this.pickupy0, this.pickupx1, this.pickupy1);
+        // console.log("Moving: " + this.moving);
+        // console.log(this.pickupx0, this.pickupy0, this.pickupx1, this.pickupy1);
 
         if (this.moving & 1) {
             this.imgx0 = this.pickupx0+mousedx;
@@ -2500,14 +2565,38 @@ function imagetoollineobject() {
 			this.datay1 = this.imganalobj.imgheight - Math.round(this.imgy1);
 			// Clear moving
 			this.moving = 0;
-            console.log("Set moving to 0");
-            console.log(this.imgx0)
-            console.log(this.datax0, this.datay0, this.datax1, this.datay1);
+            // console.log("Set moving to 0");
+            // console.log(this.imgx0)
+            // console.log(this.datax0, this.datay0, this.datax1, this.datay1);
 			// Update
 			this.update();
 		}
 		
 	}
+
+    this.doubleclick = function(mx, my){
+        if (this.shown & this.active) {
+            // console.log(this.imganalobj.pan)
+            // If the image takes up less than the whole canvas, initialize the line across the image with some margin
+            if (this.imganalobj.imgwidth*this.imganalobj.imgzoom < this.imganalobj.imgcan.width || this.imganalobj.imgheight*this.imganalobj.imgzoom < this.imganalobj.imgcan.height) {
+                this.imgx0 = Math.round(this.imganalobj.imgwidth / 5);
+                this.imgx1 = this.imganalobj.imgwidth - this.imgx0;
+                this.imgy0 = Math.round(this.imganalobj.imgheight / 5);
+                this.imgy1 = this.imganalobj.imgheight - this.imgy0;
+            } else {
+                // Otherwise, initialize the line in the middle of the actual viewport
+                this.imgx0 = Math.round(-this.imganalobj.pan.x/this.imganalobj.imgzoom) + Math.round(this.imganalobj.imgcan.width/this.imganalobj.imgzoom/5);
+                this.imgx1 = this.imgx0 + this.imganalobj.imgcan.width/this.imganalobj.imgzoom - 2*Math.round(this.imganalobj.imgcan.width/this.imganalobj.imgzoom/5);
+                // Set to mouse y
+                this.imgy0 = my / this.imganalobj.imgzoom;
+                this.imgy1 = this.imgy0;
+            }
+        }
+        // Update the data
+		this.update();
+		// Redraw the image
+		this.imganalobj.imagedraw();
+    }
 
     this.disable = function() {
         // Turn off the chart

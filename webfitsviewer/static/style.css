@@ -56,9 +56,9 @@ td.tools {
     line-height: 1.2em;
 }
 
-form {
+/* form {
     margin: 1rem 0rem;
-}
+} */
 
 /* Log Table */
 tr.logdebug {
@@ -147,6 +147,10 @@ div.tools {
     border-radius: 5px;
     /* max-width: 50%;
     min-width: 500px; */
+}
+
+div.tools > form {
+    margin: 0 !important;
 }
 
 #statsdiv{

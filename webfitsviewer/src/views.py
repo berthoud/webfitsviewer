@@ -654,6 +654,7 @@ analimg.init("%s", "%s");
         retdata += "height = %d\n" % hei
         retdata += "bzero = %e\n" % bzero
         retdata += "bscale = %e\n" % bscale
+        retdata += "filename = %s\n" % self.session['file']
         retdata += "message = %s\n" % message
         retdata += "encoding = %s\n" % "UInt16"
         if 'CTYPE1' in head:

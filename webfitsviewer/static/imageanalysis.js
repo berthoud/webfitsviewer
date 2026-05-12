@@ -58,6 +58,7 @@ function imageanalysisobject() {
 	this.imgzoom = 1.0; // Zoom factor (i.e. zoom in if >1)
 	this.imgcan = 0; // image canvas object
 	this.rescale = 1; // flag indicating that imgscaled needs to be recalculated
+	this.filename = ''; // File name
 	// Coordinate system variables (others are added is coords=true)
 	this.coords = false;
 	// Analysis tools variables
@@ -322,6 +323,9 @@ function imageanalysisobject() {
 		var bzero = parseFloat(headtxt.substring(ind));
 		ind = headtxt.indexOf('bscale = ') + 9;
 		var bscale = parseFloat(headtxt.substring(ind));
+		ind = headtxt.indexOf('filename = ') + 11;
+		len = headtxt.substring(ind).indexOf('\n');
+		this.filename = headtxt.substr(ind,len);
 		ind = headtxt.indexOf('message = ') + 10;
 		len = headtxt.substring(ind).indexOf('\n');
 		message = headtxt.substr(ind, len);
@@ -2398,10 +2402,12 @@ function imagetoollineobject() {
         
         // Set the download information
         // Give this a filename that includes the image name and the coordinates of the line
-        let encoded_uri = getDownloadBlobURL(csv, 'export.csv', 'text/csv;charset=utf-8;')
+		let fname = this.imganalobj.filename.split('.')[0]+'.csv'
+		console.log(fname)
+        let encoded_uri = getDownloadBlobURL(csv, fname, 'text/csv;charset=utf-8;')
         let link = document.getElementById('data_download');
         link.setAttribute("href", encoded_uri);
-        link.setAttribute("download", "export.csv");
+        link.setAttribute("download", fname);
         
         //** Display arc length */
         $('#imagetoolsoutput2').html(points_in_radec);

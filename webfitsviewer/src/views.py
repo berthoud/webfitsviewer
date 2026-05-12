@@ -416,8 +416,6 @@ Image Frame: <select name = "plane_selection"
             return ''
         # Return image tools
         imgtools = """
-<td class = "tools">
-<h3>Image Tools:</h3>
 <script language = "javascript"><!--
 analimg = new imageanalysisobject();
 analimg.writetools();

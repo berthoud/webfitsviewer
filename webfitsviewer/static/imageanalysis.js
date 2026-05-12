@@ -2141,36 +2141,13 @@ function imagetoollineobject() {
 		this.datay0 = Math.round(this.imganalobj.imgheight / 5);
 		this.datay1 = this.imganalobj.imgheight - this.datay0;
 
-        // console.log(this.imganalobj)
-        // console.log(this.datax0);
         this.draw();
 	}
 
 	// DRAW: Draws the box with the current color at the current location.
 	this.draw = function() {
 		if (this.shown & this.active) {
-            if (this.notyetactivated) {
-                this.notyetactivated = false;
-                // console.log(this.imganalobj)
-                // console.log(this.imganalobj.imgwidth*this.imganalobj.imgzoom, this.imganalobj.imgcan.width, this.imganalobj.imgheight*this.imganalobj.imgzoom, this.imganalobj.imgcan.height)
-                // console.log(this.imganalobj.pan)
-                // If the image takes up less than the whole canvas, initialize the line across the image with some margin
-                if (this.imganalobj.imgwidth*this.imganalobj.imgzoom < this.imganalobj.imgcan.width || this.imganalobj.imgheight*this.imganalobj.imgzoom < this.imganalobj.imgcan.height) {
-                    this.imgx0 = Math.round(this.imganalobj.imgwidth / 5);
-                    this.imgx1 = this.imganalobj.imgwidth - this.imgx0;
-                    this.imgy0 = Math.round(this.imganalobj.imgheight / 5);
-                    this.imgy1 = this.imganalobj.imgheight - this.imgy0;
-                } else {
-                    // Otherwise, initialize the line in the middle of the actual viewport
-                    // console.log('init 2')
-
-                    this.imgx0 = Math.round(-this.imganalobj.pan.x/this.imganalobj.imgzoom) + Math.round(this.imganalobj.imgcan.width/this.imganalobj.imgzoom/5);
-                    this.imgx1 = this.imgx0 + this.imganalobj.imgcan.width/this.imganalobj.imgzoom - 2*Math.round(this.imganalobj.imgcan.width/this.imganalobj.imgzoom/5);
-
-                    this.imgy0 = Math.round(-this.imganalobj.pan.y/this.imganalobj.imgzoom + this.imganalobj.imgcan.height/this.imganalobj.imgzoom/2);
-                    this.imgy1 = this.imgy0;
-                }
-            }
+            
 
 			// Get the canvas
 			ctx = this.imganalobj.imgcan.getContext('2d');
@@ -2246,6 +2223,36 @@ function imagetoollineobject() {
 		if ( ! this.active ){
 			return;
 		}
+
+        if (this.notyetactivated) {
+                this.notyetactivated = false;
+                // console.log(this.imganalobj)
+                // console.log(this.imganalobj.imgwidth*this.imganalobj.imgzoom, this.imganalobj.imgcan.width, this.imganalobj.imgheight*this.imganalobj.imgzoom, this.imganalobj.imgcan.height)
+                // console.log(this.imganalobj.pan)
+                // If the image takes up less than the whole canvas, initialize the line across the image with some margin
+                if (this.imganalobj.imgwidth*this.imganalobj.imgzoom < this.imganalobj.imgcan.width || this.imganalobj.imgheight*this.imganalobj.imgzoom < this.imganalobj.imgcan.height) {
+                    this.imgx0 = Math.round(this.imganalobj.imgwidth / 5);
+                    this.imgx1 = this.imganalobj.imgwidth - this.imgx0;
+                    this.imgy0 = Math.round(this.imganalobj.imgheight / 5);
+                    this.imgy1 = this.imganalobj.imgheight - this.imgy0;
+                } else {
+                    // Otherwise, initialize the line in the middle of the actual viewport
+                    // console.log('init 2')
+
+                    this.imgx0 = Math.round(-this.imganalobj.pan.x/this.imganalobj.imgzoom) + Math.round(this.imganalobj.imgcan.width/this.imganalobj.imgzoom/5);
+                    this.imgx1 = this.imgx0 + this.imganalobj.imgcan.width/this.imganalobj.imgzoom - 2*Math.round(this.imganalobj.imgcan.width/this.imganalobj.imgzoom/5);
+
+                    this.imgy0 = Math.round(-this.imganalobj.pan.y/this.imganalobj.imgzoom + this.imganalobj.imgcan.height/this.imganalobj.imgzoom/2);
+                    this.imgy1 = this.imgy0;
+                }
+
+                datady = this.imganalobj.imgheight;
+                this.datax0 = this.imgx0;
+                this.datax1 = this.imgx1;
+                this.datay0 = (datady-this.imgy0);
+                this.datay1 = (datady-this.imgy1);
+        }
+
 		imglogadd('AnalLine: Going');
         datady = this.imganalobj.imgheight;
 		zoom = this.imganalobj.imgzoom;
@@ -2402,13 +2409,12 @@ function imagetoollineobject() {
         
         // Set the download information
         // Give this a filename that includes the image name and the coordinates of the line
-		let fname = this.imganalobj.filename.split('.')[0]+'.csv'
-		console.log(fname)
+		let fname = this.imganalobj.filename.split('.')[0]+`_line_${this.datax0}_${this.datay0}_${this.datax1}_${this.datay1}.csv`
         let encoded_uri = getDownloadBlobURL(csv, fname, 'text/csv;charset=utf-8;')
         let link = document.getElementById('data_download');
         link.setAttribute("href", encoded_uri);
         link.setAttribute("download", fname);
-        
+
         //** Display arc length */
         $('#imagetoolsoutput2').html(points_in_radec);
 		
@@ -2597,6 +2603,11 @@ function imagetoollineobject() {
                 this.imgy0 = my / this.imganalobj.imgzoom;
                 this.imgy1 = this.imgy0;
             }
+
+            this.imgx0 = Math.round(this.imgx0);
+            this.imgx1 = Math.round(this.imgx1);
+            this.imgy0 = Math.round(this.imgy0);
+            this.imgy1 = Math.round(this.imgy1);
         }
         // Update the data
 		this.update();

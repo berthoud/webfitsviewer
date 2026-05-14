@@ -78,11 +78,12 @@ class SiteController(object):
         #responsearr = environ.get('SCRIPT_NAME').strip('/').split('/') # Does not work with older browsers
         responsearr = environ.get('REQUEST_URI').strip('/').split('/')
         if len(responsearr) > 0:
-            siteurl = responsearr[0]
-            responsearr = responsearr[1:]
             # remove query string if present
             if '?' in responsearr[-1]:
                 responsearr[-1] = responsearr[-1].split('?')[0]
+            # set siteurl and responsearr
+            siteurl = responsearr[0]
+            responsearr = responsearr[1:]
         else: siteurl = ''
         # Load Configuration
         self.conf = ConfigObj(environ.get('WEBVIEW_CONFIG'))

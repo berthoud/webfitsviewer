@@ -81,6 +81,9 @@ class SiteController(object):
             siteurl = responsearr[0]
             responsearr = responsearr[1:]
         else: siteurl = ''
+        # remove query string if present
+        if '?' in responsearr[-1]:
+            responsearr[-1] = responsearr[-1].split('?')[0]
         # Load Configuration
         self.conf = ConfigObj(environ.get('WEBVIEW_CONFIG'))
         # Add configuration from site_sitename

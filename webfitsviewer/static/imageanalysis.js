@@ -2660,14 +2660,15 @@ function getDownloadBlobURL(content, filename, contentType) {
 }
 
 /**
- * ****** IMAGETOOLELLIPSE OBJECT (With the help of Claude)
+ * ****** IMAGETOOLELLIPSE OBJECT
+ * With the help of Claude
  *
  * Object that creates a movable, rotatable ellipse defined by three control
- * points and reports the ellipse centre plus the sum of the pixels enclosed.
+ * points and reports the ellipse center plus the sum of the pixels enclosed.
  *
  * The three control points are:
- *   - CENTRE : sets the position of the ellipse.
- *   - MAJOR  : a point on the semi-major axis. Its distance from the centre
+ *   - center : sets the position of the ellipse.
+ *   - MAJOR  : a point on the semi-major axis. Its distance from the center
  *              sets the semi-major length `a`, and its direction sets the
  *              rotation `theta` of the whole ellipse.
  *   - MINOR  : a point on the semi-minor axis. Dragging it aims the minor
@@ -2702,21 +2703,21 @@ function imagetoolellipseobject() {
 	this.color = 'lime';        // Colour of the ellipse + handles
 
 	// Ellipse geometry, stored in IMG coords (top-left origin, un-zoomed)
-	this.cx = 0;                // centre x
-	this.cy = 0;                // centre y
+	this.cx = 0;                // center x
+	this.cy = 0;                // center y
 	this.a = 10;                // semi-major axis length (pixels)
 	this.b = 5;                 // semi-minor axis length (pixels)
 	this.theta = 0;             // rotation of the major axis (radians, IMG frame)
 
-	// DATA-coord mirror of the centre (bottom-left origin), set on drop()
+	// DATA-coord mirror of the center (bottom-left origin), set on drop()
 	this.datacx = 0;
 	this.datacy = 0;
 
 	// Interaction state
-	this.moving = 0;            // 0 none, 1 centre, 2 major handle, 3 minor handle
+	this.moving = 0;            // 0 none, 1 center, 2 major handle, 3 minor handle
 	this.mousex0 = 0;           // IMG mouse position at the start of a move
 	this.mousey0 = 0;
-	this.pickupcx = 0;          // centre at pickup (used when translating)
+	this.pickupcx = 0;          // center at pickup (used when translating)
 	this.pickupcy = 0;
 
 	// Cached results of the last sum
@@ -2741,7 +2742,7 @@ function imagetoolellipseobject() {
 	this.handles = function() {
 		var ct = Math.cos(this.theta), st = Math.sin(this.theta);
 		return {
-			centre: { x: this.cx,                 y: this.cy },
+			center: { x: this.cx,                 y: this.cy },
 			major:  { x: this.cx + this.a * ct,   y: this.cy + this.a * st },
 			// perpendicular direction is (theta + 90deg) = (-sin, cos)
 			minor:  { x: this.cx - this.b * st,   y: this.cy + this.b * ct }
@@ -2759,7 +2760,7 @@ function imagetoolellipseobject() {
 		var fullVisible = (o.imgwidth  * zoom < o.imgcan.width) ||
 		                  (o.imgheight * zoom < o.imgcan.height);
 		if (fullVisible) {
-			// Centre of the image, sized relative to the image
+			// center of the image, sized relative to the image
 			return { cx: o.imgwidth / 2, cy: o.imgheight / 2,
 			         w: o.imgwidth,      h: o.imgheight };
 		} else {
@@ -2772,14 +2773,14 @@ function imagetoolellipseobject() {
 		}
 	}
 
-	// CLAMPCENTRE: keep the centre inside the image bounds (IMG coords).
-	this.clampcentre = function() {
+	// CLAMPcenter: keep the center inside the image bounds (IMG coords).
+	this.clampcenter = function() {
 		var W = this.imganalobj.imgwidth, H = this.imganalobj.imgheight;
 		if (this.cx < 0) { this.cx = 0; } else if (this.cx > W - 1) { this.cx = W - 1; }
 		if (this.cy < 0) { this.cy = 0; } else if (this.cy > H - 1) { this.cy = H - 1; }
 	}
 
-	// PLACEINVIEW: full layout of the ellipse for the current view -- centre,
+	// PLACEINVIEW: full layout of the ellipse for the current view -- center,
 	//              default size and axis-aligned orientation. Used for the
 	//              deferred initial placement.
 	this.placeInView = function() {
@@ -2789,7 +2790,7 @@ function imagetoolellipseobject() {
 		this.a  = Math.max(this.MINMAJOR, Math.round(r.w / 5));
 		this.b  = Math.max(this.MINMINOR, Math.round(r.h / 8));
 		this.theta = 0;
-		this.clampcentre();
+		this.clampcenter();
 		this.datacx = this.cx;
 		this.datacy = this.imganalobj.imgheight - this.cy;
 	}
@@ -2815,7 +2816,7 @@ function imagetoolellipseobject() {
 	this.draw = function() {
 		if (!(this.shown & this.active)) {
 			// ---- LINE-TOOL PARITY: re-arm deferred placement when hidden /
-			//      deactivated, so re-showing re-centres on the current view.
+			//      deactivated, so re-showing re-centers on the current view.
 			//      Delete these two lines to make placement sticky instead.
 			if (!this.notyetactivated) { this.notyetactivated = true; }
 			return;
@@ -2836,7 +2837,7 @@ function imagetoolellipseobject() {
 		ctx.ellipse(this.cx, this.cy, this.a, this.b, this.theta, 0, 2 * Math.PI);
 		ctx.stroke();
 
-		// Faint axis guide lines from centre to each handle
+		// Faint axis guide lines from center to each handle
 		ctx.save();
 		ctx.lineWidth = lw / 2;
 		ctx.beginPath();
@@ -2845,9 +2846,9 @@ function imagetoolellipseobject() {
 		ctx.stroke();
 		ctx.restore();
 
-		// Centre handle: small circle
+		// center handle: small circle
 		ctx.beginPath();
-		ctx.arc(h.centre.x, h.centre.y, hs / 2, 0, 2 * Math.PI);
+		ctx.arc(h.center.x, h.center.y, hs / 2, 0, 2 * Math.PI);
 		ctx.fill();
 
 		// Major handle: square
@@ -2859,6 +2860,16 @@ function imagetoolellipseobject() {
 		ctx.rotate(Math.PI / 4);
 		ctx.fillRect(-hs / 2, -hs / 2, hs, hs);
 		ctx.restore();
+	}
+
+	// COLTOWORLD: converts DATA-coord (col,row) to world coords (degrees) using
+	//             the same CD-matrix expansion as the line tool / mousemove().
+	this.coltoworld = function(col, row) {
+		var o = this.imganalobj;
+		return {
+			x: o.coordx0 + col * o.coordcolx + row * o.coordrowx,
+			y: o.coordy0 + col * o.coordcoly + row * o.coordrowy
+		};
 	}
 
 	// COORDSTORADEC: formats a (RA,Dec) pair in sexagesimal, same style as the
@@ -2883,7 +2894,7 @@ function imagetoolellipseobject() {
 		return msg;
 	}
 
-	// CALCULATESUM: Sums the raw pixel values whose centre lies inside the
+	// CALCULATESUM: Sums the raw pixel values whose center lies inside the
 	//               ellipse. Returns {sum, npix, mean}.
 	//               imgraw is indexed in DATA coords, so each IMG pixel (ix,iy)
 	//               maps to idx = (imgheight-1-iy)*imgwidth + ix .
@@ -2931,41 +2942,53 @@ function imagetoolellipseobject() {
 		// ---- Deferred initial placement (mirrors the line tool) ----
 		// Runs the first time the tool is active+updated, when the real zoom /
 		// pan / canvas size are known. Lays the ellipse out for the current
-		// view (centred on the image if fully visible, else on the viewport).
+		// view (centerd on the image if fully visible, else on the viewport).
 		if (this.notyetactivated) {
 			this.notyetactivated = false;
 			this.placeInView();
 		}
 
-		// Keep the DATA-coord centre in sync with the IMG-coord centre
+		// Keep the DATA-coord center in sync with the IMG-coord center
 		this.datacx = this.cx;
 		this.datacy = this.imganalobj.imgheight - this.cy;
 
 		var res = this.calculatesum();
 		var fmt = (v) => this.imganalobj.valueformat(v);
 
-		// ---- Centre (pixel coords, and RA/Dec when WCS is present) ----
-		var centreMsg = 'Centre&nbsp;X/Y: (' + fmt(this.datacx) + ', ' + fmt(this.datacy) + ')';
+		// ---- center (pixel coords, and RA/Dec when WCS is present) ----
+		var centerMsg = 'center&nbsp;X/Y: (' + fmt(this.datacx) + ', ' + fmt(this.datacy) + ')';
+		var abArcsec = '';   // appended to the a/b line when WCS is present
 		if (this.imganalobj.coords) {
-			// Use the centre as (col,row), matching the line tool's convention
-			var col = this.datacx, row = this.datacy;
-			var wx = this.imganalobj.coordx0 + col * this.imganalobj.coordcolx + row * this.imganalobj.coordrowx;
-			var wy = this.imganalobj.coordy0 + col * this.imganalobj.coordcoly + row * this.imganalobj.coordrowy;
+			// center in world coords (use the center as (col,row), like the line tool)
+			var wc = this.coltoworld(this.datacx, this.datacy);
 			if (this.imganalobj.coordlblx.toUpperCase().includes('RA') &&
 			    this.imganalobj.coordlbly.toUpperCase().includes('DEC')) {
-				centreMsg += '<br />' + this.coordstoradec(wx, wy);
+				centerMsg += '<br />' + this.coordstoradec(wc.x, wc.y);
 			} else {
-				centreMsg += '<br />' + this.imganalobj.coordlblx + ': ' + wx.toFixed(5) +
-				             '<br />' + this.imganalobj.coordlbly + ': ' + wy.toFixed(5);
+				centerMsg += '<br />' + this.imganalobj.coordlblx + ': ' + wc.x.toFixed(5) +
+				             '<br />' + this.imganalobj.coordlbly + ': ' + wc.y.toFixed(5);
 			}
+
+			// Semi-axis lengths in arcsec: convert the major / minor axis
+			// endpoints to world coords and take their separation from the
+			// center, * 3600 (the same degree-distance method as the line tool).
+			// Endpoints in DATA coords (datay = imgheight - imgy):
+			var ct = Math.cos(this.theta), st = Math.sin(this.theta);
+			var wMaj = this.coltoworld(this.datacx + this.a * ct,
+			                           this.datacy - this.a * st);
+			var wMin = this.coltoworld(this.datacx - this.b * st,
+			                           this.datacy - this.b * ct);
+			var aArcsec = Math.sqrt((wMaj.x - wc.x) ** 2 + (wMaj.y - wc.y) ** 2) * 3600;
+			var bArcsec = Math.sqrt((wMin.x - wc.x) ** 2 + (wMin.y - wc.y) ** 2) * 3600;
+			abArcsec = ' (' + aArcsec.toFixed(2) + '" / ' + bArcsec.toFixed(2) + '")';
 		}
 
-		// ---- Output panel 1 : checkbox + centre + shape ----
+		// ---- Output panel 1 : checkbox + center + shape ----
 		$('#imagetoolsoutput1').html('<form> \
 			<input type="checkbox" id="ellipsebox"> \
 			<span id="ellipsecolor">&nbsp;Ellipse&nbsp;</span></form>' +
-			centreMsg +
-			'<br />a / b: ' + fmt(this.a) + ' / ' + fmt(this.b) + ' px' +
+			centerMsg +
+			'<br />a / b: ' + fmt(this.a) + ' / ' + fmt(this.b) + ' px' + abArcsec +
 			'<br />Angle: ' + (this.theta * 180 / Math.PI).toFixed(1) + '&deg;');
 
 		// ---- Output panel 2 : the sum (the headline result) + extras ----
@@ -3035,10 +3058,10 @@ function imagetoolellipseobject() {
 			return true;
 		};
 
-		// Check the axis handles first, then the centre.
+		// Check the axis handles first, then the center.
 		if ((mousex - h.major.x) ** 2 + (mousey - h.major.y) ** 2 < grab2) { return begin(2); }
 		if ((mousex - h.minor.x) ** 2 + (mousey - h.minor.y) ** 2 < grab2) { return begin(3); }
-		if ((mousex - h.centre.x) ** 2 + (mousey - h.centre.y) ** 2 < grab2) { return begin(1); }
+		if ((mousex - h.center.x) ** 2 + (mousey - h.center.y) ** 2 < grab2) { return begin(1); }
 
 		// Otherwise: grabbing anywhere inside the ellipse also moves it.
 		var ct = Math.cos(this.theta), st = Math.sin(this.theta);
@@ -3057,10 +3080,10 @@ function imagetoolellipseobject() {
 		var H = this.imganalobj.imgheight;
 
 		if (this.moving === 1) {
-			// Translate the centre, clamped to the image.
+			// Translate the center, clamped to the image.
 			this.cx = this.pickupcx + (mousex - this.mousex0);
 			this.cy = this.pickupcy + (mousey - this.mousey0);
-			this.clampcentre();
+			this.clampcenter();
 
 		} else if (this.moving === 2) {
 			// Major handle sets BOTH the semi-major length and the rotation.
@@ -3090,18 +3113,18 @@ function imagetoolellipseobject() {
 		}
 	}
 
-	// DOUBLECLICK: moves the ellipse to the centre of the viewer's current
+	// DOUBLECLICK: moves the ellipse to the center of the viewer's current
 	//              position (mirrors the line tool's double-click). The mouse
 	//              coords arrive as (offsetX - pan.x, offsetY - pan.y), i.e.
-	//              screen pixels from the image top-left; we recentre on the
+	//              screen pixels from the image top-left; we recenter on the
 	//              viewport so they are not needed directly. The shape
-	//              (a, b, theta) is preserved -- only the centre moves.
+	//              (a, b, theta) is preserved -- only the center moves.
 	this.doubleclick = function(mx, my) {
 		if (this.shown & this.active) {
 			var r = this.viewregion();
 			this.cx = Math.round(r.cx);
 			this.cy = Math.round(r.cy);
-			this.clampcentre();
+			this.clampcenter();
 			this.datacx = this.cx;
 			this.datacy = this.imganalobj.imgheight - this.cy;
 		}

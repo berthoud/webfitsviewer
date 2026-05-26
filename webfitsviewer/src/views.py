@@ -456,10 +456,12 @@ analimg.init("%s", "%s");
                 addtools = "analimg.addtool('imagetoolstatsobject','Stats');"
                 addtools +="analimg.addtool('imagetoolpsfobject','PSF');"
                 addtools +="analimg.addtool('imagetoollineobject','Line');"
+                addtools +="analimg.addtool('imagetoolellipseobject', 'Ellipse');"
         else:
             addtools = "analimg.addtool('imagetoolstatsobject','Stats');"
             addtools +="analimg.addtool('imagetoolpsfobject','PSF');"
             addtools +="analimg.addtool('imagetoollineobject','Line');"
+            addtools +="analimg.addtool('imagetoolellipseobject', 'Ellipse');"
         # Combine display text
         imgdisplay = imgdisplay % (addtools, dataurl, fileurlpath)
         self.log.debug('  Image Display Written')

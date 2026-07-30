@@ -1,0 +1,11 @@
+#!/bin/bash
+echo "Content-type: text/html"
+echo
+echo "<html>"
+echo "<body>"
+echo "<h2>Dumping Main</h2>"
+echo "This dumps the response from the webviewer into temp/dump.txt"
+echo "</body>"
+echo "</html>"
+#/Users/berthoud/instruments/hawc/drp/ghdrp/webview/src/main.py >> /Users/berthoud/instruments/hawc/drp/ghdrp/webview/temp/dump.txt
+/home/hawc/Applications/hawcdrp/webview/src/mainsky.py >> /home/hawc/Applications/hawcdrp/webview/temp/dump.txt

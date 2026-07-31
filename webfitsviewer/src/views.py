@@ -758,10 +758,10 @@ logrequest();
         # Set New Logtime
         # If logtime < listtime-1s
         # -> Assume there have been log enties since the last update
-        # -> Return all entries up to listtime-1s
+        # -> Return all entries up to listtime+1s
         #    (Because there could be more entries during the current second)
         if lasttime < listtime - 1:
-            newlasttime = listtime - 1
+            newlasttime = listtime + 1
         # Else (logtime >= listtime-1s)
         # -> Assume there have been no log entries since the last update
         #    (at least 2 seconds ago)
